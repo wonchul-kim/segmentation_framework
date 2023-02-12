@@ -86,7 +86,7 @@ def _coco_remove_images_without_annotations(dataset, cat_list=None):
     return dataset
 
 
-def get_coco(root, image_set, transforms):
+def get_coco(root, mode, num_classes, transforms=None):
     PATHS = {
         "train": ("train2017", os.path.join("annotations", "instances_train2017.json")),
         "val": ("val2017", os.path.join("annotations", "instances_val2017.json")),
@@ -96,13 +96,13 @@ def get_coco(root, image_set, transforms):
 
     transforms = Compose([FilterAndRemapCocoCategories(CAT_LIST, remap=True), ConvertCocoPolysToMask(), transforms])
 
-    img_folder, ann_file = PATHS[image_set]
+    img_folder, ann_file = PATHS[mode]
     img_folder = os.path.join(root, img_folder)
     ann_file = os.path.join(root, ann_file)
 
     dataset = torchvision.datasets.CocoDetection(img_folder, ann_file, transforms=transforms)
 
-    if image_set == "train":
+    if mode == "train":
         dataset = _coco_remove_images_without_annotations(dataset, CAT_LIST)
 
     return dataset

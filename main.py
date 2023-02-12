@@ -13,6 +13,7 @@ from models.modeling import get_model
 from src.train import evaluate, train_one_epoch
 
 def main(args):
+    ##### Settings
     if args.output_dir:
         utils.mkdir(args.output_dir)
 
@@ -26,11 +27,13 @@ def main(args):
     else:
         torch.backends.cudnn.benchmark = True
 
-    data_loader, num_classes = get_dataset(args.input_dir, args.dataset, "train", get_transform(True, args), \
+    ##### Dataloader
+    data_loader, train_sampler, num_classes = get_dataset(args.input_dir, args.dataset_format, "train", get_transform(True, args), \
                                     batch_size=args.batch_size, workers=args.workers, distributed=args.distributed)
-    data_loader_test, _ = get_dataset(args.input_dir, args.dataset, "val", get_transform(False, args), \
+    data_loader_test, _, _ = get_dataset(args.input_dir, args.dataset_format, "val", get_transform(False, args), \
                                     batch_size=1, workers=args.workers, distributed=args.distributed)
 
+    ##### Modeling
     model = get_model(args.model_name, args.weights, args.weights_backbone, num_classes, args.aux_loss)
     model.to(device)
     if args.distributed:
@@ -125,7 +128,7 @@ if __name__ == "__main__":
     import yaml
     
     cfgs = argparse.Namespace()
-    train_recipe = './recipes/train_recipe.yaml'
+    train_recipe = './unittest/camvid.yaml'
     with open(train_recipe, 'r') as yf:
         try:
             recipe = yaml.safe_load(yf)

@@ -1,5 +1,5 @@
-input_dir: /HDD/datasets/public/coco
-dataset_format: coco
+input_dir: /HDD/datasets/public/camvid
+dataset_format: mask
 model_name: fcn_resnet101
 
 aux_loss: false
