@@ -1,0 +1,37 @@
+input_dir: /HDD/datasets/public/coco
+dataset: coco
+model_name: fcn_resnet101
+
+aux_loss: false
+device: cuda
+input_height: 80
+input_width: 80
+input_channel: 3
+batch_size: 2
+epochs: 30
+workers: 16
+init_lr: 0.01
+momentum: 0.9
+weight_decay: 0.0001
+lr_warmup_epochs: 0
+lr_warmup_method: linear
+lr_warmup_decay: 0.01
+print_freq: 10
+output_dir: './res'
+resume: false # str >> seed_model
+start_epoch: 0
+test_only: false
+#Forces the use of deterministic algorithms only ?????????????????????
+use_deterministic_algorithms: false
+
+# distributed training parameters
+world_size: 1 #number of distributed processes
+dist_url: env:// #url used to set up distributed training
+
+weights: null #the weights enum name to load
+weights_backbone: null #the backbone weights enum name to load
+
+# Mixed precision training parameters
+amp: false 
+
+########## configs
