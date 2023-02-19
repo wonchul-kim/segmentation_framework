@@ -1,5 +1,5 @@
 import os.path as osp 
-from transforms import Compose
+from utils.transforms import Compose
 import torch 
 import torchvision
 import utils.helpers as utils
