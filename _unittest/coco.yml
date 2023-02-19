@@ -3,7 +3,7 @@ input_dir: /HDD/datasets/public/coco
 dataset_format: coco
 
 ### for model params.
-model_name: fcn_resnet101
+model_name: fcn_resnet50
 input_height: 40
 input_width: 40
 input_channel: 3

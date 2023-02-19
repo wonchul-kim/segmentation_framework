@@ -3,9 +3,9 @@ input_dir: /HDD/datasets/public/camvid
 dataset_format: mask
 
 ### for model params.
-model_name: fcn_resnet101
-input_height: 4
-input_width: 4
+model_name: fcn_resnet50
+input_height: 40
+input_width: 40
 input_channel: 3
 weights: null #the weights enum name to load
 weights_backbone: null #the backbone weights enum name to load
@@ -17,7 +17,7 @@ aux_loss: false
 device: cuda
 start_epoch: 0
 epochs: 30
-batch_size: 1
+batch_size: 2
 workers: 16
 init_lr: 0.01
 momentum: 0.9

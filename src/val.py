@@ -1,11 +1,12 @@
 import warnings
 import torch 
-import utils.helpers as utils
+from utils.torch_utils import reduce_across_processes
+from utils.metrics import ConfusionMatrix, MetricLogger
 
 def evaluate(model, data_loader, device, num_classes):
     model.eval()
-    confmat = utils.ConfusionMatrix(num_classes)
-    metric_logger = utils.MetricLogger(delimiter="  ")
+    confmat = ConfusionMatrix(num_classes)
+    metric_logger = MetricLogger(delimiter="  ")
     header = "Test:"
     num_processed_samples = 0
     with torch.inference_mode():
@@ -21,7 +22,7 @@ def evaluate(model, data_loader, device, num_classes):
 
         confmat.reduce_from_all_processes()
 
-    num_processed_samples = utils.reduce_across_processes(num_processed_samples)
+    num_processed_samples = reduce_across_processes(num_processed_samples)
     if (
         hasattr(data_loader.dataset, "__len__")
         and len(data_loader.dataset) != num_processed_samples

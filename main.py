@@ -5,6 +5,7 @@ import time
 import torch
 import torch.utils.data
 import utils.helpers as utils
+import utils.torch_utils as torch_utils
 from models.modeling import get_model
 from src.ds_utils import get_dataset, get_dataloader
 from src.optimizers import get_optimizer
@@ -19,7 +20,7 @@ def main(args):
     if args.output_dir:
         utils.mkdir(args.output_dir)
 
-    utils.init_distributed_mode(args)
+    torch_utils.init_distributed_mode(args)
     device = set_envs(args)
 
     dataset, num_classes = get_dataset(args.input_dir, args.dataset_format, "train", get_transform(True, args))
@@ -89,8 +90,8 @@ def main(args):
         }
         if args.amp:
             checkpoint["scaler"] = scaler.state_dict()
-        utils.save_on_master(checkpoint, os.path.join(args.output_dir, f"model_{epoch}.pth"))
-        utils.save_on_master(checkpoint, os.path.join(args.output_dir, "checkpoint.pth"))
+        torch_utils.save_on_master(checkpoint, os.path.join(args.output_dir, f"model_{epoch}.pth"))
+        torch_utils.save_on_master(checkpoint, os.path.join(args.output_dir, "checkpoint.pth"))
 
     total_time = time.time() - start_time
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))
@@ -102,7 +103,8 @@ if __name__ == "__main__":
     import yaml
     
     cfgs = argparse.Namespace()
-    train_recipe = './_unittest/coco.yml'
+    # train_recipe = './_unittest/coco.yml'
+    train_recipe = './_unittest/camvid.yml'
     with open(train_recipe, 'r') as yf:
         try:
             recipe = yaml.safe_load(yf)
