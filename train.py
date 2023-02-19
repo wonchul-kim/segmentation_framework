@@ -1,41 +1,37 @@
 import datetime
 import os
 import time
-import warnings
 
-from src.losses import criterion
 import torch
 import torch.utils.data
-import utils.utils as utils
-from src.ds_utils import get_dataset, get_transform
-from torch.optim.lr_scheduler import PolynomialLR
+import utils.helpers as utils
 from models.modeling import get_model
-from src.train import evaluate, train_one_epoch
+from src.ds_utils import get_dataset, get_dataloader
+from src.optimizers import get_optimizer
+from src.losses import criterion
+from src.lr_schedulers import get_lr_scheduler
+from src.train import train_one_epoch
+from src.val import evaluate
+from utils.torch_utils import set_envs
+from utils.preprocessing import get_transform
 
 def main(args):
-    ##### Settings
     if args.output_dir:
         utils.mkdir(args.output_dir)
 
     utils.init_distributed_mode(args)
+    device = set_envs(args)
 
-    device = torch.device(args.device)
+    dataset, num_classes = get_dataset(args.input_dir, args.dataset_format, "train", get_transform(True, args))
+    dataset_test, _ = get_dataset(args.input_dir, args.dataset_format, "val", get_transform(False, args))
 
-    if args.use_deterministic_algorithms:
-        torch.backends.cudnn.benchmark = False
-        torch.use_deterministic_algorithms(True)
-    else:
-        torch.backends.cudnn.benchmark = True
+    data_loader, data_loader_test, train_sampler = get_dataloader(dataset, dataset_test, args)
 
-    ##### Dataloader
-    data_loader, train_sampler, num_classes = get_dataset(args.input_dir, args.dataset_format, "train", get_transform(True, args), \
-                                    batch_size=args.batch_size, workers=args.workers, distributed=args.distributed)
-    data_loader_test, _, _ = get_dataset(args.input_dir, args.dataset_format, "val", get_transform(False, args), \
-                                    batch_size=1, workers=args.workers, distributed=args.distributed)
-
-    ##### Modeling
-    model = get_model(args.model_name, args.weights, args.weights_backbone, num_classes, args.aux_loss)
+    model = get_model(model_name=args.model_name, weights=args.weights, weights_backbone=args.weights_backbone, \
+                        num_classes=num_classes, aux_loss=args.aux_loss
+            )
     model.to(device)
+
     if args.distributed:
         model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
 
@@ -51,35 +47,13 @@ def main(args):
     if args.aux_loss:
         params = [p for p in model_without_ddp.aux_classifier.parameters() if p.requires_grad]
         params_to_optimize.append({"params": params, "lr": args.init_lr * 10})
-    optimizer = torch.optim.SGD(params_to_optimize, lr=args.init_lr, momentum=args.momentum, weight_decay=args.weight_decay)
 
+    optimizer = get_optimizer(params_to_optimize, args.init_lr, args.momentum, args.weight_decay)
     scaler = torch.cuda.amp.GradScaler() if args.amp else None
 
-    iters_per_epoch = len(data_loader)
-    main_lr_scheduler = PolynomialLR(
-        optimizer, total_iters=iters_per_epoch * (args.epochs - args.lr_warmup_epochs), power=0.9
-    )
 
-    if args.lr_warmup_epochs > 0:
-        warmup_iters = iters_per_epoch * args.lr_warmup_epochs
-        args.lr_warmup_method = args.lr_warmup_method.lower()
-        if args.lr_warmup_method == "linear":
-            warmup_lr_scheduler = torch.optim.lr_scheduler.LinearLR(
-                optimizer, start_factor=args.lr_warmup_decay, total_iters=warmup_iters
-            )
-        elif args.lr_warmup_method == "constant":
-            warmup_lr_scheduler = torch.optim.lr_scheduler.ConstantLR(
-                optimizer, factor=args.lr_warmup_decay, total_iters=warmup_iters
-            )
-        else:
-            raise RuntimeError(
-                f"Invalid warmup lr method '{args.lr_warmup_method}'. Only linear and constant are supported."
-            )
-        lr_scheduler = torch.optim.lr_scheduler.SequentialLR(
-            optimizer, schedulers=[warmup_lr_scheduler, main_lr_scheduler], milestones=[warmup_iters]
-        )
-    else:
-        lr_scheduler = main_lr_scheduler
+    lr_scheduler = get_lr_scheduler(optimizer, data_loader, args.epochs, args.lr_warmup_epochs, \
+                                        args.lr_warmup_method, args.lr_warmup_decay)
 
     if args.resume:
         checkpoint = torch.load(args.resume, map_location="cpu")
@@ -128,7 +102,7 @@ if __name__ == "__main__":
     import yaml
     
     cfgs = argparse.Namespace()
-    train_recipe = './unittest/camvid.yaml'
+    train_recipe = './_unittest/coco.yml'
     with open(train_recipe, 'r') as yf:
         try:
             recipe = yaml.safe_load(yf)

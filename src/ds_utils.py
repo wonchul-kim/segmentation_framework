@@ -1,14 +1,35 @@
-import torchvision 
-from utils.coco_utils import get_coco
-from torchvision.transforms import functional as F, InterpolationMode
-import torch
-import transforms as T
-import utils.utils as utils
+import os.path as osp 
+from transforms import Compose
+import torch 
+import torchvision
+import utils.helpers as utils
+from src.datasets import COCODataset, MaskDataset
+from utils.coco_utils import FilterAndRemapCocoCategories, ConvertCocoPolysToMask, _coco_remove_images_without_annotations
 
-from src.datasets import MASKDatasets
-from utils.preprocessings.transforms import Compose
+def get_dataloader(dataset, dataset_test, args):
+    if args.distributed:
+        train_sampler = torch.utils.data.distributed.DistributedSampler(dataset)
+        test_sampler = torch.utils.data.distributed.DistributedSampler(dataset_test, shuffle=False)
+    else:
+        train_sampler = torch.utils.data.RandomSampler(dataset)
+        test_sampler = torch.utils.data.SequentialSampler(dataset_test)
 
-def get_dataset(dir_path, dataset_format, mode, transform=None, batch_size=1, workers=16, distributed=False):
+    data_loader = torch.utils.data.DataLoader(
+        dataset,
+        batch_size=args.batch_size,
+        sampler=train_sampler,
+        num_workers=args.workers,
+        collate_fn=utils.collate_fn,
+        drop_last=True,
+    )
+
+    data_loader_test = torch.utils.data.DataLoader(
+        dataset_test, batch_size=1, sampler=test_sampler, num_workers=args.workers, collate_fn=utils.collate_fn
+    )
+    
+    return data_loader, data_loader_test, train_sampler
+
+def get_dataset(dir_path, name, image_set, transform):
     def sbd(*args, **kwargs):
         return torchvision.datasets.SBDataset(*args, mode="segmentation", **kwargs)
 
@@ -16,98 +37,49 @@ def get_dataset(dir_path, dataset_format, mode, transform=None, batch_size=1, wo
         "voc": (dir_path, torchvision.datasets.VOCSegmentation, 21),
         "voc_aug": (dir_path, sbd, 21),
         "coco": (dir_path, get_coco, 21),
-        "mask": (dir_path, get_mask_dataset, 10)
+        "mask": (dir_path, get_mask, 21),
     }
-    p, dataset_fn, num_classes = paths[dataset_format]
+    p, ds_fn, num_classes = paths[name]
 
-    dataset = dataset_fn(p, mode=mode, transforms=transform)
+    ds = ds_fn(p, image_set=image_set, transforms=transform)
+    return ds, num_classes
 
-    if distributed:
-        if mode == 'train':
-            ds_sampler = torch.utils.data.distributed.DistributedSampler(dataset, shuffle=True)
-        elif mode == 'val':
-            ds_sampler = torch.utils.data.distributed.DistributedSampler(dataset, shuffle=False)
-        else:
-            print(f"There is no such mode({mode}) for dataset")
-    else:
-        if mode == 'train':
-            ds_sampler = torch.utils.data.RandomSampler(dataset)
-        elif mode == 'val':
-            ds_sampler = torch.utils.data.SequentialSampler(dataset)
-        else:
-            print(f"There is no such mode({mode}) for dataset")
+def get_coco(root, image_set, transforms):
+    PATHS = {
+        "train": ("train2017", osp.join("annotations", "instances_train2017.json")),
+        "val": ("val2017", osp.join("annotations", "instances_val2017.json")),
+    }
+    CAT_LIST = [0, 5, 2, 16, 9, 44, 6, 3, 17, 62, 21, 67, 18, 19, 4, 1, 64, 20, 63, 7, 72]
 
-    data_loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, sampler=ds_sampler, \
-                                    num_workers=workers, collate_fn=utils.collate_fn, drop_last=True)
+    transforms = Compose([FilterAndRemapCocoCategories(CAT_LIST, remap=True), \
+                        ConvertCocoPolysToMask(), transforms])
 
-    return data_loader, ds_sampler, num_classes
+    img_folder, ann_file = PATHS[image_set]
+    img_folder = osp.join(root, img_folder)
+    ann_file = osp.join(root, ann_file)
 
-def get_mask_dataset(ds_path, mode, transforms):
-    _transforms = Compose([
-        transforms
-    ])
+    # dataset = torchvision.datasets.CocoDetection(img_folder, ann_file, transforms=transforms)
+    dataset = COCODataset(img_folder, ann_file, transforms=transforms)
 
-    dataset = MASKDatasets(ds_path, mode, transforms=_transforms)
-
-    # if mode == "train":
-    #     dataset = _coco_remove_images_without_annotations(dataset, CAT_LIST)
+    if image_set == "train": #FIXME: Need to make this option 
+        dataset = _coco_remove_images_without_annotations(dataset, CAT_LIST)
 
     return dataset
 
+def get_mask(root, image_set, transforms):
+    PATHS = {
+        "train": ("train/images"),
+        "val": ("val/images"),
+    }
 
+    transforms = Compose([transforms])
 
-def get_transform(train, args):
-    if train:
-        return SegmentationPresetTrain(input_height=args.input_height, input_width=args.input_width, 
-                                       input_channel=args.input_channel, crop_size=args.input_height)
-    elif args.weights and args.test_only:
-        weights = torchvision.models.get_weight(args.weights)
-        trans = weights.transforms()
+    img_folder = PATHS[image_set]
+    img_folder = osp.join(root, img_folder)
 
-        def preprocessing(img, target):
-            img = trans(img)
-            size = F.get_dimensions(img)[1:]
-            target = F.resize(target, size, interpolation=InterpolationMode.NEAREST)
-            return img, F.pil_to_tensor(target)
+    dataset = MaskDataset(img_folder, image_set, transforms=transforms)
 
-        return preprocessing
-    else:
-        return SegmentationPresetEval(input_height=args.input_height, input_width=args.input_width, 
-                                       input_channel=args.input_channel)
-    
+    # if image_set == "train": #FIXME: Need to make this option 
+    #     dataset = _coco_remove_images_without_annotations(dataset, CAT_LIST)
 
-class SegmentationPresetTrain:
-    def __init__(self, *, input_height, input_width, input_channel, crop_size, hflip_prob=0.5, mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)):
-        min_size = int(0.5 * input_height)
-        max_size = int(2.0 * input_height)
-
-        trans = [T.RandomResize(min_size, max_size)]
-        if hflip_prob > 0:
-            trans.append(T.RandomHorizontalFlip(hflip_prob))
-        trans.extend(
-            [
-                T.RandomCrop(crop_size),
-                T.PILToTensor(),
-                T.ConvertImageDtype(torch.float),
-                T.Normalize(mean=mean, std=std),
-            ]
-        )
-        self.transforms = T.Compose(trans)
-
-    def __call__(self, img, target):
-        return self.transforms(img, target)
-
-
-class SegmentationPresetEval:
-    def __init__(self, *, input_height, input_width, input_channel, mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)):
-        self.transforms = T.Compose(
-            [
-                T.RandomResize(input_height, input_height),
-                T.PILToTensor(),
-                T.ConvertImageDtype(torch.float),
-                T.Normalize(mean=mean, std=std),
-            ]
-        )
-
-    def __call__(self, img, target):
-        return self.transforms(img, target)
+    return dataset

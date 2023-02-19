@@ -1,13 +1,9 @@
 import copy
-import os
 
 import torch
 import torch.utils.data
-import torchvision 
 from PIL import Image
 from pycocotools import mask as coco_mask
-from transforms import Compose
-
 
 class FilterAndRemapCocoCategories:
     def __init__(self, categories, remap=True):
@@ -68,10 +64,10 @@ def _coco_remove_images_without_annotations(dataset, cat_list=None):
         # if more than 1k pixels occupied in the image
         return sum(obj["area"] for obj in anno) > 1000
 
-    if not isinstance(dataset, torchvision.datasets.CocoDetection):
-        raise TypeError(
-            f"This function expects dataset of type torchvision.datasets.CocoDetection, instead  got {type(dataset)}"
-        )
+    # if not isinstance(dataset, torchvision.datasets.CocoDetection):
+    #     raise TypeError(
+    #         f"This function expects dataset of type torchvision.datasets.CocoDetection, instead  got {type(dataset)}"
+    #     )
 
     ids = []
     for ds_idx, img_id in enumerate(dataset.ids):
@@ -86,23 +82,3 @@ def _coco_remove_images_without_annotations(dataset, cat_list=None):
     return dataset
 
 
-def get_coco(root, mode, num_classes, transforms=None):
-    PATHS = {
-        "train": ("train2017", os.path.join("annotations", "instances_train2017.json")),
-        "val": ("val2017", os.path.join("annotations", "instances_val2017.json")),
-        # "train": ("val2017", os.path.join("annotations", "instances_val2017.json"))
-    }
-    CAT_LIST = [0, 5, 2, 16, 9, 44, 6, 3, 17, 62, 21, 67, 18, 19, 4, 1, 64, 20, 63, 7, 72]
-
-    transforms = Compose([FilterAndRemapCocoCategories(CAT_LIST, remap=True), ConvertCocoPolysToMask(), transforms])
-
-    img_folder, ann_file = PATHS[mode]
-    img_folder = os.path.join(root, img_folder)
-    ann_file = os.path.join(root, ann_file)
-
-    dataset = torchvision.datasets.CocoDetection(img_folder, ann_file, transforms=transforms)
-
-    if mode == "train":
-        dataset = _coco_remove_images_without_annotations(dataset, CAT_LIST)
-
-    return dataset
