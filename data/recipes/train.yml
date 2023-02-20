@@ -11,10 +11,10 @@ aux_loss: false
 
 ### for training params.
 device: cuda
-device_ids: 0,1
+device_ids: 0
 start_epoch: 0
-epochs: 30
-batch_size: 2
+epochs: 300
+batch_size: 8
 workers: 16
 init_lr: 0.01
 momentum: 0.9

@@ -44,7 +44,7 @@ def get_dataset(dir_path, name, image_set, transform, classes):
     ds = ds_fn(p, image_set=image_set, transforms=transform, classes=classes)
     return ds, num_classes
 
-def get_coco(root, image_set, transforms):
+def get_coco(root, image_set, transforms, classes):
     PATHS = {
         "train": ("train2017", osp.join("annotations", "instances_train2017.json")),
         "val": ("val2017", osp.join("annotations", "instances_val2017.json")),

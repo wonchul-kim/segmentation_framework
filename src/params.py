@@ -23,7 +23,10 @@ def set_params(cfgs):
 
     if hasattr(cfgs, 'device_ids'):
         if cfgs.device_ids != None:
-            cfgs.device_ids = list(map(int, cfgs.device_ids.split(",")))
+            if isinstance(cfgs.device_ids, str):
+                cfgs.device_ids = list(map(int, cfgs.device_ids.split(",")))
+            elif isinstance(cfgs.device_ids, int):
+                cfgs.device_ids = [int(cfgs.device_ids)]
         else:
             cfgs.device_ids = [0]
     else:

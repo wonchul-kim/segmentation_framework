@@ -12,7 +12,7 @@ from src.optimizers import get_optimizer
 from src.losses import criterion
 from src.lr_schedulers import get_lr_scheduler
 from src.train import train_one_epoch
-from src.validate import evaluate
+from src.validate import evaluate, save_validation
 from src.params import set_params
 from utils.torch_utils import set_envs, save_on_master
 from utils.preprocessing import get_transform
@@ -27,7 +27,7 @@ def main(args):
     dataset, num_classes = get_dataset(args.input_dir, args.dataset_format, "train", get_transform(True, args), args.classes)
     dataset_test, _ = get_dataset(args.input_dir, args.dataset_format, "val", get_transform(False, args), args.classes)
 
-    debug_dataset(dataset, args.debug_dir, 'train', args.num_classes)
+    # debug_dataset(dataset, args.debug_dir, 'train', args.num_classes)
 
     data_loader, data_loader_test, train_sampler = get_dataloader(dataset, dataset_test, args)
 
@@ -89,6 +89,17 @@ def main(args):
             train_sampler.set_epoch(epoch)
         train_one_epoch(model, criterion, optimizer, data_loader, lr_scheduler, device, epoch, args.print_freq, scaler)
         confmat = evaluate(model, data_loader_test, device=device, num_classes=num_classes)
+        if epoch%10 == 0:
+            save_validation(model, device, args.classes, dataset, args.val_dir, args.num_classes, epoch)
+            checkpoint = {
+            "model": model_without_ddp.state_dict(),
+            "optimizer": optimizer.state_dict(),
+            "lr_scheduler": lr_scheduler.state_dict(),
+            "epoch": epoch,
+            "args": args,
+            }   
+            save_on_master(checkpoint, os.path.join(args.weights_dir, f"model_{epoch}.pth"))
+            
         print(confmat)
         checkpoint = {
             "model": model_without_ddp.state_dict(),
@@ -99,9 +110,7 @@ def main(args):
         }
         if args.amp:
             checkpoint["scaler"] = scaler.state_dict()
-        save_on_master(checkpoint, os.path.join(args.output_dir, f"model_{epoch}.pth"))
-        save_on_master(checkpoint, os.path.join(args.output_dir, "checkpoint.pth"))
-
+        save_on_master(checkpoint, os.path.join(args.weights_dir, "last.pth"))
     total_time = time.time() - start_time
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))
     print(f"Training time {total_time_str}")
@@ -112,8 +121,8 @@ if __name__ == "__main__":
     import yaml
     
     cfgs = argparse.Namespace()
-    # data = './data/_unittest/coco.yml'
-    data = './data/_unittest/camvid.yml'
+    data = './data/_unittest/coco.yml'
+    # data = './data/_unittest/camvid.yml'
     with open(data, 'r') as yf:
         try:
             data = yaml.safe_load(yf)
