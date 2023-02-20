@@ -73,5 +73,5 @@ class MaskDataset(torch.utils.data.Dataset):
         if self.transforms is not None:
             image, target = self.transforms(image, mask)
 
-        return image, target#, fname
+        return image, target, fname
 

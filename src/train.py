@@ -6,7 +6,12 @@ def train_one_epoch(model, criterion, optimizer, data_loader, lr_scheduler, devi
     metric_logger = MetricLogger(delimiter="  ")
     metric_logger.add_meter("lr", SmoothedValue(window_size=1, fmt="{value}"))
     header = f"Epoch: [{epoch}]"
-    for image, target in metric_logger.log_every(data_loader, print_freq, header):
+    for batch in metric_logger.log_every(data_loader, print_freq, header):
+        if len(batch) == 3:
+            image, target, fname = batch
+        else:
+            image, target = batch 
+            fname = None
         image, target = image.to(device), target.to(device)
         with torch.cuda.amp.autocast(enabled=scaler is not None):
             output = model(image)

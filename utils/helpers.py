@@ -14,11 +14,21 @@ def cat_list(images, fill_value=0):
 
 
 def collate_fn(batch):
-    images, targets = list(zip(*batch))
-    batched_imgs = cat_list(images, fill_value=0)
-    batched_targets = cat_list(targets, fill_value=255)
-    return batched_imgs, batched_targets
+    if len(list(zip(*batch))) == 2:
+        images, targets = list(zip(*batch))
+        batched_imgs = cat_list(images, fill_value=0)
+        batched_targets = cat_list(targets, fill_value=255)
 
+        return batched_imgs, batched_targets
+
+    elif len(list(zip(*batch))) == 3:
+        images, targets, batched_fnames = list(zip(*batch))
+        batched_imgs = cat_list(images, fill_value=0)
+        batched_targets = cat_list(targets, fill_value=255)
+
+        return batched_imgs, batched_targets, batched_fnames
+    else:
+        raise RuntimeError(f"There is something wrong with collate_fn in the dataset")
 
 def mkdir(path):
     try:

@@ -10,7 +10,12 @@ def evaluate(model, data_loader, device, num_classes):
     header = "Test:"
     num_processed_samples = 0
     with torch.inference_mode():
-        for image, target in metric_logger.log_every(data_loader, 100, header):
+        for batch in metric_logger.log_every(data_loader, 100, header):
+            if len(batch) == 2:
+                image, target, fname = batch
+            else:
+                image, target = batch
+                fname = None
             image, target = image.to(device), target.to(device)
             output = model(image)
             output = output["out"]

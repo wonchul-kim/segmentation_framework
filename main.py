@@ -12,7 +12,7 @@ from src.optimizers import get_optimizer
 from src.losses import criterion
 from src.lr_schedulers import get_lr_scheduler
 from src.train import train_one_epoch
-from validate import evaluate
+from src.validate import evaluate
 from src.params import set_params
 from utils.torch_utils import set_envs, save_on_master
 from utils.preprocessing import get_transform
@@ -134,4 +134,4 @@ if __name__ == "__main__":
 
     set_params(cfgs)
 
-    # main(cfgs)
+    main(cfgs)
