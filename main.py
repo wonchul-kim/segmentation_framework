@@ -18,7 +18,11 @@ from utils.torch_utils import set_envs, save_on_master
 from utils.preprocessing import get_transform
 from utils.helpers import debug_dataset
 
+import matplotlib.pyplot as plt 
+
 def main(args):
+
+    
     if args.output_dir:
         utils.mkdir(args.output_dir)
 
@@ -32,8 +36,7 @@ def main(args):
     data_loader, data_loader_test, train_sampler = get_dataloader(dataset, dataset_test, args)
 
     model = get_model(model_name=args.model_name, weights=args.weights, weights_backbone=args.weights_backbone, \
-                        num_classes=num_classes, aux_loss=args.aux_loss
-            )
+                        num_classes=num_classes, aux_loss=args.aux_loss)
     model.to(device)
     model_without_ddp = model
 
@@ -84,11 +87,23 @@ def main(args):
         return
 
     start_time = time.time()
+    train_losses, train_lrs = [], []
     for epoch in range(args.start_epoch, args.epochs):
         if args.distributed:
             train_sampler.set_epoch(epoch)
-        train_one_epoch(model, criterion, optimizer, data_loader, lr_scheduler, device, epoch, args.print_freq, scaler)
+        train_loss, train_lr = train_one_epoch(model, criterion, optimizer, data_loader, lr_scheduler, device, epoch, args.print_freq, scaler)
         confmat = evaluate(model, data_loader_test, device=device, num_classes=num_classes)
+        train_losses.append(train_loss)
+        train_lrs.append(train_lr)
+
+        print(train_losses, train_lrs)
+        plt.subplot(211)
+        plt.plot(train_losses)
+        plt.subplot(212)
+        plt.plot(train_lrs)
+        plt.savefig(os.path.join(args.log_dir, 'train_plot.png'))
+        plt.close()
+
         if epoch%10 == 0:
             save_validation(model, device, args.classes, dataset, args.val_dir, args.num_classes, epoch)
             checkpoint = {
