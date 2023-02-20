@@ -1,5 +1,4 @@
 import torch
-import utils.helpers as utils
 from utils.metrics import SmoothedValue, MetricLogger
 
 def train_one_epoch(model, criterion, optimizer, data_loader, lr_scheduler, device, epoch, print_freq, scaler=None):

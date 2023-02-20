@@ -1,6 +1,8 @@
 import os
 import torch 
 import torch.distributed as dist
+import numpy as np
+
 
 def set_envs(args):
     init_distributed_mode(args)
@@ -90,3 +92,43 @@ def reduce_across_processes(val):
     dist.barrier()
     dist.all_reduce(t)
     return t
+
+# def save_val_images(image, target, fn, output, val_dir, classes, curr_epoch=None, val_idx=None):
+#     IDS, VALUES = [], []
+#     diff = int(255//len(classes))
+#     for idx in range(len(classes)):
+#         IDS.append(int(diff*idx))
+#         VALUES.append(idx)
+            
+#     t2l = { val : id_ for val, id_ in zip(VALUES, IDS) }
+
+#     for idx, (_image, _target, _fn, _output) in enumerate(zip(image, target, fn, output)):
+#         _image, _target = _image.to("cpu"), _target.to("cpu")
+
+#         _preds = torch.nn.functional.softmax(_output, dim=0)
+#         _preds = torch.argmax(_preds, dim=0)
+#         _preds = _preds.float().detach().to('cpu')
+#         _preds.apply_(lambda x: t2l[x])
+#         _preds = np.array(transforms.ToPILImage()(_preds.byte()))
+#         _target = transforms.ToPILImage()(_target.byte())
+#         _image = transforms.ToPILImage()(_image.byte())
+
+#         fig = plt.figure(figsize=(30, 20), dpi=dpi)
+#         plt.subplot(131)
+#         plt.imshow(_image)
+#         plt.title("ORIGINAL", fontsize=30)
+#         plt.subplot(132)
+#         plt.imshow(_image, alpha=0.3)
+#         plt.imshow(_target, alpha=0.8)
+#         plt.title("MASK", fontsize=30)
+#         plt.subplot(133)
+#         plt.imshow(_image, alpha=0.3)
+#         plt.imshow(_preds, alpha=0.8)
+#         plt.title("PREDS", fontsize=30)
+#         plt.savefig(osp.join(val_dir, _fn + '_{}.png'.format(val_idx)), bbox_inches='tight')
+#         # if curr_epoch == None:
+#         #     plt.savefig(osp.join(val_dir, _fn + '_{}.png'.format(idx1)), bbox_inches='tight')
+#         # else:
+#         #     plt.savefig(osp.join(val_dir, _fn + '_{}_{}_{}.png'.format(idx1, idx2, curr_epoch)), bbox_inches='tight')
+#         plt.close()
+

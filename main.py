@@ -5,13 +5,15 @@ import time
 import torch
 import torch.utils.data
 import utils.helpers as utils
+
 from models.modeling import get_model
 from src.ds_utils import get_dataset, get_dataloader
 from src.optimizers import get_optimizer
 from src.losses import criterion
 from src.lr_schedulers import get_lr_scheduler
 from src.train import train_one_epoch
-from src.val import evaluate
+from validate import evaluate
+from src.params import set_params
 from utils.torch_utils import set_envs, save_on_master
 from utils.preprocessing import get_transform
 
@@ -130,12 +132,6 @@ if __name__ == "__main__":
     for key, val in recipe.items():
         _cfgs[key] = val
 
-    if hasattr(cfgs, 'device_ids'):
-        if cfgs.device_ids != None:
-            cfgs.device_ids = list(map(int, cfgs.device_ids.split(",")))
-        else:
-            cfgs.device_ids = [0]
-    else:
-        cfgs.device_ids = [0]
+    set_params(cfgs)
 
-    main(cfgs)
+    # main(cfgs)
