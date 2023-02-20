@@ -3,6 +3,7 @@ import torch
 import torch.distributed as dist
 
 def set_envs(args):
+    init_distributed_mode(args)
     device = torch.device(args.device)
 
     if args.use_deterministic_algorithms:

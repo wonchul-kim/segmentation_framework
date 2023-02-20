@@ -1,0 +1,3 @@
+### for dataset params.
+input_dir: /HDD/datasets/public/coco
+dataset_format: coco

@@ -5,7 +5,6 @@ import time
 import torch
 import torch.utils.data
 import utils.helpers as utils
-import utils.torch_utils as torch_utils
 from models.modeling import get_model
 from src.ds_utils import get_dataset, get_dataloader
 from src.optimizers import get_optimizer
@@ -13,14 +12,13 @@ from src.losses import criterion
 from src.lr_schedulers import get_lr_scheduler
 from src.train import train_one_epoch
 from src.val import evaluate
-from utils.torch_utils import set_envs
+from utils.torch_utils import set_envs, save_on_master
 from utils.preprocessing import get_transform
 
 def main(args):
     if args.output_dir:
         utils.mkdir(args.output_dir)
 
-    torch_utils.init_distributed_mode(args)
     device = set_envs(args)
 
     dataset, num_classes = get_dataset(args.input_dir, args.dataset_format, "train", get_transform(True, args))
@@ -32,11 +30,11 @@ def main(args):
                         num_classes=num_classes, aux_loss=args.aux_loss
             )
     model.to(device)
+    model_without_ddp = model
 
     if args.distributed:
         model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
 
-    model_without_ddp = model
     if args.distributed:
         model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu])
         model_without_ddp = model.module
@@ -52,6 +50,12 @@ def main(args):
     optimizer = get_optimizer(params_to_optimize, args.init_lr, args.momentum, args.weight_decay)
     scaler = torch.cuda.amp.GradScaler() if args.amp else None
 
+    ###############################################################################################################    
+    ### Need to locate parallel training settings after parameter settings for optimization !!!!!!!!!!!!!!!!!!!!!!!
+    ###############################################################################################################
+    if not args.distributed and len(args.device_ids) > 1: 
+        print("The algiorithm is executed by nn.DataParallel on devices: {}".format(args.device_ids))
+        model = torch.nn.DataParallel(model, device_ids=args.device_ids, output_device=args.device_ids[0])
 
     lr_scheduler = get_lr_scheduler(optimizer, data_loader, args.epochs, args.lr_warmup_epochs, \
                                         args.lr_warmup_method, args.lr_warmup_decay)
@@ -90,8 +94,8 @@ def main(args):
         }
         if args.amp:
             checkpoint["scaler"] = scaler.state_dict()
-        torch_utils.save_on_master(checkpoint, os.path.join(args.output_dir, f"model_{epoch}.pth"))
-        torch_utils.save_on_master(checkpoint, os.path.join(args.output_dir, "checkpoint.pth"))
+        save_on_master(checkpoint, os.path.join(args.output_dir, f"model_{epoch}.pth"))
+        save_on_master(checkpoint, os.path.join(args.output_dir, "checkpoint.pth"))
 
     total_time = time.time() - start_time
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))
@@ -103,9 +107,20 @@ if __name__ == "__main__":
     import yaml
     
     cfgs = argparse.Namespace()
-    # train_recipe = './_unittest/coco.yml'
-    train_recipe = './_unittest/camvid.yml'
-    with open(train_recipe, 'r') as yf:
+    # data = './data/_unittest/coco.yml'
+    data = './data/_unittest/camvid.yml'
+    with open(data, 'r') as yf:
+        try:
+            data = yaml.safe_load(yf)
+        except yaml.YAMLError as exc:
+            print(exc)
+            
+    _cfgs = vars(cfgs)
+    for key, val in data.items():
+        _cfgs[key] = val
+
+    recipe = './data/recipes/train.yml'
+    with open(recipe, 'r') as yf:
         try:
             recipe = yaml.safe_load(yf)
         except yaml.YAMLError as exc:
@@ -114,5 +129,13 @@ if __name__ == "__main__":
     _cfgs = vars(cfgs)
     for key, val in recipe.items():
         _cfgs[key] = val
+
+    if hasattr(cfgs, 'device_ids'):
+        if cfgs.device_ids != None:
+            cfgs.device_ids = list(map(int, cfgs.device_ids.split(",")))
+        else:
+            cfgs.device_ids = [0]
+    else:
+        cfgs.device_ids = [0]
 
     main(cfgs)

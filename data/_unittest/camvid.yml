@@ -1,0 +1,4 @@
+### for dataset params.
+input_dir: /HDD/datasets/public/camvid
+dataset_format: mask
+
