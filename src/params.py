@@ -7,6 +7,11 @@ import yaml
 
 def set_params(cfgs):
 
+    if isinstance(cfgs.classes, str):
+        cfgs.classes = list(map(str, cfgs.classes.split(",")))
+
+    cfgs.num_classes = len(cfgs.classes) + 1
+
     if hasattr(cfgs, "output_dir"):
         if cfgs.output_dir == None or cfgs.output_dir == "None" or cfgs.output_dir == "none":
             cfgs.output_dir = str(Path(cfgs.input_dir).parent)
@@ -26,7 +31,7 @@ def set_params(cfgs):
 
     ### define logging directories
     if cfgs.resume: ### To resume training
-        pass
+        raise NotImplementedError(f"Not Implemented: cfgs.resume")
         # latest_ckpt = get_latest_ckpt(cfgs.output_dir, 'segmentation')  
         # assert os.path.exists(latest_ckpt), ValueError(f'resume checkpoint({latest_ckpt}) does not exist')
         # # logger(f"* To resume training, latest ckpt is {latest_ckpt}")            

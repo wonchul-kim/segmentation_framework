@@ -16,6 +16,7 @@ from src.validate import evaluate
 from src.params import set_params
 from utils.torch_utils import set_envs, save_on_master
 from utils.preprocessing import get_transform
+from utils.helpers import debug_dataset
 
 def main(args):
     if args.output_dir:
@@ -23,8 +24,10 @@ def main(args):
 
     device = set_envs(args)
 
-    dataset, num_classes = get_dataset(args.input_dir, args.dataset_format, "train", get_transform(True, args))
-    dataset_test, _ = get_dataset(args.input_dir, args.dataset_format, "val", get_transform(False, args))
+    dataset, num_classes = get_dataset(args.input_dir, args.dataset_format, "train", get_transform(True, args), args.classes)
+    dataset_test, _ = get_dataset(args.input_dir, args.dataset_format, "val", get_transform(False, args), args.classes)
+
+    debug_dataset(dataset, args.debug_dir, 'train', args.num_classes)
 
     data_loader, data_loader_test, train_sampler = get_dataloader(dataset, dataset_test, args)
 

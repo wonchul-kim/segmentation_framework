@@ -45,16 +45,24 @@ class COCODataset(torchvision.datasets.vision.VisionDataset):
         return len(self.ids)
 
 class MaskDataset(torch.utils.data.Dataset):
-    def __init__(self, img_folder, roi=None, transforms=None, img_exts=['png', 'jpg']):
+    TOTAL_CLASSES = ['sky', 'building', 'pole', 'road', 'pavement', 
+            'tree', 'signsymbol', 'fence', 'car', 
+            'pedestrian', 'bicyclist', 'unlabelled']
+
+    def __init__(self, img_folder, classes, roi=None, transforms=None, img_exts=['png', 'jpg']):
         self.img_folder = img_folder
         self.roi = roi
         self.transforms = transforms
+
+        print(f"There {classes} classes")
+        self.class_values = [self.TOTAL_CLASSES.index(cls.lower()) for cls in classes]
+        print(f"  - class_values: {self.class_values}")
         
         self.img_files = []
         for img_ext in img_exts:
             self.img_files += glob.glob(os.path.join(self.img_folder, "*.{}".format(img_ext)))
             
-        print(f"There are {len(self.img_files)} image files")
+        print(f"  - There are {len(self.img_files)} image files")
     
     def __len__(self):
         return len(self.img_files)

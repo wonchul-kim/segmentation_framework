@@ -33,7 +33,7 @@ class SegmentationPresetTrain:
                 T.RandomCrop(crop_size),
                 T.PILToTensor(),
                 T.ConvertImageDtype(torch.float),
-                T.Normalize(mean=mean, std=std),
+                # T.Normalize(mean=mean, std=std),
             ]
         )
         self.transforms = T.Compose(trans)
@@ -49,7 +49,7 @@ class SegmentationPresetEval:
                 T.RandomResize(base_size, base_size),
                 T.PILToTensor(),
                 T.ConvertImageDtype(torch.float),
-                T.Normalize(mean=mean, std=std),
+                # T.Normalize(mean=mean, std=std),
             ]
         )
 
