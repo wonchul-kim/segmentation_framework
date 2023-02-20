@@ -59,8 +59,9 @@ def debug_dataset(dataset, debug_dir, mode, num_classes, channel_first=True, inp
                     ratio=0.1, denormalization_fn=None, image_loading_mode='rgb', width=256, height=256, rows=4, cols=4):
     imgsz_h, imgsz_w = dataset[0][1].shape
 
-    width = min(imgsz_w, width)
-    height = min(imgsz_h, height)
+    # width = min(imgsz_w, width)
+    # height = min(imgsz_h, height)
+    # print("..................", width, height, imgsz_h, imgsz_w)
     origin = 25,25
     font = cv2.FONT_HERSHEY_SIMPLEX
     text = np.zeros((50, width*2, input_channel), np.uint8)
@@ -93,6 +94,7 @@ def debug_dataset(dataset, debug_dir, mode, num_classes, channel_first=True, inp
             else:
                 raise ValueError(f"There is no such image_loading_mode({image_loading_mode})")
         
+            mask = mask.astype('float32')
             mask = cv2.resize(mask, (height, width))*(255//num_classes)
             mask = cv2.cvtColor(mask.astype(np.uint8), cv2.COLOR_GRAY2BGR)
         elif input_channel == 1:

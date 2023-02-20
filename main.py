@@ -27,8 +27,8 @@ def main(args):
     dataset, num_classes = get_dataset(args.input_dir, args.dataset_format, "train", get_transform(True, args), args.classes)
     dataset_test, _ = get_dataset(args.input_dir, args.dataset_format, "val", get_transform(False, args), args.classes)
 
-    # debug_dataset(dataset, args.debug_dir, 'train', args.num_classes)
-
+    debug_dataset(dataset, args.debug_dir, 'train', args.num_classes)
+    debug_dataset(dataset_test, args.debug_dir, 'val', args.num_classes)
     data_loader, data_loader_test, train_sampler = get_dataloader(dataset, dataset_test, args)
 
     model = get_model(model_name=args.model_name, weights=args.weights, weights_backbone=args.weights_backbone, \
@@ -121,8 +121,8 @@ if __name__ == "__main__":
     import yaml
     
     cfgs = argparse.Namespace()
-    data = './data/_unittest/coco.yml'
-    # data = './data/_unittest/camvid.yml'
+    # data = './data/_unittest/coco.yml'
+    data = './data/_unittest/camvid.yml'
     with open(data, 'r') as yf:
         try:
             data = yaml.safe_load(yf)

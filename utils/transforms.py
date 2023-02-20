@@ -25,7 +25,6 @@ class Compose:
             image, target = t(image, target)
         return image, target
 
-
 class RandomResize:
     def __init__(self, min_size, max_size=None):
         self.min_size = min_size
@@ -37,6 +36,7 @@ class RandomResize:
         size = random.randint(self.min_size, self.max_size)
         image = F.resize(image, size)
         target = F.resize(target, size, interpolation=T.InterpolationMode.NEAREST)
+
         return image, target
 
 
