@@ -11,7 +11,7 @@ def evaluate(model, data_loader, device, num_classes):
     num_processed_samples = 0
     with torch.inference_mode():
         for batch in metric_logger.log_every(data_loader, 100, header):
-            if len(batch) == 2:
+            if len(batch) == 3:
                 image, target, fname = batch
             else:
                 image, target = batch
