@@ -47,6 +47,7 @@ class COCODataset(torchvision.datasets.vision.VisionDataset):
     def __len__(self) -> int:
         return len(self.ids)
 
+##FIXME: This maskdataset is too dependent to camvid dataset..., especially total_classes w/o background label 
 class MaskDataset(torch.utils.data.Dataset):
     TOTAL_CLASSES = ['sky', 'building', 'pole', 'road', 'pavement', 
             'tree', 'signsymbol', 'fence', 'car', 
@@ -97,11 +98,15 @@ class LabelmeDatasets(torch.utils.data.Dataset):
         assert len(self.img_files) != 0, f"There is no images in dataset directory: {osp.join(self.root_dir)} with {img_exts}"
 
         self.roi_info = roi_info
-        self.class2label = {}
+        self.class2label = {'_background_': 0}
         for idx, label in enumerate(classes):
-            self.class2label[label.lower()] = int(idx)
+            self.class2label[label.lower()] = int(idx) + 1
         print(f"There are {self.class2label} classes")
         print(f"  - There are {len(self.img_files)} image files with {len(self.roi_info)} RoIs") 
+
+        self.image = None
+        self.fname = None
+        self.json_file = None
         
     def __len__(self):
         if self.roi_info != None:
@@ -111,19 +116,25 @@ class LabelmeDatasets(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         if self.roi_info != None:
-            img_file = self.img_files[idx//len(self.roi_info)]
+            if idx%len(self.roi_info) == 0:
+                img_file = self.img_files[idx//len(self.roi_info)]
+                self.fname = osp.split(osp.splitext(img_file)[0])[-1]
+                self.json_file = osp.join(osp.split(img_file)[0], self.fname + '.json')
+                self.image = Image.open(img_file)
             roi = self.roi_info[idx%len(self.roi_info)]
+            fname = self.fname + "_{}_{}_{}_{}".format(roi[0], roi[1], roi[2], roi[3])
         else:
             img_file = self.img_files[idx]
-        fname = osp.split(osp.splitext(img_file)[0])[-1]
+            self.fname = osp.split(osp.splitext(img_file)[0])[-1]
+            self.json_file = osp.join(osp.split(img_file)[0], self.fname + '.json')
+            self.image = Image.open(img_file)
+            fname = self.fname
 
-        image = Image.open(img_file)
-        (w, h) = (image.size)
-        # image = cv2.imread(self.img_files[idx])
-        # (w, h, _) = (image.shape)
+        w, h = self.image.size
+        # self.image = cv2.imread(self.img_files[idx])
+        # (w, h, _) = (self.image.shape)
 
-        json_file = osp.join(osp.split(img_file)[0], fname + '.json')
-        mask = make_mask(json_file, w, h, self.class2label, 'pil')
+        mask = make_mask(self.json_file, w, h, self.class2label, 'pil')
 
         ### Crop image with RoI
         if self.roi_info != None:
@@ -131,11 +142,11 @@ class LabelmeDatasets(torch.utils.data.Dataset):
             assert w >= roi[2], ValueError(f"Image width ({w}) should bigger than roi_info bx ({roi[2]})")
             assert h >= roi[3], ValueError(f"Image height ({h}) should bigger than roi_info by ({roi[3]})")
 
-            image = image.crop((roi[0], roi[1], roi[2], roi[3]))
+            image = self.image.crop((roi[0], roi[1], roi[2], roi[3]))
             mask = mask.crop((roi[0], roi[1], roi[2], roi[3]))
 
         ####### To transform
         if self.transforms is not None:
-            image, target = self.transforms(image, mask)
+            image, mask = self.transforms(image, mask)
 
-        return image, target, fname    
+        return image, mask, fname     

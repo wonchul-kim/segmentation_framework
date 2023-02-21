@@ -25,6 +25,18 @@ class Compose:
             image, target = t(image, target)
         return image, target
 
+class Resize:
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+
+    def __call__(self, image, target):
+        image = T.Resize([self.width, self.height])(image)#, (self.width, self.height))
+        target = T.Resize([self.width, self.height])(target)#, (self.width, self.height))
+
+        return image, target
+
+
 class RandomResize:
     def __init__(self, min_size, max_size=None):
         self.min_size = min_size

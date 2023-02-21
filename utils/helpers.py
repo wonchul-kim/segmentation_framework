@@ -104,9 +104,9 @@ def debug_dataset(dataset, debug_dir, mode, num_classes, channel_first=True, inp
         mask = cv2.addWeighted(image, 0.1, mask, 0.9, 0)
         image_mask = cv2.hconcat([image, mask])
         if fname != None:
-            cv2.putText(text, fname + '_{}.png'.format(idx), origin, font, 0.6, (255,255,255), 1)
+            cv2.putText(text, fname + '_{}.png'.format(idx), origin, font, 0.4, (255,255,255), 1)
         else:
-            cv2.putText(text, '{}.png'.format(idx), origin, font, 0.6, (255,255,255), 1)
+            cv2.putText(text, '{}.png'.format(idx), origin, font, 0.4, (255,255,255), 1)
         image_mask = cv2.vconcat([text, image_mask])
         text = np.zeros((50, width*2, input_channel), np.uint8)
 
