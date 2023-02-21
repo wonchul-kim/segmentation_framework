@@ -6,7 +6,7 @@ import json
 def make_mask(json_file, width, height, class2label, format='pil'):
     with open(json_file) as f:
         anns = json.load(f)
-    mask = np.zeros((width, height))
+    mask = np.zeros((height, width))
     for shapes in anns['shapes']:
         label = shapes['label'].lower()
         if label in class2label.keys():
