@@ -16,7 +16,7 @@ def make_mask(json_file, width, height, class2label, format='pil'):
             except:
                 print("Not found:", _points)
                 continue
-            cv2.fillPoly(mask, [arr], color=(class2label[label]*120))
+            cv2.fillPoly(mask, [arr], color=(class2label[label]))
 
     if format == 'pil':
         return Image.fromarray(mask)
