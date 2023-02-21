@@ -102,7 +102,7 @@ class LabelmeDatasets(torch.utils.data.Dataset):
         for idx, label in enumerate(classes):
             self.class2label[label.lower()] = int(idx) + 1
         print(f"There are {self.class2label} classes")
-        print(f"  - There are {len(self.img_files)} image files with {len(self.roi_info)} RoIs") 
+        print(f"  - There are {len(self.img_files)} image files") 
 
         self.image = None
         self.fname = None
@@ -121,7 +121,7 @@ class LabelmeDatasets(torch.utils.data.Dataset):
                 self.fname = osp.split(osp.splitext(img_file)[0])[-1]
                 self.json_file = osp.join(osp.split(img_file)[0], self.fname + '.json')
                 self.image = Image.open(img_file)
-            roi = self.roi_info[idx%len(self.roi_info)]
+            roi = self.roi_info[int(idx%len(self.roi_info))]
             fname = self.fname + "_{}_{}_{}_{}".format(roi[0], roi[1], roi[2], roi[3])
         else:
             img_file = self.img_files[idx]
@@ -129,6 +129,7 @@ class LabelmeDatasets(torch.utils.data.Dataset):
             self.json_file = osp.join(osp.split(img_file)[0], self.fname + '.json')
             self.image = Image.open(img_file)
             fname = self.fname
+            image = self.image
 
         w, h = self.image.size
         # self.image = cv2.imread(self.img_files[idx])
