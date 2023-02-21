@@ -27,7 +27,7 @@ class SegmentationPresetTrain:
             [
                 T.PILToTensor(),
                 T.ConvertImageDtype(torch.float),
-                T.Normalize(mean=mean, std=std),
+                # T.Normalize(mean=mean, std=std),
             ]
         )
         self.transforms = T.Compose(trans)
@@ -43,7 +43,7 @@ class SegmentationPresetEval:
             [
                 T.PILToTensor(),
                 T.ConvertImageDtype(torch.float),
-                T.Normalize(mean=mean, std=std),
+                # T.Normalize(mean=mean, std=std),
             ]
         )
 

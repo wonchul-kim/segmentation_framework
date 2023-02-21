@@ -29,7 +29,7 @@ def get_dataloader(dataset, dataset_test, args):
     
     return data_loader, data_loader_test, train_sampler
 
-def get_dataset(dir_path, name, image_set, transform, classes, roi_info=None):
+def get_dataset(dir_path, name, image_set, transform, classes, roi_info=None, patch_info=None):
     def sbd(*args, **kwargs):
         return torchvision.datasets.SBDataset(*args, mode="segmentation", **kwargs)
 
@@ -42,10 +42,10 @@ def get_dataset(dir_path, name, image_set, transform, classes, roi_info=None):
     }
     p, ds_fn, num_classes = paths[name]
 
-    ds = ds_fn(p, image_set=image_set, transforms=transform, classes=classes, roi_info=roi_info)
+    ds = ds_fn(p, image_set=image_set, transforms=transform, classes=classes, roi_info=roi_info, patch_info=patch_info)
     return ds, num_classes
 
-def get_coco(root, image_set, transforms, classes, roi_info=None):
+def get_coco(root, image_set, transforms, classes, roi_info=None, patch_info=None):
     PATHS = {
         "train": ("train2017", osp.join("annotations", "instances_train2017.json")),
         "val": ("val2017", osp.join("annotations", "instances_val2017.json")),
@@ -67,7 +67,7 @@ def get_coco(root, image_set, transforms, classes, roi_info=None):
 
     return dataset
 
-def get_mask(root, image_set, transforms, classes, roi_info=None):
+def get_mask(root, image_set, transforms, classes, roi_info=None, patch_info=None):
     PATHS = {
         "train": ("train/images"),
         "val": ("val/images"),
@@ -85,7 +85,7 @@ def get_mask(root, image_set, transforms, classes, roi_info=None):
 
     return dataset
 
-def get_labelme(root, image_set, transforms, classes, roi_info=None):
+def get_labelme(root, image_set, transforms, classes, roi_info=None, patch_info=None):
     PATHS = {
         "train": ("train"),
         "val": ("val"),
@@ -96,7 +96,7 @@ def get_labelme(root, image_set, transforms, classes, roi_info=None):
     img_folder = PATHS[image_set]
     img_folder = osp.join(root, img_folder)
 
-    dataset = LabelmeDatasets(img_folder, classes, transforms=transforms, roi_info=roi_info)
+    dataset = LabelmeDatasets(img_folder, classes, transforms=transforms, roi_info=roi_info, patch_info=patch_info)
 
     # if image_set == "train": #FIXME: Need to make this option 
     #     dataset = _coco_remove_images_without_annotations(dataset, CAT_LIST)

@@ -12,7 +12,7 @@ def set_params(cfgs):
 
     cfgs.num_classes = len(cfgs.classes) + 1
 
-    ### RoIs
+    ####### RoIs ####################################################################################
     if hasattr(cfgs, 'roi'):
         cfgs.roi = bool(cfgs.roi)
     else:
@@ -39,6 +39,91 @@ def set_params(cfgs):
             cfgs.roi_info = [[int(cfgs.roi_start_x), int(cfgs.roi_start_y), int(cfgs.roi_start_x) + int(cfgs.roi_width), int(cfgs.roi_start_y) + int(cfgs.roi_height)]]
     else:
         cfgs.roi_info = None 
+
+    ####### patches ##################################################################################
+    cfgs.patches = bool(cfgs.patches)
+    if cfgs.patches:
+        cfgs.patch_info = {"patch_width": int(cfgs.patch_width), "patch_height": int(cfgs.patch_height)}
+
+        if hasattr(cfgs, 'patch_include_point_positive'):
+            if cfgs.patch_include_point_positive != None:
+                patch_include_point_positive = bool(cfgs.patch_include_point_positive)
+            else:
+                patch_include_point_positive = False
+        else:
+            patch_include_point_positive = False
+
+        cfgs.patch_info['patch_include_point_positive'] = patch_include_point_positive
+
+        ####### for centric --------------------------------
+        if hasattr(cfgs, 'patch_centric'):
+            if cfgs.patch_centric != None:
+                cfgs.patch_centric = bool(cfgs.patch_centric)
+            else:
+                cfgs.patch_centric = False
+        else:
+            cfgs.patch_centric = False
+
+        if cfgs.patch_centric:
+
+            if hasattr(cfgs, 'shake_patch'):
+                if int(cfgs.shake_patch) >= 0:
+                    shake_patch = int(cfgs.shake_patch)
+                else:
+                    shake_patch = 0
+            else:
+                shake_patch = 0
+
+            cfgs.patch_info['patch_centric'] = True
+            cfgs.patch_info['shake_patch'] = shake_patch
+        else:
+            cfgs.patch_info['patch_centric'] = False 
+
+        ####### for sliding -------------------------------
+        if hasattr(cfgs, 'patch_slide'):
+            if cfgs.patch_slide != None:
+                cfgs.patch_slide = bool(cfgs.patch_slide)
+            else:
+                cfgs.patch_slide = False
+        else:
+            cfgs.patch_slide = False
+        
+        if cfgs.patch_slide:
+            if hasattr(cfgs, 'patch_overlap_ratio'):
+                if cfgs.patch_overlap_ratio != None:
+                        patch_overlap_ratio = float(cfgs.patch_overlap_ratio)
+                else:
+                    patch_overlap_ratio = 0
+            else:
+                patch_overlap_ratio = 0
+
+            if hasattr(cfgs, 'patch_num_involved_pixel'):
+                if cfgs.patch_num_involved_pixel != None and cfgs.patch_num_involved_pixel != 0:
+                        patch_num_involved_pixel = int(cfgs.patch_num_involved_pixel)
+                else:
+                    patch_num_involved_pixel = 2
+            else:
+                patch_num_involved_pixel = 2
+
+            if hasattr(cfgs, 'patch_bg_ratio'):
+                if cfgs.patch_bg_ratio != None:
+                    patch_bg_ratio = float(cfgs.patch_bg_ratio)
+                else:
+                    patch_bg_ratio = 0
+            else:
+                patch_bg_ratio = 0
+            
+            assert float(patch_overlap_ratio) <= 1 and float(patch_overlap_ratio) >= 0, ValueError(f"patch_overlap_ratio should be 0 <= patch_overlap_ratio <= 1, not {float(patch_overlap_ratio)}")
+            assert float(patch_bg_ratio) <= 1 and float(patch_bg_ratio) >= 0, ValueError(f"patch_bg_ratio should be 0 <= patch_bg_ratio <= 1, not {float(patch_bg_ratio)}")
+
+            cfgs.patch_info["patch_slide"] = True
+            cfgs.patch_info["patch_overlap_ratio"] = patch_overlap_ratio
+            cfgs.patch_info["patch_num_involved_pixel"] = patch_num_involved_pixel
+            cfgs.patch_info["patch_bg_ratio"] = patch_bg_ratio
+        else:
+            cfgs.patch_info['patch_slide'] = False 
+    else:
+        cfgs.patch_info = None
 
 
     if hasattr(cfgs, "output_dir"):

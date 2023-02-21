@@ -1,0 +1,24 @@
+input_dir: /HDD/datasets/_unittest/single_roi/w_patches/sungwoo_intops/split_datasets
+output_dir: "./res/sungwoo"
+classes: ["SCRATCH", "STABBED", "DUST"]
+dataset_format: labelme
+
+### roi
+roi: true
+roi_from_json: false
+roi_start_x: 500
+roi_start_y: 700
+roi_width: 1280
+roi_height: 512
+
+### patches
+patches: true
+patch_include_point_positive: true
+patch_centric: true
+shake_patch: 0
+patch_slide: true
+patch_width: 256
+patch_height: 256
+patch_overlap_ratio: 0.1
+patch_num_involved_pixel: 2
+patch_bg_ratio: 0.1
