@@ -1,0 +1,12 @@
+input_dir: /HDD/datasets/_unittest/single_roi/wo_patches/sungwoo_intops/split_datasets
+output_dir: "./res/sungwoo"
+classes: ["SCRATCH", "STABBED", "DUST"]
+dataset_format: labelme
+
+### roi
+roi: true
+roi_from_json: false
+roi_start_x: 500
+roi_start_y: 700
+roi_width: 1280
+roi_height: 512

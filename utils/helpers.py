@@ -56,7 +56,7 @@ def increment_path(path, exist_ok=False, sep='', mkdir=False):
     return path
 
 def debug_dataset(dataset, debug_dir, mode, num_classes, channel_first=True, input_channel=3,\
-                    ratio=0.1, denormalization_fn=None, image_loading_mode='rgb', width=256, height=256, rows=4, cols=4):
+                    ratio=1, denormalization_fn=None, image_loading_mode='rgb', width=256, height=256, rows=4, cols=4):
     imgsz_h, imgsz_w = dataset[0][1].shape
 
     # width = min(imgsz_w, width)

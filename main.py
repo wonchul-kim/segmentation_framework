@@ -4,7 +4,7 @@ import time
 
 import torch
 import torch.utils.data
-import utils.helpers as utils
+from threading import Thread
 
 from models.modeling import get_model
 from src.ds_utils import get_dataset, get_dataloader
@@ -17,19 +17,20 @@ from src.params import set_params
 from utils.torch_utils import set_envs, save_on_master
 from utils.preprocessing import get_transform
 from utils.helpers import debug_dataset
+import utils.helpers as utils
 
 import matplotlib.pyplot as plt 
 
 def main(args):
-
-    
     if args.output_dir:
         utils.mkdir(args.output_dir)
 
     device = set_envs(args)
 
-    dataset, num_classes = get_dataset(args.input_dir, args.dataset_format, "train", get_transform(True, args), args.classes)
-    dataset_test, _ = get_dataset(args.input_dir, args.dataset_format, "val", get_transform(False, args), args.classes)
+    dataset, num_classes = get_dataset(args.input_dir, args.dataset_format, "train", get_transform(True, args), \
+                                        args.classes, args.roi_info)
+    dataset_test, _ = get_dataset(args.input_dir, args.dataset_format, "val", get_transform(False, args), \
+                                    args.classes, args.roi_info)
 
     debug_dataset(dataset, args.debug_dir, 'train', args.num_classes)
     debug_dataset(dataset_test, args.debug_dir, 'val', args.num_classes)
@@ -137,7 +138,9 @@ if __name__ == "__main__":
     
     cfgs = argparse.Namespace()
     # data = './data/_unittest/coco.yml'
-    data = './data/_unittest/camvid.yml'
+    # data = './data/_unittest/camvid.yml'
+    # data = './data/_unittest/samkee.yml'
+    data = './data/_unittest/single_rois_wo_patches.yml'
     with open(data, 'r') as yf:
         try:
             data = yaml.safe_load(yf)

@@ -1,4 +1,5 @@
 ### for dataset params.
 input_dir: /HDD/datasets/public/coco
+output_dir: './coco'
 dataset_format: coco
 classes: [""]

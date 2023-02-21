@@ -1,7 +1,7 @@
 ### for model params.
 model_name: fcn_resnet50
-input_height: 224
-input_width: 224
+input_height: 640
+input_width: 512
 input_channel: 3
 weights: null #the weights enum name to load
 weights_backbone: null #the backbone weights enum name to load
@@ -14,7 +14,7 @@ device: cuda
 device_ids: 0
 start_epoch: 0
 epochs: 300
-batch_size: 8
+batch_size: 2
 workers: 16
 init_lr: 0.01
 momentum: 0.9
@@ -26,7 +26,6 @@ lr_warmup_decay: 0.01
 amp: false 
 
 ### for logging
-output_dir: './res'
 print_freq: 10
 
 ### for distributed training params.
