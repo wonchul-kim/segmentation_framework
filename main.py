@@ -32,10 +32,11 @@ def main(args):
     dataset_test, _ = get_dataset(args.input_dir, args.dataset_format, "val", get_transform(False, args), \
                                     args.classes, args.roi_info)
 
-    # Thread(target=debug_dataset, args=(dataset, args.debug_dir, 'train', args.num_classes))
-    # Thread(target=debug_dataset, args=(dataset_test, args.debug_dir, 'val', args.num_classes))
-    debug_dataset(dataset, args.debug_dir, 'train', args.num_classes)
-    debug_dataset(dataset_test, args.debug_dir, 'val', args.num_classes)
+    Thread(target=debug_dataset, args=(dataset, args.debug_dir, 'train', args.num_classes))
+    Thread(target=debug_dataset, args=(dataset_test, args.debug_dir, 'val', args.num_classes))
+    # debug_dataset(dataset, args.debug_dir, 'train', args.num_classes)
+    # debug_dataset(dataset_test, args.debug_dir, 'val', args.num_classes)
+
     data_loader, data_loader_test, train_sampler = get_dataloader(dataset, dataset_test, args)
 
     model = get_model(model_name=args.model_name, weights=args.weights, weights_backbone=args.weights_backbone, \
@@ -143,7 +144,7 @@ if __name__ == "__main__":
     # data = './data/_unittest/camvid.yml'
     # data = './data/_unittest/samkee.yml'
     # data = './data/_unittest/single_rois_wo_patches.yml'
-    data = './data/_unittest/multiple_rois_wo_patches.yml'
+    # data = './data/_unittest/multiple_rois_wo_patches.yml'
     with open(data, 'r') as yf:
         try:
             data = yaml.safe_load(yf)

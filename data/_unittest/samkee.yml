@@ -1,5 +1,5 @@
 ### for dataset params.
 input_dir: /HDD/datasets/projects/samkee/test_90_movingshot/split_dataset
-output_dir: "./samkee"
+output_dir: "./res/samkee"
 dataset_format: labelme
 classes: ["BUBBLE", "DUST", "LINE", "CRACK", "BLACK", "PEELING", "BURR"]

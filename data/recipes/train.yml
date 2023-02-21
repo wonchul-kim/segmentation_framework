@@ -1,7 +1,7 @@
 ### for model params.
 model_name: fcn_resnet50
-input_height: 512
-input_width: 512
+input_height: 256
+input_width: 256
 input_channel: 3
 weights: null #the weights enum name to load
 weights_backbone: null #the backbone weights enum name to load
