@@ -14,11 +14,17 @@ def set_params(cfgs, _vars, _augs=None):
 
     ####### RoIs ####################################################################################
     if hasattr(cfgs, 'roi'):
-        _vars.roi = bool(cfgs.roi)
+        if cfgs.roi != None:
+            _vars.roi = bool(cfgs.roi)
+        else:
+            _vars.roi = False
     else:
         _vars.roi = False
     if hasattr(cfgs, 'roi_from_json'):
-        _vars.roi_from_json = bool(cfgs.roi_from_json)
+        if cfgs.roi_from_json != None:
+            _vars.roi_from_json = bool(cfgs.roi_from_json)
+        else:
+            _vars.roi_from_json = False
     else:
         _vars.roi_from_json = False
     
