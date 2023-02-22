@@ -41,7 +41,14 @@ def set_params(cfgs):
         cfgs.roi_info = None 
 
     ####### patches ##################################################################################
-    cfgs.patches = bool(cfgs.patches)
+    if hasattr(cfgs, 'patches'):
+        if cfgs.patches != None:
+            cfgs.patches = bool(cfgs.patches)
+        else:
+            cfgs.patches = False 
+    else:
+        cfgs.patches = False 
+        
     if cfgs.patches:
         cfgs.patch_info = {"patch_width": int(cfgs.patch_width), "patch_height": int(cfgs.patch_height)}
 
