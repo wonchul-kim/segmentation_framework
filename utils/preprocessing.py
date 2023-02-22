@@ -1,3 +1,6 @@
+from calendar import c
+from glob import glob 
+import os.path as osp
 import torch
 import utils.transforms as T
 import torchvision
@@ -86,3 +89,46 @@ class SegmentationPresetEval:
 
 #     def __call__(self, img, target):
 #         return self.transforms(img, target)
+
+def get_image_files(img_folder, img_exts, roi_info=None, patch_info=None):
+    img_files = []
+    for input_format in img_exts:
+        img_files += glob(osp.join(img_folder, "*.{}".format(input_format)))
+
+    imgs_info = []
+    num_data = 0
+    for img_file in img_files:
+        img_info = {'img_file': img_file, 'rois': []}
+        if patch_info == None and roi_info == None:
+            img_info['rois'] = None
+            num_data += 1
+        elif patch_info == None and roi_info != None:
+            for roi in roi_info:
+                img_info['rois'].append(roi)  
+                num_data += 1
+        elif patch_info != None:
+            NotImplementedError
+
+        imgs_info.append(img_info)
+
+    return imgs_info, num_data
+
+
+# def get_image_files(img_folder, img_exts, roi_info=None, patch_info=None):
+
+#     img_files = []
+#     for input_format in img_exts:
+#         img_files += glob(osp.join(img_folder, "*.{}".format(input_format)))
+
+#     imgs_info = []
+#     for img_file in img_files:
+#         if patch_info == None and roi_info == None:
+#             imgs_info.append({'img_file': img_file, 'roi': None})            
+#         elif patch_info == None and roi_info != None:
+#             for roi in roi_info:
+#                 imgs_info.append({'img_file': img_file, 'roi': roi})  
+#         elif patch_info != None:
+#             NotImplementedError
+
+#     return imgs_info
+
