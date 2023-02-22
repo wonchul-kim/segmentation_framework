@@ -5,52 +5,73 @@ from pathlib import Path
 from datetime import datetime
 import yaml
 
-def set_params(cfgs):
+def set_params(cfgs, _vars, _augs=None):
     ### classes
     if isinstance(cfgs.classes, str):
-        cfgs.classes = list(map(str, cfgs.classes.split(",")))
+        _vars.classes = list(map(str, cfgs.classes.split(",")))
 
-    cfgs.num_classes = len(cfgs.classes) + 1
+    _vars.num_classes = len(cfgs.classes) + 1
 
     ####### RoIs ####################################################################################
     if hasattr(cfgs, 'roi'):
-        cfgs.roi = bool(cfgs.roi)
+        _vars.roi = bool(cfgs.roi)
     else:
-        cfgs.roi = False
+        _vars.roi = False
     if hasattr(cfgs, 'roi_from_json'):
-        cfgs.roi_from_json = bool(cfgs.roi_from_json)
+        _vars.roi_from_json = bool(cfgs.roi_from_json)
     else:
-        cfgs.roi_from_json = False
+        _vars.roi_from_json = False
     
-    assert (cfgs.roi and cfgs.roi_from_json) != True, ValueError(f"roi ({cfgs.roi}) and roi_from_json ({cfgs.roi_from_json}) cannot be both True")
+    assert (_vars.roi and _vars.roi_from_json) != True, ValueError(f"roi ({_vars.roi}) and roi_from_json ({_vars.roi_from_json}) cannot be both True")
     
-    if cfgs.roi:
+    if _vars.roi:
         if isinstance(cfgs.roi_start_x, str) and isinstance(cfgs.roi_start_y, str) \
             and isinstance(cfgs.roi_width, str) and isinstance(cfgs.roi_height, str):
-            cfgs.roi_start_x = list(map(int, cfgs.roi_start_x.split(',')))
-            cfgs.roi_start_y = list(map(int, cfgs.roi_start_y.split(',')))
-            cfgs.roi_width = list(map(int, cfgs.roi_width.split(',')))
-            cfgs.roi_height = list(map(int, cfgs.roi_height.split(',')))
+            _vars.roi_start_x = list(map(int, cfgs.roi_start_x.split(',')))
+            _vars.roi_start_y = list(map(int, cfgs.roi_start_y.split(',')))
+            _vars.roi_width = list(map(int, cfgs.roi_width.split(',')))
+            _vars.roi_height = list(map(int, cfgs.roi_height.split(',')))
 
-            cfgs.roi_info = []
+            _vars.roi_info = []
             for roi_start_x, roi_start_y, roi_width, roi_height in zip(cfgs.roi_start_x, cfgs.roi_start_y, cfgs.roi_width, cfgs.roi_height):
-                cfgs.roi_info.append([roi_start_x, roi_start_y, roi_start_x + roi_width, roi_start_y + roi_height])
+                _vars.roi_info.append([int(roi_start_x), int(roi_start_y), int(roi_start_x + roi_width), int(roi_start_y + roi_height)])
         else:
-            cfgs.roi_info = [[int(cfgs.roi_start_x), int(cfgs.roi_start_y), int(cfgs.roi_start_x) + int(cfgs.roi_width), int(cfgs.roi_start_y) + int(cfgs.roi_height)]]
+            _vars.roi_info = [[int(cfgs.roi_start_x), int(cfgs.roi_start_y), int(cfgs.roi_start_x) + int(cfgs.roi_width), int(cfgs.roi_start_y) + int(cfgs.roi_height)]]
     else:
-        cfgs.roi_info = None 
+        _vars.roi_info = None 
 
     ####### patches ##################################################################################
     if hasattr(cfgs, 'patches'):
         if cfgs.patches != None:
-            cfgs.patches = bool(cfgs.patches)
+            _vars.patches = bool(cfgs.patches)
         else:
-            cfgs.patches = False 
+            _vars.patches = False 
     else:
-        cfgs.patches = False 
+        _vars.patches = False 
         
-    if cfgs.patches:
-        cfgs.patch_info = {"patch_width": int(cfgs.patch_width), "patch_height": int(cfgs.patch_height)}
+    if _vars.patches:
+        if hasattr(cfgs, 'patch_centric'):
+            if cfgs.patch_centric != None:
+                _vars.patch_centric = bool(cfgs.patch_centric)
+            else:
+                _vars.patch_centric = False 
+        else:
+            _vars.patch_centric = False
+        if hasattr(cfgs, 'patch_slide'):
+            if cfgs.patch_slide != None:
+                _vars.patch_slide = bool(cfgs.patch_slide)
+            else:
+                _vars.patch_slide = False 
+        else:
+            _vars.patch_slide = False
+
+        assert (_vars.patch_centric or _vars.patch_slide), \
+            ValueError(f"If you want to use patch-based learning, NEED to turn on one of patch_centric or patch_slide")
+        
+        assert (cfgs.patch_width != None or cfgs.patch_height != None), \
+            ValueError(f"If you want to use patch-based learning, NEED to define all of patch_width and patch_height")
+       
+        _vars.patch_info = {"patch_width": int(cfgs.patch_width), "patch_height": int(cfgs.patch_height)}
 
         if hasattr(cfgs, 'patch_include_point_positive'):
             if cfgs.patch_include_point_positive != None:
@@ -60,18 +81,10 @@ def set_params(cfgs):
         else:
             patch_include_point_positive = False
 
-        cfgs.patch_info['patch_include_point_positive'] = patch_include_point_positive
+        _vars.patch_info['patch_include_point_positive'] = patch_include_point_positive
 
         ####### for centric --------------------------------
-        if hasattr(cfgs, 'patch_centric'):
-            if cfgs.patch_centric != None:
-                cfgs.patch_centric = bool(cfgs.patch_centric)
-            else:
-                cfgs.patch_centric = False
-        else:
-            cfgs.patch_centric = False
-
-        if cfgs.patch_centric:
+        if _vars.patch_centric:
 
             if hasattr(cfgs, 'shake_patch'):
                 if int(cfgs.shake_patch) >= 0:
@@ -81,21 +94,13 @@ def set_params(cfgs):
             else:
                 shake_patch = 0
 
-            cfgs.patch_info['patch_centric'] = True
-            cfgs.patch_info['shake_patch'] = shake_patch
+            _vars.patch_info['patch_centric'] = True
+            _vars.patch_info['shake_patch'] = shake_patch
         else:
-            cfgs.patch_info['patch_centric'] = False 
+            _vars.patch_info['patch_centric'] = False 
 
-        ####### for sliding -------------------------------
-        if hasattr(cfgs, 'patch_slide'):
-            if cfgs.patch_slide != None:
-                cfgs.patch_slide = bool(cfgs.patch_slide)
-            else:
-                cfgs.patch_slide = False
-        else:
-            cfgs.patch_slide = False
-        
-        if cfgs.patch_slide:
+        ####### for sliding -------------------------------     
+        if _vars.patch_slide:
             if hasattr(cfgs, 'patch_overlap_ratio'):
                 if cfgs.patch_overlap_ratio != None:
                         patch_overlap_ratio = float(cfgs.patch_overlap_ratio)
@@ -123,35 +128,43 @@ def set_params(cfgs):
             assert float(patch_overlap_ratio) <= 1 and float(patch_overlap_ratio) >= 0, ValueError(f"patch_overlap_ratio should be 0 <= patch_overlap_ratio <= 1, not {float(patch_overlap_ratio)}")
             assert float(patch_bg_ratio) <= 1 and float(patch_bg_ratio) >= 0, ValueError(f"patch_bg_ratio should be 0 <= patch_bg_ratio <= 1, not {float(patch_bg_ratio)}")
 
-            cfgs.patch_info["patch_slide"] = True
-            cfgs.patch_info["patch_overlap_ratio"] = patch_overlap_ratio
-            cfgs.patch_info["patch_num_involved_pixel"] = patch_num_involved_pixel
-            cfgs.patch_info["patch_bg_ratio"] = patch_bg_ratio
+            _vars.patch_info["patch_slide"] = True
+            _vars.patch_info["patch_overlap_ratio"] = patch_overlap_ratio
+            _vars.patch_info["patch_num_involved_pixel"] = patch_num_involved_pixel
+            _vars.patch_info["patch_bg_ratio"] = patch_bg_ratio
         else:
-            cfgs.patch_info['patch_slide'] = False 
+            _vars.patch_info['patch_slide'] = False 
     else:
-        cfgs.patch_info = None
+        _vars.patch_info = None
 
 
     if hasattr(cfgs, "output_dir"):
         if cfgs.output_dir == None or cfgs.output_dir == "None" or cfgs.output_dir == "none":
-            cfgs.output_dir = str(Path(cfgs.input_dir).parent)
+            _vars.output_dir = str(Path(cfgs.input_dir).parent)
         else:
-            cfgs.output_dir = str(cfgs.output_dir)
+            _vars.output_dir = str(cfgs.output_dir)
     else:
-        cfgs.output_dir = str(Path(cfgs.input_dir).parent)
+        _vars.output_dir = str(Path(cfgs.input_dir).parent)
 
+
+    if hasattr(cfgs, 'device'):
+        if cfgs.device != None:
+            _vars.device = str(cfgs.device)
+        else:
+            _vars.device = 'cpu'
+    else:
+        _vars.device = 'cpu'
 
     if hasattr(cfgs, 'device_ids'):
         if cfgs.device_ids != None:
             if isinstance(cfgs.device_ids, str):
-                cfgs.device_ids = list(map(int, cfgs.device_ids.split(",")))
+                _vars.device_ids = list(map(int, cfgs.device_ids.split(",")))
             elif isinstance(cfgs.device_ids, int):
-                cfgs.device_ids = [int(cfgs.device_ids)]
+                _vars.device_ids = [int(cfgs.device_ids)]
         else:
-            cfgs.device_ids = [0]
+            _vars.device_ids = [0]
     else:
-        cfgs.device_ids = [0]
+        _vars.device_ids = [0]
 
     ### define logging directories
     if cfgs.resume: ### To resume training
@@ -164,26 +177,26 @@ def set_params(cfgs):
         # cfgs.ckpt, cfgs.resume = latest_ckpt, True  
         # # logger(f'*** Resuming training from {latest_ckpt}')
     else:
-        if not osp.exists(cfgs.output_dir):
-            os.makedirs(cfgs.output_dir)
+        if not osp.exists(_vars.output_dir):
+            os.makedirs(_vars.output_dir)
 
-        cfgs.output_dir = str(os.path.join(cfgs.output_dir, 'outputs/segmentation', datetime.now().strftime('%Y_%m_%d_%H_%M')))
-        cfgs.output_dir += "/train"
+        _vars.output_dir = str(os.path.join(_vars.output_dir, 'outputs/segmentation', datetime.now().strftime('%Y_%m_%d_%H_%M')))
+        _vars.output_dir += "/train"
 
-    cfgs.configs_dir = osp.join(cfgs.output_dir, 'configs')
-    aivutils.mkdir(cfgs.configs_dir)
-    cfgs.weights_dir = osp.join(cfgs.output_dir, 'weights')
-    aivutils.mkdir(cfgs.weights_dir)
-    cfgs.val_dir = osp.join(cfgs.output_dir, 'val')
-    aivutils.mkdir(cfgs.val_dir)
-    cfgs.debug_dir = osp.join(cfgs.output_dir, 'debug')
-    aivutils.mkdir(cfgs.debug_dir)
-    cfgs.log_dir = osp.join(cfgs.output_dir, 'logs')
-    aivutils.mkdir(cfgs.log_dir)
+    _vars.configs_dir = osp.join(_vars.output_dir, 'configs')
+    aivutils.mkdir(_vars.configs_dir)
+    _vars.weights_dir = osp.join(_vars.output_dir, 'weights')
+    aivutils.mkdir(_vars.weights_dir)
+    _vars.val_dir = osp.join(_vars.output_dir, 'val')
+    aivutils.mkdir(_vars.val_dir)
+    _vars.debug_dir = osp.join(_vars.output_dir, 'debug')
+    aivutils.mkdir(_vars.debug_dir)
+    _vars.log_dir = osp.join(_vars.output_dir, 'logs')
+    aivutils.mkdir(_vars.log_dir)
 
 
-    with open(osp.join(cfgs.configs_dir, 'cfgs.yaml'), 'w') as f:
+    with open(osp.join(_vars.configs_dir, 'cfgs.yaml'), 'w') as f:
         yaml.dump(cfgs.__dict__, f, indent=2)
 
-    with open(osp.join(cfgs.configs_dir, 'vars.yaml'), 'w') as f:
-        yaml.dump(cfgs.__dict__, f, indent=2)
+    with open(osp.join(_vars.configs_dir, 'vars.yaml'), 'w') as f:
+        yaml.dump(_vars.__dict__, f, indent=2)
