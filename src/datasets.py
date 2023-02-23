@@ -10,7 +10,7 @@ import math
 import numpy as np
 from typing import Any, Callable, Optional, Tuple, List
 from utils.labelme_utils import make_mask
-from utils.preprocessing import get_image_files
+from utils.preprocessing import get_images_info
 
 class COCODataset(torchvision.datasets.vision.VisionDataset):
     def __init__(
@@ -89,8 +89,8 @@ class MaskDataset(torch.utils.data.Dataset):
         return image, target, fname
 
 class LabelmeIterableDatasets(torch.utils.data.IterableDataset):
-    def __init__(self, img_folder, classes, transforms=None, roi_info=None, patch_info=None, img_exts=['png', 'bmp']):
-        self.imgs_info, self.num_data = get_image_files(img_folder, img_exts=img_exts, roi_info=roi_info, patch_info=patch_info)
+    def __init__(self, mode, img_folder, classes, transforms=None, roi_info=None, patch_info=None, img_exts=['png', 'bmp']):
+        self.imgs_info, self.num_data = get_images_info(mode, img_folder, img_exts=img_exts, classes=classes, roi_info=roi_info, patch_info=patch_info)
         assert len(self.imgs_info) != 0, f"There is no images in dataset directory: {osp.join(self.root_dir)} with {img_exts}"
 
         self.transforms = transforms
@@ -137,13 +137,62 @@ class LabelmeIterableDatasets(torch.utils.data.IterableDataset):
     def __len__(self):
         return self.num_data
 
+# class LabelmeIterableDatasets(torch.utils.data.IterableDataset):
+#     def __init__(self, img_folder, classes, transforms=None, roi_info=None, patch_info=None, img_exts=['png', 'bmp']):
+#         self.imgs_info, self.num_data = get_images_info(img_folder, img_exts=img_exts, roi_info=roi_info, patch_info=patch_info)
+#         assert len(self.imgs_info) != 0, f"There is no images in dataset directory: {osp.join(self.root_dir)} with {img_exts}"
+
+#         self.transforms = transforms
+#         self.class2label = {'_background_': 0}
+#         for idx, label in enumerate(classes):
+#             self.class2label[label.lower()] = int(idx) + 1
+#         print(f"There are {self.class2label} classes")
+#         print(f"  - There are {len(self.imgs_info)} image files") 
+
+#         self.image, self.mask, self.fname = None, None, None
+
+#     def __iter__(self):
+#         for img_info in self.imgs_info:
+#             img_file = img_info['img_file']
+#             rois = img_info['rois']
+#             self.image = Image.open(img_file)
+#             self.fname = osp.split(osp.splitext(img_file)[0])[-1]
+#             w, h = self.image.size
+#             self.mask = make_mask(osp.join(osp.split(img_file)[0], self.fname + '.json'), w, h, self.class2label, 'pil')
+
+#             if rois == None:
+#                 ####### To transform
+#                 if self.transforms is not None:
+#                     image, mask = self.transforms(self.image, self.mask)
+
+#                 yield image, mask, self.fname 
+#             else:
+#                 for roi in rois:
+#                     ####### To crop image with RoI
+#                     assert roi[0] >= 0 and roi[1] >=0, \
+#                             ValueError(f"roi_info top left/right should be more than 0, not tx({roi[0]}), ty({roi[1]})")
+#                     assert w >= roi[2], ValueError(f"Image width ({w}) should bigger than roi_info bx ({roi[2]})")
+#                     assert h >= roi[3], ValueError(f"Image height ({h}) should bigger than roi_info by ({roi[3]})")
+
+#                     image = self.image.crop((roi[0], roi[1], roi[2], roi[3]))
+#                     mask = self.mask.crop((roi[0], roi[1], roi[2], roi[3]))
+
+#                     ####### To transform
+#                     if self.transforms is not None:
+#                         image, mask = self.transforms(image, mask)
+
+#                     yield image, mask, self.fname 
+
+#     def __len__(self):
+#         return self.num_data
+
 class LabelmeDatasets(torch.utils.data.Dataset):
     '''
     With multiple-roi and no patch,
     '''
-    def __init__(self, img_folder, classes, transforms=None, roi_info=None, patch_info=None, img_exts=['png', 'bmp']):
+    def __init__(self, mode,  img_folder, classes, transforms=None, roi_info=None, patch_info=None, img_exts=['png', 'bmp']):
 
-        self.imgs_info = get_image_files(img_folder, img_exts=img_exts, roi_info=roi_info, patch_info=patch_info)
+        self.imgs_info = get_images_info(mode, img_folder, img_exts=img_exts, roi_info=roi_info, patch_info=patch_info)
         assert len(self.imgs_info) != 0, f"There is no images in dataset directory: {osp.join(self.root_dir)} with {img_exts}"
 
         self.transforms = transforms

@@ -9,6 +9,11 @@ def set_params(cfgs, _vars, _augs=None):
     ### classes
     if isinstance(cfgs.classes, str):
         _vars.classes = list(map(str, cfgs.classes.split(",")))
+    
+    for idx, _class in enumerate(_vars.classes):
+        _vars.classes[idx] = _class.lower()
+
+    print(f"* There are {_vars.classes} classes")
 
     _vars.num_classes = len(cfgs.classes) + 1
 
@@ -100,8 +105,17 @@ def set_params(cfgs, _vars, _augs=None):
             else:
                 shake_patch = 0
 
+            if hasattr(cfgs, 'shake_dist_ratio'):
+                if int(cfgs.shake_dist_ratio) >= 0:
+                    shake_dist_ratio = int(cfgs.shake_dist_ratio)
+                else:
+                    shake_dist_ratio = 4
+            else:
+                shake_dist_ratio = 4
+
             _vars.patch_info['patch_centric'] = True
             _vars.patch_info['shake_patch'] = shake_patch
+            _vars.patch_info['shake_dist_ratio'] = shake_dist_ratio
         else:
             _vars.patch_info['patch_centric'] = False 
 

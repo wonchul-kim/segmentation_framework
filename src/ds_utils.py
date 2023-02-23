@@ -8,7 +8,6 @@ from utils.coco_utils import FilterAndRemapCocoCategories, ConvertCocoPolysToMas
 from utils.torch_utils import worker_init_fn
 
 def get_dataloader(dataset, dataset_test, args):
-
     if isinstance(dataset, LabelmeIterableDatasets):
         data_loader = torch.utils.data.DataLoader(
         dataset,
@@ -114,7 +113,7 @@ def get_labelme(root, image_set, transforms, classes, roi_info=None, patch_info=
     img_folder = PATHS[image_set]
     img_folder = osp.join(root, img_folder)
 
-    dataset = LabelmeIterableDatasets(img_folder, classes, transforms=transforms, roi_info=roi_info, patch_info=patch_info)
+    dataset = LabelmeIterableDatasets(image_set, img_folder, classes, transforms=transforms, roi_info=roi_info, patch_info=patch_info)
 
     # if image_set == "train": #FIXME: Need to make this option 
     #     dataset = _coco_remove_images_without_annotations(dataset, CAT_LIST)
