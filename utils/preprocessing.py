@@ -247,16 +247,15 @@ def get_imgs_info_from_patches(mode, img_file, classes, patch_info, roi=None):
             points.append(_points)
 
         if patch_info['patch_slide']:
-            patch_coords = get_segmentation_pil_patches_info(img_height=img_height, img_width=img_width, \
+            patch_coords, num_patch_slide = get_segmentation_pil_patches_info(img_height=img_height, img_width=img_width, \
                 patch_height=patch_info['patch_height'], patch_width=patch_info['patch_width'], points=points, \
                 overlap_ratio=patch_info['patch_overlap_ratio'], num_involved_pixel=patch_info['patch_num_involved_pixel'], \
                 bg_ratio=patch_info['patch_bg_ratio'], roi=roi)
 
-            idx_patch_coords = 1
             for patch_coord in patch_coords:
                 assert patch_coord[2] - patch_coord[0] == patch_info['patch_width'] and patch_coord[3] - patch_coord[1] == patch_info['patch_height'], f"patch coord is wrong"
                 rois.append(patch_coord)
-                idx_patch_coords += 1
+            num_data += num_patch_slide
 
     return rois, num_data
 
@@ -271,6 +270,7 @@ def get_segmentation_pil_patches_info(img_width, img_height, patch_height, patch
     dx = int((1. - overlap_ratio)*patch_width)
     dy = int((1. - overlap_ratio)*patch_height)
 
+    num_data = 0
     for y0 in range(0, img_height, dy):
         for x0 in range(0, img_width, dx):
             # make sure we don't have a tiny image on the edge
@@ -312,7 +312,6 @@ def get_segmentation_pil_patches_info(img_width, img_height, patch_height, patch
             count_involved_defect_pixel = 0
             if len(points) > 0:
                 for b in points:
-                    print(b)
                     for xb0, yb0 in b:
                         if (xb0 >= xmin) and (xb0 <= xmax) and (yb0 <= ymax) and (yb0 >= ymin):
                             count_involved_defect_pixel += 1
@@ -325,6 +324,7 @@ def get_segmentation_pil_patches_info(img_width, img_height, patch_height, patch
                     continue
 
             info.append([x, y, x + patch_width, y+patch_height])
+            num_data += 1
 
-    return info
+    return info, num_data
 
