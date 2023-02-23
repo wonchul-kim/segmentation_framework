@@ -37,7 +37,10 @@ def main(args):
     debug_dataset(dataset, args.debug_dir, 'train', args.num_classes)
     debug_dataset(dataset_test, args.debug_dir, 'val', args.num_classes)
 
-    # data_loader, data_loader_test = get_dataloader(dataset, dataset_test, args)
+    data_loader, data_loader_test = get_dataloader(dataset, dataset_test, args)
+
+
+    
 
     # model = get_model(model_name=args.model_name, weights=args.weights, weights_backbone=args.weights_backbone, \
     #                     num_classes=num_classes, aux_loss=args.aux_loss)
