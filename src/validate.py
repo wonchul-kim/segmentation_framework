@@ -8,14 +8,14 @@ from utils.torch_utils import reduce_across_processes
 from utils.metrics import ConfusionMatrix, MetricLogger
 from torchvision import transforms
 
-def evaluate(model, data_loader, device, num_classes):
+def evaluate(model, dataloader, device, num_classes):
     model.eval()
     confmat = ConfusionMatrix(num_classes)
     metric_logger = MetricLogger(delimiter="  ")
     header = "Test:"
     num_processed_samples = 0
     with torch.inference_mode():
-        for batch in metric_logger.log_every(data_loader, 100, header):
+        for batch in metric_logger.log_every(dataloader, 100, header):
             if len(batch) == 3:
                 image, target, fname = batch
             else:
@@ -34,13 +34,13 @@ def evaluate(model, data_loader, device, num_classes):
 
     num_processed_samples = reduce_across_processes(num_processed_samples)
     if (
-        hasattr(data_loader.dataset, "__len__")
-        and len(data_loader.dataset) != num_processed_samples
+        hasattr(dataloader.dataset, "__len__")
+        and len(dataloader.dataset) != num_processed_samples
         and torch.distributed.get_rank() == 0
     ):
         # See FIXME above
         warnings.warn(
-            f"It looks like the dataset has {len(data_loader.dataset)} samples, but {num_processed_samples} "
+            f"It looks like the dataset has {len(dataloader.dataset)} samples, but {num_processed_samples} "
             "samples were used for the validation, which might bias the results. "
             "Try adjusting the batch size and / or the world size. "
             "Setting the world size to 1 is always a safe bet."

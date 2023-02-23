@@ -34,10 +34,14 @@ def main(args):
 
     # # Thread(target=debug_dataset, args=(dataset, args.debug_dir, 'train', args.num_classes))
     # # Thread(target=debug_dataset, args=(dataset_test, args.debug_dir, 'val', args.num_classes))
-    debug_dataset(dataset, args.debug_dir, 'train', args.num_classes)
-    debug_dataset(dataset_test, args.debug_dir, 'val', args.num_classes)
+    # debug_dataset(dataset, args.debug_dir, 'train', args.num_classes)
+    # debug_dataset(dataset_test, args.debug_dir, 'val', args.num_classes)
 
-    data_loader, data_loader_test = get_dataloader(dataset, dataset_test, args)
+    dataloader, dataloader_val = get_dataloader(dataset, dataset_test, args)
+
+    for batch in dataloader:
+        image, target, fname = batch 
+        print(image.shape, target.shape, fname)
 
 
     
@@ -72,7 +76,7 @@ def main(args):
     #     print("The algiorithm is executed by nn.DataParallel on devices: {}".format(args.device_ids))
     #     model = torch.nn.DataParallel(model, device_ids=args.device_ids, output_device=args.device_ids[0])
 
-    # lr_scheduler = get_lr_scheduler(optimizer, data_loader, args.epochs, args.lr_warmup_epochs, \
+    # lr_scheduler = get_lr_scheduler(optimizer, dataloader, args.epochs, args.lr_warmup_epochs, \
     #                                     args.lr_warmup_method, args.lr_warmup_decay)
 
     # if args.resume:
@@ -89,7 +93,7 @@ def main(args):
     #     # We disable the cudnn benchmarking because it can noticeably affect the accuracy
     #     torch.backends.cudnn.benchmark = False
     #     torch.backends.cudnn.deterministic = True
-    #     confmat = evaluate(model, data_loader_test, device=device, num_classes=num_classes)
+    #     confmat = evaluate(model, dataloader_val, device=device, num_classes=num_classes)
     #     print(confmat)
     #     return
 
@@ -98,8 +102,8 @@ def main(args):
     # for epoch in range(args.start_epoch, args.epochs):
     #     # if args.distributed:
     #     #     train_sampler.set_epoch(epoch)
-    #     train_loss, train_lr = train_one_epoch(model, criterion, optimizer, data_loader, lr_scheduler, device, epoch, args.print_freq, scaler)
-    #     confmat = evaluate(model, data_loader_test, device=device, num_classes=num_classes)
+    #     train_loss, train_lr = train_one_epoch(model, criterion, optimizer, dataloader, lr_scheduler, device, epoch, args.print_freq, scaler)
+    #     confmat = evaluate(model, dataloader_val, device=device, num_classes=num_classes)
     #     train_losses.append(train_loss)
     #     train_lrs.append(train_lr)
 
