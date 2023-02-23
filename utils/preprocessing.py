@@ -3,6 +3,7 @@ from importlib.resources import path
 import os.path as osp
 import json
 import numpy as np
+import random
 import torch
 import utils.transforms as T
 import torchvision
@@ -128,9 +129,7 @@ def get_images_info(mode, img_folder, img_exts, classes=None, roi_info=None, pat
 
 def get_imgs_info_from_patches(mode, img_file, classes, patch_info, roi=None):
     assert patch_info['patch_slide'] or patch_info['patch_centric'], ValueError(f"If you want to use patch, need to choose at least one of slide or centric")
-    engine = Image2Patches()
 
-    fname = osp.split(osp.splitext(img_file)[0])[-1]
     json_file = osp.splitext(img_file)[0] + '.json'
     with open(json_file) as jf:
         anns = json.load(jf)
@@ -248,9 +247,10 @@ def get_imgs_info_from_patches(mode, img_file, classes, patch_info, roi=None):
             points.append(_points)
 
         if patch_info['patch_slide']:
-            patch_coords = engine.get_segmentation_pil_patches_info(img_h=img_height, img_w=img_width, slice_height=patch_info['patch_height'], \
-                                                    slice_width=patch_info['patch_width'], points=points, overlap_ratio=patch_info['patch_overlap_ratio'], \
-                                                    num_involved_pixel=patch_info['patch_num_involved_pixel'], bg_ratio=patch_info['patch_bg_ratio'], roi_info=roi)
+            patch_coords = get_segmentation_pil_patches_info(img_height=img_height, img_width=img_width, \
+                patch_height=patch_info['patch_height'], patch_width=patch_info['patch_width'], points=points, \
+                overlap_ratio=patch_info['patch_overlap_ratio'], num_involved_pixel=patch_info['patch_num_involved_pixel'], \
+                bg_ratio=patch_info['patch_bg_ratio'], roi=roi)
 
             idx_patch_coords = 1
             for patch_coord in patch_coords:
@@ -260,9 +260,71 @@ def get_imgs_info_from_patches(mode, img_file, classes, patch_info, roi=None):
 
     return rois, num_data
 
+def get_segmentation_pil_patches_info(img_width, img_height, patch_height, patch_width, points, overlap_ratio, \
+            num_involved_pixel=2, bg_ratio=-1, roi=None, skip_highly_overlapped_tiles=True):
 
+    if roi != None:
+        img_height = roi[3] - roi[1]
+        img_width = roi[2] - roi[0]
 
+    info = [] # x1y1x2y2
+    dx = int((1. - overlap_ratio)*patch_width)
+    dy = int((1. - overlap_ratio)*patch_height)
 
+    for y0 in range(0, img_height, dy):
+        for x0 in range(0, img_width, dx):
+            # make sure we don't have a tiny image on the edge
+            if y0 + patch_height > img_height:
+                # skip if too much overlap (> 0.6)
+                if skip_highly_overlapped_tiles:
+                    if (y0 + patch_height - img_height) > (0.6*patch_height):
+                        continue
+                    else:
+                        y = img_height - patch_height
+                else:
+                    y = img_height - patch_height
+            else:
+                y = y0
 
+            if x0 + patch_width > img_width:
+                # skip if too much overlap (> 0.6)
+                if skip_highly_overlapped_tiles:
+                    if (x0 + patch_width - img_width) > (0.6*patch_width):
+                        continue
+                    else:
+                        x = img_width - patch_width
+                else:
+                    x = img_width - patch_width
+            else:
+                x = x0
 
+            xmin, xmax, ymin, ymax = x, x + patch_width, y, y + patch_height
+            # find points that lie entirely within the window
+            # is_inside = False
+            # if len(points) > 0:
+            #     for b in points:
+            #         for xb0, yb0 in b:
+            #             if (xb0 >= xmin) and (xb0 <= xmax) and (yb0 <= ymax) and (yb0 >= ymin) :
+            #                 is_inside = True 
+            #                 break
+
+            is_inside = False
+            count_involved_defect_pixel = 0
+            if len(points) > 0:
+                for b in points:
+                    print(b)
+                    for xb0, yb0 in b:
+                        if (xb0 >= xmin) and (xb0 <= xmax) and (yb0 <= ymax) and (yb0 >= ymin):
+                            count_involved_defect_pixel += 1
+                        if count_involved_defect_pixel > num_involved_pixel:
+                            is_inside = True 
+                            break
+
+            if not is_inside:
+                if not bg_ratio >= random.random():
+                    continue
+
+            info.append([x, y, x + patch_width, y+patch_height])
+
+    return info
 

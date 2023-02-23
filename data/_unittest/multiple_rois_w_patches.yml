@@ -14,10 +14,10 @@ roi_height: 4352,512,512,4352
 ### patches
 patches: true
 patch_include_point_positive: false
-patch_centric: true
-shake_patch: 8
+patch_centric: false
+shake_patch: 0
 shake_dist_ratio: 3
-patch_slide: false
+patch_slide: true
 patch_width: 512
 patch_height: 512
 patch_overlap_ratio: 0.1
