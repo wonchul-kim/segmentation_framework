@@ -3,7 +3,7 @@ from utils.transforms import Compose
 import torch 
 import torchvision
 import utils.helpers as utils
-from src.datasets import COCODataset, MaskDataset, LabelmeDatasets
+from src.datasets import COCODataset, MaskDataset, LabelmeDatasets, LabelmeIterableDatasets
 from utils.coco_utils import FilterAndRemapCocoCategories, ConvertCocoPolysToMask, _coco_remove_images_without_annotations
 from utils.torch_utils import worker_init_fn
 
@@ -46,7 +46,7 @@ def get_dataloader(dataset, dataset_test, args):
     return data_loader, data_loader_test
 
 
-def get_dataset(dir_path, name, image_set, transform, classes, roi_info=None, patch_info=None):
+def get_dataset(dir_path, name, image_set, transform, classes, roi_info=None, patch_info=None, debug=True):
     def sbd(*args, **kwargs):
         return torchvision.datasets.SBDataset(*args, mode="segmentation", **kwargs)
 
@@ -113,7 +113,7 @@ def get_labelme(root, image_set, transforms, classes, roi_info=None, patch_info=
     img_folder = PATHS[image_set]
     img_folder = osp.join(root, img_folder)
 
-    dataset = LabelmeDatasets(img_folder, classes, transforms=transforms, roi_info=roi_info, patch_info=patch_info)
+    dataset = LabelmeIterableDatasets(img_folder, classes, transforms=transforms, roi_info=roi_info, patch_info=patch_info)
 
     # if image_set == "train": #FIXME: Need to make this option 
     #     dataset = _coco_remove_images_without_annotations(dataset, CAT_LIST)

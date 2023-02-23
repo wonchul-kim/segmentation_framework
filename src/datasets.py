@@ -88,7 +88,7 @@ class MaskDataset(torch.utils.data.Dataset):
 
         return image, target, fname
 
-class LabelmeDatasets(torch.utils.data.IterableDataset):
+class LabelmeIterableDatasets(torch.utils.data.IterableDataset):
     def __init__(self, img_folder, classes, transforms=None, roi_info=None, patch_info=None, img_exts=['png', 'bmp']):
         self.imgs_info, self.num_data = get_image_files(img_folder, img_exts=img_exts, roi_info=roi_info, patch_info=patch_info)
         assert len(self.imgs_info) != 0, f"There is no images in dataset directory: {osp.join(self.root_dir)} with {img_exts}"
@@ -137,53 +137,53 @@ class LabelmeDatasets(torch.utils.data.IterableDataset):
     def __len__(self):
         return self.num_data
 
-# class LabelmeDatasets(torch.utils.data.Dataset):
-#     '''
-#     With multiple-roi and no patch,
-#     '''
-#     def __init__(self, img_folder, classes, transforms=None, roi_info=None, patch_info=None, img_exts=['png', 'bmp']):
+class LabelmeDatasets(torch.utils.data.Dataset):
+    '''
+    With multiple-roi and no patch,
+    '''
+    def __init__(self, img_folder, classes, transforms=None, roi_info=None, patch_info=None, img_exts=['png', 'bmp']):
 
-#         self.imgs_info = get_image_files(img_folder, img_exts=img_exts, roi_info=roi_info, patch_info=patch_info)
-#         assert len(self.imgs_info) != 0, f"There is no images in dataset directory: {osp.join(self.root_dir)} with {img_exts}"
+        self.imgs_info = get_image_files(img_folder, img_exts=img_exts, roi_info=roi_info, patch_info=patch_info)
+        assert len(self.imgs_info) != 0, f"There is no images in dataset directory: {osp.join(self.root_dir)} with {img_exts}"
 
-#         self.transforms = transforms
-#         self.class2label = {'_background_': 0}
-#         for idx, label in enumerate(classes):
-#             self.class2label[label.lower()] = int(idx) + 1
-#         print(f"There are {self.class2label} classes")
-#         print(f"  - There are {len(self.imgs_info)} image files") 
+        self.transforms = transforms
+        self.class2label = {'_background_': 0}
+        for idx, label in enumerate(classes):
+            self.class2label[label.lower()] = int(idx) + 1
+        print(f"There are {self.class2label} classes")
+        print(f"  - There are {len(self.imgs_info)} image files") 
 
-#     def __len__(self):
-#         return len(self.imgs_info)
+    def __len__(self):
+        return len(self.imgs_info)
 
-#     def __getitem__(self, idx):
-#         print(idx)
-#         img_file = self.imgs_info[idx]['img_file']
-#         roi = self.imgs_info[idx]['roi']
-#         fname = osp.split(osp.splitext(img_file)[0])[-1]
-#         json_file = osp.join(osp.split(img_file)[0], fname + '.json')
-#         image = Image.open(img_file)
+    def __getitem__(self, idx):
+        print(idx)
+        img_file = self.imgs_info[idx]['img_file']
+        roi = self.imgs_info[idx]['roi']
+        fname = osp.split(osp.splitext(img_file)[0])[-1]
+        json_file = osp.join(osp.split(img_file)[0], fname + '.json')
+        image = Image.open(img_file)
 
-#         w, h = image.size
-#         # self.image = cv2.imread(self.imgs_info[idx])
-#         # (w, h, _) = (self.image.shape)
+        w, h = image.size
+        # self.image = cv2.imread(self.imgs_info[idx])
+        # (w, h, _) = (self.image.shape)
 
-#         mask = make_mask(json_file, w, h, self.class2label, 'pil')
+        mask = make_mask(json_file, w, h, self.class2label, 'pil')
 
-#         ### Crop image with RoI
-#         if roi != None:
-#             assert roi[0] >= 0 and roi[1] >=0, ValueError(f"roi_info top left/right should be more than 0, not tx({roi[0]}), ty({roi[1]})")
-#             assert w >= roi[2], ValueError(f"Image width ({w}) should bigger than roi_info bx ({roi[2]})")
-#             assert h >= roi[3], ValueError(f"Image height ({h}) should bigger than roi_info by ({roi[3]})")
+        ### Crop image with RoI
+        if roi != None:
+            assert roi[0] >= 0 and roi[1] >=0, ValueError(f"roi_info top left/right should be more than 0, not tx({roi[0]}), ty({roi[1]})")
+            assert w >= roi[2], ValueError(f"Image width ({w}) should bigger than roi_info bx ({roi[2]})")
+            assert h >= roi[3], ValueError(f"Image height ({h}) should bigger than roi_info by ({roi[3]})")
 
-#             image = image.crop((roi[0], roi[1], roi[2], roi[3]))
-#             mask = mask.crop((roi[0], roi[1], roi[2], roi[3]))
+            image = image.crop((roi[0], roi[1], roi[2], roi[3]))
+            mask = mask.crop((roi[0], roi[1], roi[2], roi[3]))
 
-#         ####### To transform
-#         if self.transforms is not None:
-#             image, mask = self.transforms(image, mask)
+        ####### To transform
+        if self.transforms is not None:
+            image, mask = self.transforms(image, mask)
 
-#         return image, mask, fname     
+        return image, mask, fname     
 
 # class LabelmeDatasets(torch.utils.data.Dataset):
 #     def __init__(self, img_folder, classes, transforms=None, roi_info=None, patch_info=None, img_exts=['png', 'bmp']):
