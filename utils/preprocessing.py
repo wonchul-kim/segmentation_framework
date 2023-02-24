@@ -140,102 +140,21 @@ def get_imgs_info_from_patches(mode, img_file, classes, patch_info, roi=None):
     for shape in anns['shapes']:
         shape_type = str(shape['shape_type']).lower()
         label = shape['label'].lower()
-        # _points = []
-        cxs, cys = [], []
-        # br_offset_x, br_offset_y, tl_offset_x, tl_offset_y = 0, 0, 0, 0
-        if label in classes or label.upper() in classes: 
-            if shape_type == 'polygon' or shape_type == 'watershed':
-                _points = shape['points']
-                if len(_points) == 0: ## handling exception
-                    continue
-                elif len(_points) > 0 and len(_points) <= 2: ## for positive samples
-                    if patch_info['patch_include_point_positive']:
-                        if mode in ['train']:
-                            points.append(_points)
-                    if mode in ['test', 'val']:
-                        points.append(_points)
-                    continue
-            elif shape_type == 'circle':
-                _points = shape['points'][0]
-            elif shape_type == 'rectangle':
-                _points = shape['points']
-                __points = [_points[0]]
-                __points.append([_points[1][0], _points[0][1]])
-                __points.append(_points[1])
-                __points.append([_points[0][0], _points[1][1]])
-                __points.append(_points[0])
-                _points = __points
-            elif shape_type == 'point': 
-                _points = shape['points']
-                if len(_points) == 0:
-                    continue
-                elif len(_points) == 1:
-                    if patch_info['patch_include_point_positive']:
-                        if mode in ['train']:
-                            points.append(_points)
-                    if mode in ['test', 'val']:
-                        points.append(_points)
-                    continue
-            else:
-                raise ValueError(f"There is no such shape-type: {shape_type}")
 
+        if label in classes or label.upper() in classes: 
+            _points = get_points_from_labelme(shape, shape_type, points, patch_info, mode)
+            if not _points:
+                continue
+       
             try: 
                 if roi != None:
-                    not_in_roi = False
-                    for _point in _points:
-                        x = _point[0]
-                        y = _point[1]
-
-                        if x >= roi[0] and x <= roi[2] and y >= roi[1] and  y <= roi[3]:
-                            pass
-                        else:
-                            not_in_roi = True
-                            break
-                    if not_in_roi:
+                    if is_points_not_in_roi(_points, roi):
                         continue
 
                 if patch_info['patch_centric']:
-                    for _point in _points:
-                        cxs.append(_point[0])
-                        cys.append(_point[1])
-
-                    avg_cx = int(np.mean(cxs))
-                    avg_cy = int(np.mean(cys))
-                    print(_points, roi)
-                    print("..", avg_cx, avg_cy, patch_info['patch_width'], patch_info['patch_height'])
-
-                    shake_x = int(patch_info['patch_width']/patch_info['shake_dist_ratio'])
-                    shake_y = int(patch_info['patch_height']/patch_info['shake_dist_ratio'])
-
-                    shake_directions = [[avg_cx, avg_cy], 
-                                        [avg_cx + shake_x, avg_cy], [avg_cx - shake_x, avg_cy], [avg_cx, avg_cy - shake_y], [avg_cx, avg_cy + shake_y],  
-                                        [avg_cx + shake_x, avg_cy + shake_y], [avg_cx + shake_x, avg_cy - shake_y], [avg_cx - shake_x, avg_cy + shake_y], [avg_cx - shake_x, avg_cy - shake_y], ]
-                    
-                    for shake_idx in range(0, patch_info['shake_patch'] + 1):
-                        avg_cx = shake_directions[shake_idx][0]
-                        avg_cy = shake_directions[shake_idx][1]
-
-                        br_offset_x = int(avg_cx + patch_info['patch_width']/2 - img_width)
-                        br_offset_y = int(avg_cy + patch_info['patch_height']/2 - img_height)
-                        if br_offset_x > 0:
-                            avg_cx -= br_offset_x 
-                        if br_offset_y > 0:
-                            avg_cy -= br_offset_y
-                            
-                        tl_offset_x = int(avg_cx - patch_info['patch_width']/2)
-                        tl_offset_y = int(avg_cy - patch_info['patch_height']/2)
-                        if tl_offset_x < 0:
-                            avg_cx -= tl_offset_x 
-                        if tl_offset_y < 0:
-                            avg_cy -= tl_offset_y
-
-                        patch_coord = [int(avg_cx - int(patch_info['patch_width']/2)), int(avg_cy - int(patch_info['patch_height']/2)), \
-                                                        int(avg_cx + int(patch_info['patch_width']/2)), int(avg_cy + int(patch_info['patch_height']/2))]
-                        assert patch_coord[2] - patch_coord[0] == patch_info['patch_width'] and patch_coord[3] - patch_coord[1] == patch_info['patch_height'], \
-                                ValueError(f"patch coord is wrong")
-
-                        rois.append(patch_coord)
-                        num_data += 1
+                    centric_patches_rois, centric_patches_num_data = get_centric_patches(_points, patch_info, img_width, img_height)
+                    rois += centric_patches_rois
+                    num_data =+ centric_patches_num_data
 
             except Exception as e:
                 print("Oops!", e.__class__, "occurred.")
@@ -247,7 +166,7 @@ def get_imgs_info_from_patches(mode, img_file, classes, patch_info, roi=None):
             points.append(_points)
 
         if patch_info['patch_slide']:
-            patch_coords, num_patch_slide = get_segmentation_pil_patches_info(img_height=img_height, img_width=img_width, \
+            patch_coords, num_patch_slide = get_sliding_patches(img_height=img_height, img_width=img_width, \
                 patch_height=patch_info['patch_height'], patch_width=patch_info['patch_width'], points=points, \
                 overlap_ratio=patch_info['patch_overlap_ratio'], num_involved_pixel=patch_info['patch_num_involved_pixel'], \
                 bg_ratio=patch_info['patch_bg_ratio'], roi=roi)
@@ -259,54 +178,146 @@ def get_imgs_info_from_patches(mode, img_file, classes, patch_info, roi=None):
 
     return rois, num_data
 
-def get_segmentation_pil_patches_info(img_width, img_height, patch_height, patch_width, points, overlap_ratio, \
-            num_involved_pixel=2, bg_ratio=-1, roi=None, skip_highly_overlapped_tiles=True):
+def get_points_from_labelme(shape, shape_type, points, patch_info, mode):
+    if shape_type == 'polygon' or shape_type == 'watershed':
+        _points = shape['points']
+        if len(_points) == 0: ## handling exception
+            return False
+        elif len(_points) > 0 and len(_points) <= 2: ## for positive samples
+            if patch_info['patch_include_point_positive']:
+                if mode in ['train']:
+                    points.append(_points)
+            if mode in ['test', 'val']:
+                points.append(_points)
+            return False
+    elif shape_type == 'circle':
+        _points = shape['points'][0]
+    elif shape_type == 'rectangle':
+        _points = shape['points']
+        __points = [_points[0]]
+        __points.append([_points[1][0], _points[0][1]])
+        __points.append(_points[1])
+        __points.append([_points[0][0], _points[1][1]])
+        __points.append(_points[0])
+        _points = __points
+    elif shape_type == 'point': 
+        _points = shape['points']
+        if len(_points) == 0:
+            return False
+        elif len(_points) == 1:
+            if patch_info['patch_include_point_positive']:
+                if mode in ['train']:
+                    points.append(_points)
+            if mode in ['test', 'val']:
+                points.append(_points)
+            return False
+    else:
+        raise ValueError(f"There is no such shape-type: {shape_type}")
+
+    return _points
+
+def is_points_not_in_roi(_points, roi):
+    not_in_roi = False
+    for _point in _points:
+        x = _point[0]
+        y = _point[1]
+
+        if x >= roi[0] and x <= roi[2] and y >= roi[1] and  y <= roi[3]:
+            pass
+        else:
+            not_in_roi = True
+            break
+    
+    return not_in_roi
+
+def get_centric_patches(_points, patch_info, img_width, img_height):
+    cxs, cys = [], []
+    centric_patches_rois = []
+    centric_patches_num_data = 0
+    for _point in _points:
+        cxs.append(_point[0])
+        cys.append(_point[1])
+
+    avg_cx = int(np.mean(cxs))
+    avg_cy = int(np.mean(cys))
+
+    shake_x = int(patch_info['patch_width']/patch_info['shake_dist_ratio'])
+    shake_y = int(patch_info['patch_height']/patch_info['shake_dist_ratio'])
+
+    shake_directions = [[avg_cx, avg_cy], 
+                        [avg_cx + shake_x, avg_cy], [avg_cx - shake_x, avg_cy], [avg_cx, avg_cy - shake_y], [avg_cx, avg_cy + shake_y],  
+                        [avg_cx + shake_x, avg_cy + shake_y], [avg_cx + shake_x, avg_cy - shake_y], [avg_cx - shake_x, avg_cy + shake_y], [avg_cx - shake_x, avg_cy - shake_y], ]
+    
+    for shake_idx in range(0, patch_info['shake_patch'] + 1):
+        avg_cx = shake_directions[shake_idx][0]
+        avg_cy = shake_directions[shake_idx][1]
+
+        br_offset_x = int(avg_cx + patch_info['patch_width']/2 - img_width)
+        br_offset_y = int(avg_cy + patch_info['patch_height']/2 - img_height)
+        if br_offset_x > 0:
+            avg_cx -= br_offset_x 
+        if br_offset_y > 0:
+            avg_cy -= br_offset_y
+            
+        tl_offset_x = int(avg_cx - patch_info['patch_width']/2)
+        tl_offset_y = int(avg_cy - patch_info['patch_height']/2)
+        if tl_offset_x < 0:
+            avg_cx -= tl_offset_x 
+        if tl_offset_y < 0:
+            avg_cy -= tl_offset_y
+
+        patch_coord = [int(avg_cx - int(patch_info['patch_width']/2)), int(avg_cy - int(patch_info['patch_height']/2)), \
+                                        int(avg_cx + int(patch_info['patch_width']/2)), int(avg_cy + int(patch_info['patch_height']/2))]
+        assert patch_coord[2] - patch_coord[0] == patch_info['patch_width'] and patch_coord[3] - patch_coord[1] == patch_info['patch_height'], \
+                ValueError(f"patch coord is wrong")
+
+        centric_patches_rois.append(patch_coord)
+        centric_patches_num_data += 1
+
+    return centric_patches_rois, centric_patches_num_data
+
+
+def get_sliding_patches(img_width, img_height, patch_height, patch_width, points, overlap_ratio, \
+            num_involved_pixel=2, bg_ratio=-1, roi=None, skip_highly_overlapped_tiles=False):
 
     if roi != None:
-        img_height = roi[3] - roi[1]
-        img_width = roi[2] - roi[0]
+        tl_x, tl_y, br_x, br_y = roi[0], roi[1], roi[2], roi[3]
+    else:
+        tl_x, tl_y, br_x, br_y = 0, 0, img_width, img_height
 
-    info = [] # x1y1x2y2
     dx = int((1. - overlap_ratio)*patch_width)
     dy = int((1. - overlap_ratio)*patch_height)
 
-    num_data = 0
-    for y0 in range(0, img_height, dy):
-        for x0 in range(0, img_width, dx):
+    sliding_patches_rois = [] # x1y1x2y2
+    sliding_patches_num_data = 0
+    for y0 in range(tl_y, br_y, dy):
+        for x0 in range(tl_x, br_x, dx):
             # make sure we don't have a tiny image on the edge
-            if y0 + patch_height > img_height:
+            if y0 + patch_height > br_y:
                 # skip if too much overlap (> 0.6)
                 if skip_highly_overlapped_tiles:
-                    if (y0 + patch_height - img_height) > (0.6*patch_height):
+                    if (y0 + patch_height - br_y) > (0.6*patch_height):
                         continue
                     else:
-                        y = img_height - patch_height
+                        y = br_y - patch_height
                 else:
-                    y = img_height - patch_height
+                    y = br_y - patch_height
             else:
                 y = y0
 
-            if x0 + patch_width > img_width:
+            if x0 + patch_width > br_x:
                 # skip if too much overlap (> 0.6)
                 if skip_highly_overlapped_tiles:
-                    if (x0 + patch_width - img_width) > (0.6*patch_width):
+                    if (x0 + patch_width - br_x) > (0.6*patch_width):
                         continue
                     else:
-                        x = img_width - patch_width
+                        x = br_x - patch_width
                 else:
-                    x = img_width - patch_width
+                    x = br_x - patch_width
             else:
                 x = x0
 
             xmin, xmax, ymin, ymax = x, x + patch_width, y, y + patch_height
-            # find points that lie entirely within the window
-            # is_inside = False
-            # if len(points) > 0:
-            #     for b in points:
-            #         for xb0, yb0 in b:
-            #             if (xb0 >= xmin) and (xb0 <= xmax) and (yb0 <= ymax) and (yb0 >= ymin) :
-            #                 is_inside = True 
-            #                 break
 
             is_inside = False
             count_involved_defect_pixel = 0
@@ -323,8 +334,8 @@ def get_segmentation_pil_patches_info(img_width, img_height, patch_height, patch
                 if not bg_ratio >= random.random():
                     continue
 
-            info.append([x, y, x + patch_width, y+patch_height])
-            num_data += 1
+            sliding_patches_rois.append([x, y, x + patch_width, y+patch_height])
+            sliding_patches_num_data += 1
 
-    return info, num_data
+    return sliding_patches_rois, sliding_patches_num_data
 

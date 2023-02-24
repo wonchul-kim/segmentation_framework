@@ -19,6 +19,7 @@ from utils.preprocessing import get_transform
 from utils.helpers import debug_dataset
 import utils.helpers as utils
 import matplotlib.pyplot as plt 
+from src.validate import save_validation
 
 def main(args):
     if args.output_dir:
@@ -28,24 +29,27 @@ def main(args):
 
     dataset, num_classes = get_dataset(args.input_dir, args.dataset_format, "train", get_transform(True, args), \
                                         args.classes, args.roi_info, args.patch_info)
-    dataset_test, _ = get_dataset(args.input_dir, args.dataset_format, "val", get_transform(False, args), \
+    dataset_val, _ = get_dataset(args.input_dir, args.dataset_format, "val", get_transform(False, args), \
                                     args.classes, args.roi_info, args.patch_info)
 
     Thread(target=debug_dataset, args=(dataset, args.debug_dir, 'train', args.num_classes))
-    Thread(target=debug_dataset, args=(dataset_test, args.debug_dir, 'val', args.num_classes))
+    Thread(target=debug_dataset, args=(dataset_val, args.debug_dir, 'val', args.num_classes))
     # debug_dataset(dataset, args.debug_dir, 'train', args.num_classes)
-    # debug_dataset(dataset_test, args.debug_dir, 'val', args.num_classes)
+    # debug_dataset(dataset_val, args.debug_dir, 'val', args.num_classes)
 
-    dataloader, dataloader_val = get_dataloader(dataset, dataset_test, args)
+    dataloader, dataloader_val = get_dataloader(dataset, dataset_val, args)
 
     # for batch in dataloader:
     #     image, target, fname = batch 
-    #     print(image.shape, target.shape, fname)
 
     model = get_model(model_name=args.model_name, weights=args.weights, weights_backbone=args.weights_backbone, \
                         num_classes=num_classes, aux_loss=args.aux_loss)
     model.to(device)
     model_without_ddp = model
+
+    # save_validation(model, device, dataset_val, num_classes, 0, args.val_dir, input_channel=3, denormalization_fn=None, image_loading_mode='rgb')
+    # save_validation(model, device, args.classes, dataset, args.val_dir, args.num_classes, epoch)
+
 
     if args.distributed:
         model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
@@ -111,7 +115,9 @@ def main(args):
         plt.close()
 
         if epoch%10 == 0:
-            save_validation(model, device, args.classes, dataset, args.val_dir, args.num_classes, epoch)
+            # Thread(target=save_validation, args=(model, device, args.classes, dataset, args.val_dir, args.num_classes, epoch))
+            # save_validation(model, device, args.classes, dataset, args.val_dir, args.num_classes, epoch)
+            save_validation(model, device, dataset_val, num_classes, 0, args.val_dir, input_channel=3, denormalization_fn=None, image_loading_mode='rgb')
             checkpoint = {
             "model": model_without_ddp.state_dict(),
             "optimizer": optimizer.state_dict(),

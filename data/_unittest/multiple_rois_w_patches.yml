@@ -18,8 +18,8 @@ patch_centric: false
 shake_patch: 0
 shake_dist_ratio: 3
 patch_slide: true
-patch_width: 256
-patch_height: 256
+patch_width: 512
+patch_height: 512
 patch_overlap_ratio: 0.1
 patch_num_involved_pixel: 2
 patch_bg_ratio: 0
