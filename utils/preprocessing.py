@@ -166,10 +166,18 @@ def get_imgs_info_from_patches(mode, img_file, classes, patch_info, roi=None):
             points.append(_points)
 
         if patch_info['patch_slide']:
-            patch_coords, num_patch_slide = get_sliding_patches(img_height=img_height, img_width=img_width, \
-                patch_height=patch_info['patch_height'], patch_width=patch_info['patch_width'], points=points, \
-                overlap_ratio=patch_info['patch_overlap_ratio'], num_involved_pixel=patch_info['patch_num_involved_pixel'], \
-                bg_ratio=patch_info['patch_bg_ratio'], roi=roi)
+            if mode == 'train':
+                patch_coords, num_patch_slide = get_sliding_patches(img_height=img_height, img_width=img_width, \
+                    patch_height=patch_info['patch_height'], patch_width=patch_info['patch_width'], points=points, \
+                    overlap_ratio=patch_info['patch_overlap_ratio'], num_involved_pixel=patch_info['patch_num_involved_pixel'], \
+                    bg_ratio=patch_info['patch_bg_ratio'], roi=roi, skip_highly_overlapped_tiles=False)
+            elif mode == 'val':
+                patch_coords, num_patch_slide = get_sliding_patches(img_height=img_height, img_width=img_width, \
+                    patch_height=patch_info['patch_height'], patch_width=patch_info['patch_width'], points=points, \
+                    overlap_ratio=patch_info['patch_overlap_ratio'], num_involved_pixel=patch_info['patch_num_involved_pixel'], \
+                    bg_ratio=patch_info['patch_bg_ratio'], roi=roi, skip_highly_overlapped_tiles=True)
+            else:
+                raise ValueError(f"There is no such mode({mode})")
 
             for patch_coord in patch_coords:
                 assert patch_coord[2] - patch_coord[0] == patch_info['patch_width'] and patch_coord[3] - patch_coord[1] == patch_info['patch_height'], f"patch coord is wrong"
