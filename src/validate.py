@@ -110,9 +110,6 @@ def save_validation(model, device, dataset, num_classes, epoch, output_dir, inpu
             cv2.putText(text2, "(b) ground truth" , origin, font, 0.6, (255,255,255), 1)
             cv2.putText(text3, "(c) predicted" , origin, font, 0.6, (255,255,255), 1)
 
-
-            print(image.shape, mask.shape, preds.shape)
-            print(text1.shape, text2.shape, text3.shape)
             image = cv2.vconcat([text1, image])
             mask = cv2.vconcat([text2, mask])
             preds = cv2.vconcat([text3, preds.astype(np.uint8)])

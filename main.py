@@ -50,7 +50,6 @@ def main(args):
     # save_validation(model, device, dataset_val, num_classes, 0, args.val_dir, input_channel=3, denormalization_fn=None, image_loading_mode='rgb')
     # save_validation(model, device, args.classes, dataset, args.val_dir, args.num_classes, epoch)
 
-
     if args.distributed:
         model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
 
@@ -117,7 +116,7 @@ def main(args):
         if epoch%10 == 0:
             # Thread(target=save_validation, args=(model, device, args.classes, dataset, args.val_dir, args.num_classes, epoch))
             # save_validation(model, device, args.classes, dataset, args.val_dir, args.num_classes, epoch)
-            save_validation(model, device, dataset_val, num_classes, 0, args.val_dir, input_channel=3, denormalization_fn=None, image_loading_mode='rgb')
+            save_validation(model, device, dataset_val, num_classes, epoch, args.val_dir, input_channel=3, denormalization_fn=None, image_loading_mode='rgb')
             checkpoint = {
             "model": model_without_ddp.state_dict(),
             "optimizer": optimizer.state_dict(),

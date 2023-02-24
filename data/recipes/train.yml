@@ -15,7 +15,7 @@ device_ids: 0
 start_epoch: 0
 epochs: 300
 batch_size: 2
-workers: 4
+num_workers: 4
 init_lr: 0.01
 momentum: 0.9
 weight_decay: 0.0001

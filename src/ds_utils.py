@@ -12,13 +12,13 @@ def get_dataloader(dataset, dataset_test, args):
         data_loader = torch.utils.data.DataLoader(
         dataset,
         batch_size=args.batch_size,
-        num_workers=args.workers,
+        num_workers=args.num_workers,
         collate_fn=utils.collate_fn,
         drop_last=True,
         worker_init_fn=worker_init_fn
         )
 
-        data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size=1, num_workers=args.workers, collate_fn=utils.collate_fn, \
+        data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size=1, num_workers=args.num_workers, collate_fn=utils.collate_fn, \
                                                     worker_init_fn=worker_init_fn)
     
         return data_loader, data_loader_test
@@ -35,13 +35,13 @@ def get_dataloader(dataset, dataset_test, args):
             dataset,
             batch_size=args.batch_size,
             sampler=train_sampler,
-            num_workers=args.workers,
+            num_workers=args.num_workers,
             collate_fn=utils.collate_fn,
             drop_last=True,
         )
 
         data_loader_test = torch.utils.data.DataLoader(
-            dataset_test, batch_size=1, sampler=test_sampler, num_workers=args.workers, collate_fn=utils.collate_fn
+            dataset_test, batch_size=1, sampler=test_sampler, num_workers=args.num_workers, collate_fn=utils.collate_fn
         )
         
         return data_loader, data_loader_test, train_sampler
