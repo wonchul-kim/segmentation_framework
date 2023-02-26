@@ -6,7 +6,8 @@ import torch
 import torch.utils.data
 
 from models.modeling import get_model
-from src.ds_utils import get_dataset, get_dataloader
+from src.ds_utils import get_dataset
+from src.dataloaders import get_dataloader 
 from src.optimizers import get_optimizer
 from src.losses import criterion
 from src.lr_schedulers import get_lr_scheduler
@@ -32,7 +33,7 @@ def main(args):
                                     args.classes, args.debug_dir, args.roi_info, args.patch_info, \
                                     args.debug_dataset, args.debug_dataset_ratio)
 
-    # dataloader, dataloader_val = get_dataloader(dataset, dataset_val, args)
+    dataloader, dataloader_val = get_dataloader(dataset, dataset_val, args)
 
     # # for batch in dataloader:
     # #     image, target, fname = batch 
