@@ -22,8 +22,11 @@ weight_decay: 0.0001
 lr_warmup_epochs: 0
 lr_warmup_method: linear
 lr_warmup_decay: 0.01
-# Mixed precision training parameters
-amp: false 
+amp: false # Mixed precision training parameters
+
+### for debugging
+debug_dataset: True 
+debug_dataset_ratio: 0.2
 
 ### for logging
 print_freq: 10
