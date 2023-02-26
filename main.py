@@ -6,19 +6,19 @@ import torch
 import torch.utils.data
 
 from models.modeling import get_model
-from src.ds_utils import get_dataset
-from src.dataloaders import get_dataloader 
-from src.optimizers import get_optimizer
-from src.losses import criterion
-from src.lr_schedulers import get_lr_scheduler
-from src.train import train_one_epoch
-from src.validate import evaluate, save_validation
-from src.params import set_params
+from src.pytorch.ds_utils import get_dataset
+from src.pytorch.dataloaders import get_dataloader 
+from src.pytorch.optimizers import get_optimizer
+from src.pytorch.losses import criterion
+from src.pytorch.lr_schedulers import get_lr_scheduler
+from src.pytorch.train import train_one_epoch
+from src.pytorch.validate import evaluate, save_validation
+from src.pytorch.params import set_params
 from utils.torch_utils import set_envs, save_on_master
 from utils.preprocessing import get_transform
 import utils.helpers as utils
 import matplotlib.pyplot as plt 
-from src.validate import save_validation
+from src.pytorch.validate import save_validation
 
 def main(args):
     if args.output_dir:

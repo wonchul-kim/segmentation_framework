@@ -6,7 +6,7 @@ import math
 import torch 
 from utils.torch_utils import reduce_across_processes
 from utils.metrics import ConfusionMatrix, MetricLogger
-from src.datasets import LabelmeIterableDatasets
+from src.pytorch.datasets import LabelmeIterableDatasets
 
 def evaluate(model, dataloader, device, num_classes):
     model.eval()

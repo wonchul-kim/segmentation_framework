@@ -8,7 +8,7 @@ import re
 import numpy as np
 import cv2 
 import math
-from src.datasets import LabelmeIterableDatasets
+from src.pytorch.datasets import LabelmeIterableDatasets
 
 def cat_list(images, fill_value=0):
     max_size = tuple(max(s) for s in zip(*[img.shape for img in images]))
