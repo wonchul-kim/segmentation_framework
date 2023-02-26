@@ -1,4 +1,4 @@
-input_dir: /HDD/datasets/_unittest/multiple_rois/w_patches/sungwoo_edge/split_datasets
+input_dir: /HDD/datasets/_unittests/multiple_rois/w_patches/sungwoo_edge/split_datsaets
 output_dir: "./res/sungwoo"
 classes: ["STABBED", "POP"]
 dataset_format: labelme

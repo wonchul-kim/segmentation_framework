@@ -50,7 +50,8 @@ def set_params(cfgs, _vars, _augs=None):
             _vars.roi_info = [[int(cfgs.roi_start_x), int(cfgs.roi_start_y), int(cfgs.roi_start_x) + int(cfgs.roi_width), int(cfgs.roi_start_y) + int(cfgs.roi_height)]]
     else:
         _vars.roi_info = None 
-
+    ##################################################################################################
+    
     ####### patches ##################################################################################
     if hasattr(cfgs, 'patches'):
         if cfgs.patches != None:
@@ -156,8 +157,25 @@ def set_params(cfgs, _vars, _augs=None):
             _vars.patch_info['patch_slide'] = False 
     else:
         _vars.patch_info = None
+    ##################################################################################################
 
-
+    ####### debugging ################################################################################
+    if hasattr(cfgs, "debug_dataset"):
+        if cfgs.debug_dataset:
+            _vars.debug_dataset = bool(cfgs.debug_dataset)
+        else:
+            _vars.debug_dataset = False
+    else:
+        _vars.debug_dataset = False
+    if hasattr(cfgs, "debug_dataset_ratio"):
+        if cfgs.debug_dataset_ratio:
+            _vars.debug_dataset_ratio = float(cfgs.debug_dataset_ratio)
+        else:
+            _vars.debug_dataset_ratio = 1
+    else:
+        _vars.debug_dataset_ratio = 1
+    ##################################################################################################
+    
     if hasattr(cfgs, "output_dir"):
         if cfgs.output_dir == None or cfgs.output_dir == "None" or cfgs.output_dir == "none":
             _vars.output_dir = str(Path(cfgs.input_dir).parent)

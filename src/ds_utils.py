@@ -1,4 +1,5 @@
 import os.path as osp 
+from threading import Thread
 from utils.transforms import Compose
 import torch 
 import torchvision
@@ -6,6 +7,7 @@ import utils.helpers as utils
 from src.datasets import COCODataset, MaskDataset, LabelmeDatasets, LabelmeIterableDatasets
 from utils.coco_utils import FilterAndRemapCocoCategories, ConvertCocoPolysToMask, _coco_remove_images_without_annotations
 from utils.torch_utils import worker_init_fn
+from utils.helpers import debug_dataset
 
 def get_dataloader(dataset, dataset_test, args):
     if isinstance(dataset, LabelmeIterableDatasets):
@@ -46,7 +48,8 @@ def get_dataloader(dataset, dataset_test, args):
         
         return data_loader, data_loader_test, train_sampler
 
-def get_dataset(dir_path, name, image_set, transform, classes, roi_info=None, patch_info=None, debug=True):
+def get_dataset(dir_path, name, image_set, transform, classes, debug_dir=None, roi_info=None, patch_info=None, \
+                debug=True, debug_dataset_ratio=1):
     def sbd(*args, **kwargs):
         return torchvision.datasets.SBDataset(*args, mode="segmentation", **kwargs)
 
@@ -59,7 +62,12 @@ def get_dataset(dir_path, name, image_set, transform, classes, roi_info=None, pa
     }
     p, ds_fn, num_classes = paths[name]
 
-    ds = ds_fn(p, image_set=image_set, transforms=transform, classes=classes, roi_info=roi_info, patch_info=patch_info)
+    ds = ds_fn(p, image_set=image_set, transforms=transform, classes=classes, \
+                roi_info=roi_info, patch_info=patch_info)
+
+    if debug:
+        debug_dataset(ds, debug_dir, image_set, num_classes, ratio=debug_dataset_ratio)
+        # Thread(target=debug_dataset, args=(ds, debug_dir, image_set, num_classes))
     return ds, num_classes
 
 def get_coco(root, image_set, transforms, classes, roi_info=None, patch_info=None):
