@@ -90,6 +90,7 @@ class MaskDataset(torch.utils.data.Dataset):
 
 class LabelmeIterableDatasets(torch.utils.data.IterableDataset):
     def __init__(self, mode, img_folder, classes, transforms=None, roi_info=None, patch_info=None, img_exts=['png', 'bmp']):
+        
         self.imgs_info, self.num_data = get_images_info(mode, img_folder, img_exts=img_exts, classes=classes, roi_info=roi_info, patch_info=patch_info)
         assert self.num_data != 0, f"There is NO images in dataset directory: {osp.join(img_folder)} with {img_exts}"
         print(f"There are {self.num_data} images with roi({roi_info}) and patch_info({patch_info})")
@@ -102,24 +103,27 @@ class LabelmeIterableDatasets(torch.utils.data.IterableDataset):
         print(f"  - There are {len(self.imgs_info)} image files") 
 
         self.image, self.mask, self.fname = None, None, None
+        self.test = 0
 
     def __iter__(self):
-        for img_info in self.imgs_info:
+        for idx, img_info in enumerate(self.imgs_info):
             img_file = img_info['img_file']
-            rois = img_info['rois']
+            rois = img_info['rois'] 
             self.image = Image.open(img_file)
             self.fname = osp.split(osp.splitext(img_file)[0])[-1]
             w, h = self.image.size
             self.mask = make_mask(osp.join(osp.split(img_file)[0], self.fname + '.json'), w, h, self.class2label, 'pil')
 
             if rois == None:
+                self.imgs_info[idx]['counts'][0] += 1
                 ####### To transform
                 if self.transforms is not None:
                     image, mask = self.transforms(self.image, self.mask)
 
                 yield image, mask, self.fname 
             else:
-                for roi in rois:
+                for jdx, roi in enumerate(rois):
+                    self.imgs_info[idx]['counts'][jdx] += 1
                     ####### To crop image with RoI
                     assert roi[0] >= 0 and roi[1] >=0, \
                             ValueError(f"roi_info top left/right should be more than 0, not tx({roi[0]}), ty({roi[1]})")

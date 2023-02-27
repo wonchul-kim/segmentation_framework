@@ -18,7 +18,7 @@ device_ids: 0,1,2,3
 start_epoch: 0
 epochs: 100
 batch_size: 8
-num_workers: 32
+num_workers: 2
 init_lr: 0.01
 momentum: 0.9
 weight_decay: 0.0001
