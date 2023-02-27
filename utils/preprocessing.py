@@ -105,7 +105,7 @@ def get_images_info(mode, img_folder, img_exts, classes=None, roi_info=None, pat
     imgs_info = []
     num_data = 0
     for img_file in img_files:
-        img_info = {'img_file': img_file, 'rois': []}
+        img_info = {'img_file': img_file, 'rois': [], 'count': []} ### template for img_info
         if patch_info == None and roi_info == None:
             img_info['rois'] = None
             num_data += 1

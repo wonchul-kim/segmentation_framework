@@ -34,7 +34,7 @@ if __name__ == '__main__':
     # print(mask.shape)
     # cv2.imwrite("/projects/mask.png", mask)
 
-    json_file = "/HDD/datasets/_unittest/multiple_rois/wo_patches/sungwoo_edge/split_datasets/val/122111520173660_7_EdgeDown.json"
+    json_file = "/HDD/datasets/_unittests/multiple_rois/wo_patches/sungwoo_edge/split_datasets/val/122111520173660_7_EdgeDown.json"
     width = 9344
     height = 7000
     class2label = {'_background_': 0, 'stabbed': 1, 'pop': 2}

@@ -1,4 +1,4 @@
-input_dir: /HDD/datasets/_unittest/single_roi/wo_patches/sungwoo_intops/split_datasets
+input_dir: /HDD/datasets/_unittests/single_roi/wo_patches/sungwoo_intops/split_datasets
 output_dir: "./res/sungwoo"
 classes: ["SCRATCH", "STABBED", "DUST"]
 dataset_format: labelme
