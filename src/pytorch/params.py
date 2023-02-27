@@ -6,6 +6,14 @@ from datetime import datetime
 import yaml
 
 def set_params(cfgs, _vars, _augs=None):
+    if hasattr(cfgs, "output_dir"):
+        if cfgs.output_dir == None or cfgs.output_dir == "None" or cfgs.output_dir == "none":
+            _vars.output_dir = str(Path(cfgs.input_dir).parent)
+        else:
+            _vars.output_dir = str(cfgs.output_dir)
+    else:
+        _vars.output_dir = str(Path(cfgs.input_dir).parent)
+
     ### classes
     if isinstance(cfgs.classes, str):
         _vars.classes = list(map(str, cfgs.classes.split(",")))
@@ -16,6 +24,16 @@ def set_params(cfgs, _vars, _augs=None):
     print(f"* There are {_vars.classes} classes")
 
     _vars.num_classes = len(cfgs.classes) + 1
+
+    ####### Image processing ########################################################################
+    if hasattr(cfgs, 'image_loading_mode'):
+        if cfgs.image_loading_mode != None:
+            _vars.image_loading_mode = str(cfgs.image_loading_mode)
+        else:
+            _vars.image_loading_mode = 'rgb'
+    else:
+        _vars.image_loading_mode = 'rgb'
+    ##################################################################################################
 
     ####### RoIs ####################################################################################
     if hasattr(cfgs, 'roi'):
@@ -176,15 +194,46 @@ def set_params(cfgs, _vars, _augs=None):
         _vars.debug_dataset_ratio = 1
     ##################################################################################################
     
-    if hasattr(cfgs, "output_dir"):
-        if cfgs.output_dir == None or cfgs.output_dir == "None" or cfgs.output_dir == "none":
-            _vars.output_dir = str(Path(cfgs.input_dir).parent)
+    ####### logging ################################################################################
+    if hasattr(cfgs, "save_model_freq"):
+        if cfgs.save_model_freq:
+            _vars.save_model_freq = int(cfgs.save_model_freq)
         else:
-            _vars.output_dir = str(cfgs.output_dir)
+            _vars.save_model_freq = 50
     else:
-        _vars.output_dir = str(Path(cfgs.input_dir).parent)
+        _vars.save_model_freq = 50
+    if hasattr(cfgs, "save_val_img"):
+        if cfgs.save_val_img:
+            _vars.save_val_img = bool(cfgs.save_val_img)
+        else:
+            _vars.save_val_img = True
+    else:
+        _vars.save_val_img = True
+    if hasattr(cfgs, "save_val_img_ratio"):
+        if cfgs.save_val_img_ratio:
+            _vars.save_val_img_ratio = float(cfgs.save_val_img_ratio)
+        else:
+            _vars.save_val_img_ratio = 1
+    else:
+        _vars.save_val_img_ratio = 1
+    if hasattr(cfgs, "save_val_img_freq"):
+        if cfgs.save_val_img_freq:
+            _vars.save_val_img_freq = int(cfgs.save_val_img_freq)
+        else:
+            _vars.save_val_img_freq = 10
+    else:
+        _vars.save_val_img_freq = 10
+    if hasattr(cfgs, "save_val_img_iou"):
+        if cfgs.save_val_img_iou:
+            _vars.save_val_img_iou = float(cfgs.save_val_img_iou)
+        else:
+            _vars.save_val_img_iou = 0.6
+    else:
+        _vars.save_val_img_iou = 0.6
+    ##################################################################################################
 
 
+    ####### etc. ################################################################################
     if hasattr(cfgs, 'device'):
         if cfgs.device != None:
             _vars.device = str(cfgs.device)

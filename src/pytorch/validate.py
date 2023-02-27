@@ -48,12 +48,12 @@ def evaluate(model, dataloader, device, num_classes):
 
     return confmat
 
-
 RGBs = [[255, 0, 0], [0, 255, 0], [0, 0, 255], \
         [255, 255, 0], [255, 0, 255], [0, 255, 255], \
         [255, 136, 0], [136, 0, 255], [255, 51, 153]]
 
-def save_validation(model, device, dataset, num_classes, epoch, output_dir, input_channel=3, denormalization_fn=None, image_loading_mode='bgr', validation_image_idxes_list=[]):
+def save_validation(model, device, dataset, num_classes, epoch, output_dir, input_channel=3, \
+                        denormalization_fn=None, image_loading_mode='bgr', validation_image_idxes_list=[]):
     origin = 25,25
     font = cv2.FONT_HERSHEY_SIMPLEX
 
@@ -61,7 +61,6 @@ def save_validation(model, device, dataset, num_classes, epoch, output_dir, inpu
     #     validation_image_idxes_list = range(0, len(dataloader))
 
     total_idx = 1
-
     if isinstance(dataset, LabelmeIterableDatasets):
         for batch in dataset:
             if len(batch) == 3:
