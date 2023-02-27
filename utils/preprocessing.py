@@ -8,7 +8,6 @@ import torch
 import utils.transforms as T
 import torchvision
 from torchvision.transforms import functional as F, InterpolationMode
-from aivdata.src.slicer.slice import Image2Patches
 
 def get_transform(train, args):
     if train:
@@ -245,13 +244,11 @@ def get_centric_patches(_points, patch_info, img_width, img_height, roi=None):
         tl_x, tl_y, br_x, br_y = roi[0], roi[1], roi[2], roi[3]
     else:
         tl_x, tl_y, br_x, br_y = 0, 0, img_width, img_height
-        
-    width, height = br_x - tl_x, br_y - tl_y
     
-    assert patch_info['patch_width'] <= width, \
-                        ValueError(f"patch width({patch_info['patch_width']}) should bigger than roi_width({width})")
-    assert patch_info['patch_height'] <= height, \
-                        ValueError(f"patch height({patch_info['patch_height']}) should bigger than roi_width({height})")
+    assert patch_info['patch_width'] <= br_x - tl_x, \
+                    ValueError(f"patch width({patch_info['patch_width']}) should bigger than width({br_x - tl_x})")
+    assert patch_info['patch_height'] <= br_y - tl_y, \
+                    ValueError(f"patch height({patch_info['patch_height']}) should bigger than height({br_y - tl_y})")
 
     cxs, cys = [], []
     centric_patches_rois = []
@@ -269,18 +266,19 @@ def get_centric_patches(_points, patch_info, img_width, img_height, roi=None):
     shake_x = int(patch_info['patch_width']/patch_info['shake_dist_ratio'])
     shake_y = int(patch_info['patch_height']/patch_info['shake_dist_ratio'])
 
-    shake_directions = [[avg_cx, avg_cy], 
+    shake_directions = [[avg_cx, avg_cy], \
                         [avg_cx + shake_x, avg_cy], [avg_cx - shake_x, avg_cy], \
-                        [avg_cx, avg_cy - shake_y], [avg_cx, avg_cy + shake_y],  
+                        [avg_cx, avg_cy - shake_y], [avg_cx, avg_cy + shake_y], \
                         [avg_cx + shake_x, avg_cy + shake_y], [avg_cx + shake_x, avg_cy - shake_y], \
-                        [avg_cx - shake_x, avg_cy + shake_y], [avg_cx - shake_x, avg_cy - shake_y], ]
+                        [avg_cx - shake_x, avg_cy + shake_y], [avg_cx - shake_x, avg_cy - shake_y]
+                    ]
     
     for shake_idx in range(0, patch_info['shake_patch'] + 1):
         avg_cx = shake_directions[shake_idx][0]
         avg_cy = shake_directions[shake_idx][1]
 
-        br_offset_x = int(avg_cx + patch_info['patch_width']/2 - width)
-        br_offset_y = int(avg_cy + patch_info['patch_height']/2 - height)
+        br_offset_x = int(avg_cx + patch_info['patch_width']/2 - br_x)
+        br_offset_y = int(avg_cy + patch_info['patch_height']/2 - br_y)
         if br_offset_x > 0:
             avg_cx -= br_offset_x 
         if br_offset_y > 0:
@@ -302,7 +300,6 @@ def get_centric_patches(_points, patch_info, img_width, img_height, roi=None):
         centric_patches_num_data += 1
 
     return centric_patches_rois, centric_patches_num_data
-
 
 def get_sliding_patches(img_width, img_height, patch_height, patch_width, points, overlap_ratio, \
             num_involved_pixel=2, bg_ratio=-1, roi=None, skip_highly_overlapped_tiles=False):

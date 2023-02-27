@@ -149,9 +149,9 @@ if __name__ == "__main__":
     # data = './data/_unittests/camvid.yml'
     # data = './data/_unittests/samkee.yml'
     # data = './data/_unittests/single_rois_wo_patches.yml'
-    data = './data/_unittests/single_rois_w_patches.yml'
+    # data = './data/_unittests/single_rois_w_patches.yml'
     # data = './data/_unittests/multiple_rois_wo_patches.yml'
-    # data = './data/_unittests/multiple_rois_w_patches.yml'
+    data = './data/_unittests/multiple_rois_w_patches.yml'
     # data = './data/projects/sungwoo_poland.yml'
     with open(data, 'r') as yf:
         try:

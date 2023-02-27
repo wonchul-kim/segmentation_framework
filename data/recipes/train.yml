@@ -1,5 +1,5 @@
 ### for model params #######################
-model_name: deeplabv3_resnet50 #fcn_resnet50
+model_name: fcn_resnet50
 input_height: 512
 input_width: 512
 input_channel: 3
@@ -18,7 +18,7 @@ device_ids: 0,1
 start_epoch: 0
 epochs: 100
 batch_size: 2
-num_workers: 4
+num_workers: 16
 init_lr: 0.01
 momentum: 0.9
 weight_decay: 0.0001
