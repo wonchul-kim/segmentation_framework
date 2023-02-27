@@ -1,10 +1,10 @@
-input_dir: /HDD/datasets/projects/sungwoo/외관검사기/POLAND/23.01.27_PET_FILM_TOP_BO/split_dataset
+input_dir: /storage/projects/sungwoo/POLAND/23.02.20_crop_all/split_datasets
 output_dir: "./res/sungwoo"
-classes: ["STABBED", "POP"]
+classes: ["STABBED"]
 dataset_format: labelme
 
 ### roi
-roi: true
+roi: false
 roi_from_json: false
 roi_start_x: 10,960,5100,8800
 roi_start_y: 1300,5300,5300,1300

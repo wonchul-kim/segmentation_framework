@@ -5,6 +5,7 @@ import time
 import torch
 import torch.utils.data
 
+from threading import Thread
 from models.modeling import get_model
 from src.pytorch.ds_utils import get_dataset
 from src.pytorch.dataloaders import get_dataloader 
@@ -111,8 +112,7 @@ def main(args):
         plt.close()
 
         if args.save_val_img and (epoch != 0 and epoch%args.save_val_img_freq == 0):
-            save_validation(model, device, dataset_val, num_classes, epoch, args.val_dir, input_channel=3, \
-                                        denormalization_fn=None, image_loading_mode='rgb')
+            Thread(target=save_validation, args=(model, device, dataset_val, num_classes, epoch, args.val_dir))
             checkpoint = {
             "model": model_without_ddp.state_dict(),
             "optimizer": optimizer.state_dict(),

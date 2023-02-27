@@ -67,8 +67,8 @@ def increment_path(path, exist_ok=False, sep='', mkdir=False):
         path.mkdir(parents=True, exist_ok=True)  # make directory
     return path
 
-def debug_dataset(dataset, debug_dir, mode, num_classes, channel_first=True, input_channel=3,\
-                    ratio=1, denormalization_fn=None, image_loading_mode='rgb', width=256, height=256, rows=4, cols=4):
+def debug_dataset(dataset, debug_dir, mode, num_classes, ratio=1, channel_first=True, input_channel=3,\
+                    denormalization_fn=None, image_loading_mode='rgb', width=256, height=256, rows=4, cols=4):
 
     if isinstance(dataset, LabelmeIterableDatasets):
         # imgsz_h, imgsz_w = dataset[0][1].shape
