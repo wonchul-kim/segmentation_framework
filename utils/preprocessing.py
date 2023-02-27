@@ -145,23 +145,15 @@ def get_imgs_info_from_patches(mode, img_file, classes, patch_info, roi=None):
             _points = get_points_from_labelme(shape, shape_type, points, patch_info, mode)
             if not _points:
                 continue
-       
-            try: 
-                if roi != None:
-                    if is_points_not_in_roi(_points, roi):
-                        continue
 
-                if patch_info['patch_centric']:
-                    centric_patches_rois, centric_patches_num_data = get_centric_patches(_points, patch_info, img_width, img_height)
-                    rois += centric_patches_rois
-                    num_data =+ centric_patches_num_data
+            if roi != None:
+                if is_points_not_in_roi(_points, roi):
+                    continue
 
-            except Exception as e:
-                print("Oops!", e.__class__, "occurred.")
-                print("Not found points: ", _points)
-                print("Next entry.")
-                print()
-                continue 
+            if patch_info['patch_centric']:
+                centric_patches_rois, centric_patches_num_data = get_centric_patches(_points, patch_info, img_width, img_height, roi=roi)
+                rois += centric_patches_rois
+                num_data =+ centric_patches_num_data
 
             points.append(_points)
 
@@ -224,21 +216,43 @@ def get_points_from_labelme(shape, shape_type, points, patch_info, mode):
 
     return _points
 
-def is_points_not_in_roi(_points, roi):
+def is_points_not_in_roi(points, roi):
     not_in_roi = False
-    for _point in _points:
-        x = _point[0]
-        y = _point[1]
+    
+    if isinstance(points[0], int):
+        x = points[0]
+        y = points[1]
 
         if x >= roi[0] and x <= roi[2] and y >= roi[1] and  y <= roi[3]:
             pass
         else:
             not_in_roi = True
-            break
+    else:
+        for point in points:
+            x = point[0]
+            y = point[1]
+
+            if x >= roi[0] and x <= roi[2] and y >= roi[1] and  y <= roi[3]:
+                pass
+            else:
+                not_in_roi = True
+                break
     
     return not_in_roi
 
-def get_centric_patches(_points, patch_info, img_width, img_height):
+def get_centric_patches(_points, patch_info, img_width, img_height, roi=None):
+    if roi != None:
+        tl_x, tl_y, br_x, br_y = roi[0], roi[1], roi[2], roi[3]
+    else:
+        tl_x, tl_y, br_x, br_y = 0, 0, img_width, img_height
+        
+    width, height = br_x - tl_x, br_y - tl_y
+    
+    assert patch_info['patch_width'] <= width, \
+                        ValueError(f"patch width({patch_info['patch_width']}) should bigger than roi_width({width})")
+    assert patch_info['patch_height'] <= height, \
+                        ValueError(f"patch height({patch_info['patch_height']}) should bigger than roi_width({height})")
+
     cxs, cys = [], []
     centric_patches_rois = []
     centric_patches_num_data = 0
@@ -248,20 +262,25 @@ def get_centric_patches(_points, patch_info, img_width, img_height):
 
     avg_cx = int(np.mean(cxs))
     avg_cy = int(np.mean(cys))
+    
+    if roi != None and is_points_not_in_roi([avg_cx, avg_cy], roi):
+        return [], 0
 
     shake_x = int(patch_info['patch_width']/patch_info['shake_dist_ratio'])
     shake_y = int(patch_info['patch_height']/patch_info['shake_dist_ratio'])
 
     shake_directions = [[avg_cx, avg_cy], 
-                        [avg_cx + shake_x, avg_cy], [avg_cx - shake_x, avg_cy], [avg_cx, avg_cy - shake_y], [avg_cx, avg_cy + shake_y],  
-                        [avg_cx + shake_x, avg_cy + shake_y], [avg_cx + shake_x, avg_cy - shake_y], [avg_cx - shake_x, avg_cy + shake_y], [avg_cx - shake_x, avg_cy - shake_y], ]
+                        [avg_cx + shake_x, avg_cy], [avg_cx - shake_x, avg_cy], \
+                        [avg_cx, avg_cy - shake_y], [avg_cx, avg_cy + shake_y],  
+                        [avg_cx + shake_x, avg_cy + shake_y], [avg_cx + shake_x, avg_cy - shake_y], \
+                        [avg_cx - shake_x, avg_cy + shake_y], [avg_cx - shake_x, avg_cy - shake_y], ]
     
     for shake_idx in range(0, patch_info['shake_patch'] + 1):
         avg_cx = shake_directions[shake_idx][0]
         avg_cy = shake_directions[shake_idx][1]
 
-        br_offset_x = int(avg_cx + patch_info['patch_width']/2 - img_width)
-        br_offset_y = int(avg_cy + patch_info['patch_height']/2 - img_height)
+        br_offset_x = int(avg_cx + patch_info['patch_width']/2 - width)
+        br_offset_y = int(avg_cy + patch_info['patch_height']/2 - height)
         if br_offset_x > 0:
             avg_cx -= br_offset_x 
         if br_offset_y > 0:
