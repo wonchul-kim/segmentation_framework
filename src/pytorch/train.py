@@ -29,6 +29,5 @@ def train_one_epoch(model, criterion, optimizer, dataloader, lr_scheduler, devic
 
         lr_scheduler.step()
         metric_logger.update(loss=loss.item(), lr=optimizer.param_groups[0]["lr"])
-        profiler.step()
 
     return loss.item(), optimizer.param_groups[0]["lr"]
