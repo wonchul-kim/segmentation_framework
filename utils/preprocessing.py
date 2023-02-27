@@ -152,8 +152,7 @@ def get_imgs_info_from_patches(mode, img_file, classes, patch_info, roi=None):
             if patch_info['patch_centric']:
                 centric_patches_rois, centric_patches_num_data = get_centric_patches(_points, patch_info, img_width, img_height, roi=roi)
                 rois += centric_patches_rois
-                num_data =+ centric_patches_num_data
-
+                num_data += centric_patches_num_data
             points.append(_points)
 
         if patch_info['patch_slide']:
@@ -218,7 +217,7 @@ def get_points_from_labelme(shape, shape_type, points, patch_info, mode):
 def is_points_not_in_roi(points, roi):
     not_in_roi = False
     
-    if isinstance(points[0], int):
+    if isinstance(points[0], int) or isinstance(points[0], float):
         x = points[0]
         y = points[1]
 
@@ -246,9 +245,9 @@ def get_centric_patches(_points, patch_info, img_width, img_height, roi=None):
         tl_x, tl_y, br_x, br_y = 0, 0, img_width, img_height
     
     assert patch_info['patch_width'] <= br_x - tl_x, \
-                    ValueError(f"patch width({patch_info['patch_width']}) should bigger than width({br_x - tl_x})")
+                    ValueError(f"patch width({patch_info['patch_width']}) should be bigger than width({br_x - tl_x})")
     assert patch_info['patch_height'] <= br_y - tl_y, \
-                    ValueError(f"patch height({patch_info['patch_height']}) should bigger than height({br_y - tl_y})")
+                    ValueError(f"patch height({patch_info['patch_height']}) should be bigger than height({br_y - tl_y})")
 
     cxs, cys = [], []
     centric_patches_rois = []

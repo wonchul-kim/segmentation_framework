@@ -26,7 +26,6 @@ def main(args):
         utils.mkdir(args.output_dir)
 
     device = set_envs(args)
-
     dataset, num_classes = get_dataset(args.input_dir, args.dataset_format, "train", get_transform(True, args), \
                                         args.classes, args.debug_dir, args.roi_info, args.patch_info, \
                                         args.debug_dataset, args.debug_dataset_ratio)
@@ -151,8 +150,8 @@ if __name__ == "__main__":
     # data = './data/_unittests/single_rois_wo_patches.yml'
     # data = './data/_unittests/single_rois_w_patches.yml'
     # data = './data/_unittests/multiple_rois_wo_patches.yml'
-    data = './data/_unittests/multiple_rois_w_patches.yml'
-    # data = './data/projects/sungwoo_poland.yml'
+    # data = './data/_unittests/multiple_rois_w_patches.yml'
+    data = './data/projects/sungwoo_poland.yml'
     with open(data, 'r') as yf:
         try:
             data = yaml.safe_load(yf)

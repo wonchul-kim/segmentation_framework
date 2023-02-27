@@ -2,6 +2,11 @@ import torch
 from utils.metrics import SmoothedValue, MetricLogger
 
 def train_one_epoch(model, criterion, optimizer, dataloader, lr_scheduler, device, epoch, print_freq, scaler=None):
+    '''
+        * image: [batch, channel, height, width]
+        * target: [batch, height, width]
+        * output: [batch, classes, height, width]
+    '''
     model.train()
     metric_logger = MetricLogger(delimiter="  ")
     metric_logger.add_meter("lr", SmoothedValue(window_size=1, fmt="{value}"))
@@ -13,6 +18,7 @@ def train_one_epoch(model, criterion, optimizer, dataloader, lr_scheduler, devic
         else:
             image, target = batch 
             fname = None
+            
         image, target = image.to(device), target.to(device)
         with torch.cuda.amp.autocast(enabled=scaler is not None):
             output = model(image)
