@@ -1,4 +1,4 @@
-input_dir: /HDD/datasets/_unittest/multiple_rois/w_patches/sungwoo_edge/split_datasets
+input_dir: /HDD/datasets/projects/sungwoo/외관검사기/POLAND/23.01.27_PET_FILM_TOP_BO/split_dataset
 output_dir: "./res/sungwoo"
 classes: ["STABBED", "POP"]
 dataset_format: labelme
@@ -14,7 +14,7 @@ roi_height: 4352,512,512,4352
 ### patches
 patches: true
 patch_include_point_positive: false
-patch_centric: false
+patch_centric: true
 shake_patch: 0
 shake_dist_ratio: 3
 patch_slide: true

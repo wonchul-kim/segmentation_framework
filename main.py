@@ -4,22 +4,21 @@ import time
 
 import torch
 import torch.utils.data
-from threading import Thread
 
 from models.modeling import get_model
-from src.ds_utils import get_dataset, get_dataloader
-from src.optimizers import get_optimizer
-from src.losses import criterion
-from src.lr_schedulers import get_lr_scheduler
-from src.train import train_one_epoch
-from src.validate import evaluate, save_validation
-from src.params import set_params
+from src.pytorch.ds_utils import get_dataset
+from src.pytorch.dataloaders import get_dataloader 
+from src.pytorch.optimizers import get_optimizer
+from src.pytorch.losses import criterion
+from src.pytorch.lr_schedulers import get_lr_scheduler
+from src.pytorch.train import train_one_epoch
+from src.pytorch.validate import evaluate, save_validation
+from src.pytorch.params import set_params
 from utils.torch_utils import set_envs, save_on_master
 from utils.preprocessing import get_transform
-from utils.helpers import debug_dataset
 import utils.helpers as utils
 import matplotlib.pyplot as plt 
-from src.validate import save_validation
+from src.pytorch.validate import save_validation
 
 def main(args):
     if args.output_dir:
@@ -28,14 +27,11 @@ def main(args):
     device = set_envs(args)
 
     dataset, num_classes = get_dataset(args.input_dir, args.dataset_format, "train", get_transform(True, args), \
-                                        args.classes, args.roi_info, args.patch_info)
+                                        args.classes, args.debug_dir, args.roi_info, args.patch_info, \
+                                        args.debug_dataset, args.debug_dataset_ratio)
     dataset_val, _ = get_dataset(args.input_dir, args.dataset_format, "val", get_transform(False, args), \
-                                    args.classes, args.roi_info, args.patch_info)
-
-    Thread(target=debug_dataset, args=(dataset, args.debug_dir, 'train', args.num_classes))
-    Thread(target=debug_dataset, args=(dataset_val, args.debug_dir, 'val', args.num_classes))
-    # debug_dataset(dataset, args.debug_dir, 'train', args.num_classes)
-    # debug_dataset(dataset_val, args.debug_dir, 'val', args.num_classes)
+                                    args.classes, args.debug_dir, args.roi_info, args.patch_info, \
+                                    args.debug_dataset, args.debug_dataset_ratio)
 
     dataloader, dataloader_val = get_dataloader(dataset, dataset_val, args)
 
@@ -103,6 +99,7 @@ def main(args):
         #     train_sampler.set_epoch(epoch)
         train_loss, train_lr = train_one_epoch(model, criterion, optimizer, dataloader, lr_scheduler, device, epoch, args.print_freq, scaler)
         confmat = evaluate(model, dataloader_val, device=device, num_classes=num_classes)
+        print(confmat, type(confmat))
         train_losses.append(train_loss)
         train_lrs.append(train_lr)
 
@@ -113,10 +110,9 @@ def main(args):
         plt.savefig(os.path.join(args.log_dir, 'train_plot.png'))
         plt.close()
 
-        if epoch%10 == 0:
-            # Thread(target=save_validation, args=(model, device, args.classes, dataset, args.val_dir, args.num_classes, epoch))
-            # save_validation(model, device, args.classes, dataset, args.val_dir, args.num_classes, epoch)
-            save_validation(model, device, dataset_val, num_classes, epoch, args.val_dir, input_channel=3, denormalization_fn=None, image_loading_mode='rgb')
+        if args.save_val_img and (epoch != 0 and epoch%args.save_val_img_freq == 0):
+            save_validation(model, device, dataset_val, num_classes, epoch, args.val_dir, input_channel=3, \
+                                        denormalization_fn=None, image_loading_mode='rgb')
             checkpoint = {
             "model": model_without_ddp.state_dict(),
             "optimizer": optimizer.state_dict(),
@@ -124,9 +120,10 @@ def main(args):
             "epoch": epoch,
             "args": args,
             }   
+        
+        if epoch != 0 and epoch%args.save_model_freq == 0:
             save_on_master(checkpoint, os.path.join(args.weights_dir, f"model_{epoch}.pth"))
             
-        print(confmat)
         checkpoint = {
             "model": model_without_ddp.state_dict(),
             "optimizer": optimizer.state_dict(),
@@ -148,13 +145,13 @@ if __name__ == "__main__":
     
     cfgs = argparse.Namespace()
     # _vars = argparse.Namespace()
-    # data = './data/_unittest/coco.yml'
-    # data = './data/_unittest/camvid.yml'
-    # data = './data/_unittest/samkee.yml'
-    # data = './data/_unittest/single_rois_wo_patches.yml'
-    # data = './data/_unittest/single_rois_w_patches.yml'
-    # data = './data/_unittest/multiple_rois_wo_patches.yml'
-    data = './data/_unittest/multiple_rois_w_patches.yml'
+    # data = './data/_unittests/coco.yml'
+    # data = './data/_unittests/camvid.yml'
+    # data = './data/_unittests/samkee.yml'
+    # data = './data/_unittests/single_rois_wo_patches.yml'
+    # data = './data/_unittests/single_rois_w_patches.yml'
+    # data = './data/_unittests/multiple_rois_wo_patches.yml'
+    data = './data/_unittests/multiple_rois_w_patches.yml'
     with open(data, 'r') as yf:
         try:
             data = yaml.safe_load(yf)

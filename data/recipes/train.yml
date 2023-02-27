@@ -1,4 +1,4 @@
-### for model params.
+### for model params #######################
 model_name: fcn_resnet50
 input_height: 512
 input_width: 512
@@ -6,14 +6,17 @@ input_channel: 3
 weights: null #the weights enum name to load
 weights_backbone: null #the backbone weights enum name to load
 
-### for loss params.
+### for image processing #######################
+image_loading_mode: 'rgb'
+
+### for loss params. #######################
 aux_loss: false
 
-### for training params.
+### for training params. #######################
 device: cuda
 device_ids: 0,1
 start_epoch: 0
-epochs: 300
+epochs: 100
 batch_size: 2
 num_workers: 4
 init_lr: 0.01
@@ -22,17 +25,26 @@ weight_decay: 0.0001
 lr_warmup_epochs: 0
 lr_warmup_method: linear
 lr_warmup_decay: 0.01
-# Mixed precision training parameters
-amp: false 
+amp: false # Mixed precision training parameters
 
-### for logging
+### for debugging #######################
+debug_dataset: True 
+debug_dataset_ratio: 0.1
+
+### for logging #######################
 print_freq: 10
+save_model_freq: 10
+save_val_img: True 
+save_val_img_ratio: 1
+save_val_img_freq: 5
+save_val_img_iou: 0.6
 
-### for distributed training params.
+
+### for distributed training params. #######################
 world_size: 1 #number of distributed processes
 dist_url: env:// #url used to set up distributed training
 
-### etc.
+### etc. #######################
 resume: false # str >> seed_model
 
 #Forces the use of deterministic algorithms only ?????????????????????
