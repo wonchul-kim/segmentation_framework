@@ -57,7 +57,7 @@ def pth2onnx():
           verbose=True,
           do_constant_folding=True,  # whether to execute constant folding for optimization
           input_names = ['input'],   # the model's input names
-          output_names = ['output'], # the model's output names
+          output_names = ['output', 'aux'], # the model's output names
           dynamic_axes=None)
 
 
@@ -68,20 +68,26 @@ def run_onnx():
     input_name = session.get_inputs()[0].name
     output_name = session.get_outputs()[0].name
 
-    print(input_name, output_name)
+    print(input_name, output_name, session.get_outputs()[1].name)
 
-    img = Image.open("/projects/github/pytorch_segmentation/res/122111520150620_7_EdgeDown_ML.bmp")
-    img = img.crop([2048, 0, 2560, 512])
+    # img = Image.open("/projects/github/pytorch_segmentation/res/122111520150620_7_EdgeDown_ML.bmp")
+    # img = img.crop([2048, 0, 2560, 512])
 
+    img = Image.open("/projects/github/pytorch_segmentation/res/1.bmp")
     transforms = [T.PILToTensor(),
                   T.ConvertImageDtype(torch.float)
     ]
     transforms = T.Compose(transforms)
     
     tensor = transforms(img).unsqueeze(0)
-    print(tensor.shape)
-
-    out = session.run([output_name], {input_name : tensor.numpy()})[0][0]
+    print(tensor[0][0][0])
+    out = session.run([output_name], {input_name : tensor.numpy()})
+    
+    print(len(out))
+    print(">>>>>>>>>>>>>>>>>> ", np.mean(out[0][0]))
+    out = out[0]
+    print(out.shape)
+    out = out[0]
     print(">>> ", out.shape)
     out = torch.from_numpy(out)    
     out = torch.nn.functional.softmax(out, dim=0)
