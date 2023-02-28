@@ -29,4 +29,7 @@ def get_model(model_name, weights, weights_backbone, num_classes, aux_loss):
         elif model.split('_')[1] == 'mobilenet': 
             model.classifier = torchvision.models.segmentation.deeplabv3.DeepLabHead(960, num_classes)
             model.aux_classifier[4] = torch.nn.Conv2d(10, num_classes, kernel_size=(1, 1), stride=(1, 1))
+    else:
+        raise ValueError(f"There is no such model({model_name})")
+    
     return model
