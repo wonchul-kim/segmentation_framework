@@ -14,7 +14,7 @@ from src.pytorch.losses import criterion
 from src.pytorch.lr_schedulers import get_lr_scheduler
 from src.pytorch.train import train_one_epoch
 from src.pytorch.validate import evaluate, save_validation
-from src.pytorch.params import set_params
+from utils.params import set_params
 from utils.torch_utils import set_envs, save_on_master
 from utils.preprocessing import get_transform
 import utils.helpers as utils
