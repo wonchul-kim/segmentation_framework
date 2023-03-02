@@ -1,5 +1,5 @@
 ### for model params #######################
-model_name: deeplabv3plus_resnet101 #deeplabv3_resnet101
+model_name: ddrnet #deeplabv3plus_resnet101 #deeplabv3_resnet101
 input_height: 512
 input_width: 512
 input_channel: 3
@@ -31,7 +31,7 @@ lr_warmup_decay: 0.01
 amp: false # Mixed precision training parameters
 
 ### for debugging #######################
-debug_dataset: true 
+debug_dataset: false
 debug_dataset_ratio: 0.1
 
 ### for logging #######################

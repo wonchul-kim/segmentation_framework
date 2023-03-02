@@ -53,13 +53,18 @@ def main(args):
         model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu])
         model_without_ddp = model.module
 
-    params_to_optimize = [
-        {"params": [p for p in model_without_ddp.backbone.parameters() if p.requires_grad]},
-        {"params": [p for p in model_without_ddp.classifier.parameters() if p.requires_grad]},
-    ]
-    if args.aux_loss:
-        params = [p for p in model_without_ddp.aux_classifier.parameters() if p.requires_grad]
-        params_to_optimize.append({"params": params, "lr": args.init_lr * 10})
+    if args.model_name == 'ddrnet':
+        params_to_optimize = [
+            {"params": [p for p in model_without_ddp.parameters() if p.requires_grad]},
+        ]
+    else:
+        params_to_optimize = [
+            {"params": [p for p in model_without_ddp.backbone.parameters() if p.requires_grad]},
+            {"params": [p for p in model_without_ddp.classifier.parameters() if p.requires_grad]},
+        ]
+        if args.aux_loss:
+            params = [p for p in model_without_ddp.aux_classifier.parameters() if p.requires_grad]
+            params_to_optimize.append({"params": params, "lr": args.init_lr * 10})
 
     optimizer = get_optimizer(params_to_optimize, args.optimizer, args.init_lr, args.momentum, args.weight_decay)
     scaler = torch.cuda.amp.GradScaler() if args.amp else None

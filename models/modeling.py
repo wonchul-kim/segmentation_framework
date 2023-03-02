@@ -1,6 +1,7 @@
 import torch 
 import torchvision 
 import models.deeplabv3plus as deeplabv3plus
+from models.ddrnet.ddernet import DDRNet
 # def get_model(model_name, weights, weights_backbone, num_classes, aux_loss):
 #     model = torchvision.models.get_model(
 #             model_name,
@@ -15,6 +16,8 @@ import models.deeplabv3plus as deeplabv3plus
 def get_model(model_name, num_classes, weights=None, weights_backbone=None, aux_loss=False):
     if 'plus' in model_name:
         model = deeplabv3plus.modeling.__dict__[model_name](num_classes=num_classes, output_stride=8)
+    elif model_name == 'ddrnet':
+        model = DDRNet(num_classes=num_classes)
     else:
         model = torchvision.models.segmentation.__dict__[model_name](pretrained=True, aux_loss=aux_loss)
         if 'fcn' in model_name:

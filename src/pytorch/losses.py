@@ -32,6 +32,15 @@ class CELoss(nn.Module):
                 return losses["out"]
             else:
                 return losses["out"] + 0.5 * losses["aux"]
+        elif isinstance(inputs, tuple):
+            losses = []
+            for x in inputs:
+                losses.append(nn.functional.cross_entropy(x, targets, ignore_index=255))
+            
+            if not self.aux_loss:
+                return losses[0]
+            else:
+                return losses[0] + losses[1]
         else:
             return nn.functional.cross_entropy(inputs, targets, ignore_index=255)
 
