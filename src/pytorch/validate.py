@@ -7,6 +7,7 @@ import torch
 from utils.torch_utils import reduce_across_processes
 from utils.metrics import ConfusionMatrix, MetricLogger
 from src.pytorch.datasets import LabelmeIterableDatasets
+from utils.preprocessings import denormalize
 
 def evaluate(model, dataloader, device, num_classes):
     model.eval()
@@ -52,8 +53,8 @@ RGBs = [[255, 0, 0], [0, 255, 0], [0, 0, 255], \
         [255, 255, 0], [255, 0, 255], [0, 255, 255], \
         [255, 136, 0], [136, 0, 255], [255, 51, 153]]
 
-def save_validation(model, device, dataset, num_classes, epoch, output_dir, input_channel=3, \
-                        denormalization_fn=None, image_loading_mode='bgr', validation_image_idxes_list=[]):
+def save_validation(model, device, dataset, num_classes, epoch, output_dir, preprocessing_norm=False, input_channel=3, \
+                        image_loading_mode='bgr', validation_image_idxes_list=[]):
     origin = 25,25
     font = cv2.FONT_HERSHEY_SIMPLEX
 
@@ -68,7 +69,7 @@ def save_validation(model, device, dataset, num_classes, epoch, output_dir, inpu
             else: 
                 image, mask = batch[0].detach(), batch[1].detach()
                 fname = None           
-
+                
             image = image.to(device)
             image = image.unsqueeze(0)
             preds = model(image)['out'][0]
@@ -78,7 +79,10 @@ def save_validation(model, device, dataset, num_classes, epoch, output_dir, inpu
             # preds.apply_(lambda x: t2l[x])
             preds = preds.numpy()
 
-            image = image.to('cpu').numpy()[0]
+            image = image.to('cpu')[0]
+            if preprocessing_norm:
+                image = denormalize(image)
+            image = image.numpy()
             image = image.transpose((1, 2, 0))*255
             image = image.astype(np.uint8)
             mask = cv2.cvtColor(mask.numpy().astype(np.uint8)*(255//num_classes), cv2.COLOR_GRAY2BGR)
