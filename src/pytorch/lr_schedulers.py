@@ -3,14 +3,20 @@ import torch
 from torch.optim.lr_scheduler import _LRScheduler
 
 
-def get_lr_scheduler(optimizer, data_loader, epochs, lr_warmup_epochs, lr_warmup_method, lr_warmup_decay):
+def get_lr_scheduler(optimizer, lr_scheduler_type, data_loader, epochs, lr_warmup_epochs, lr_warmup_method, lr_warmup_decay):
     iters_per_epoch = len(data_loader)
     # main_lr_scheduler = PolynomialLR(
     #     optimizer, total_iters=iters_per_epoch * (epochs - lr_warmup_epochs), power=0.9
     # )
-    main_lr_scheduler = PolyLR(
-        optimizer, max_iters=iters_per_epoch * (epochs - lr_warmup_epochs), power=0.9
-    )
+    if lr_scheduler_type == 'poly' or lr_scheduler_type == 'polylr':
+        main_lr_scheduler = PolyLR(
+            optimizer, max_iters=iters_per_epoch * (epochs - lr_warmup_epochs), power=0.9
+        )
+    elif lr_scheduler_type == 'lambda' or lr_scheduler_type == 'lambdalr':
+        main_lr_scheduler = torch.optim.lr_scheduler.LambdaLR(
+            optimizer, lambda x: (1 - x / (iters_per_epoch * (epochs - lr_warmup_epochs))) ** 0.9
+        )
+
     if lr_warmup_epochs > 0:
         warmup_iters = iters_per_epoch * lr_warmup_epochs
         lr_warmup_method = lr_warmup_method.lower()

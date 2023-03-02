@@ -1,6 +1,6 @@
-input_dir: /storage/projects/sungwoo/POLAND/23.02.20_crop_all/split_datasets
-output_dir: "./res/sungwoo"
-classes: ["STABBED"]
+input_dir: /storage/projects/sungwoo/23.02.23_U_TOP_BOTTOM/split_dataset
+output_dir: /DeepLearning/_projects/sungwoo/23.02.23/U_TOP_BOTTOM
+classes: ["STABBED", "POP", "SCRATCH"]
 dataset_format: labelme
 
 ### roi
@@ -18,8 +18,8 @@ patch_centric: true
 shake_patch: 0
 shake_dist_ratio: 3
 patch_slide: false
-patch_width: 512
-patch_height: 512
+patch_width: 256
+patch_height: 256
 patch_overlap_ratio: 0.1
 patch_num_involved_pixel: 3
 patch_bg_ratio: 0

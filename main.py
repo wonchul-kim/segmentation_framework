@@ -78,7 +78,7 @@ def main(args):
         print("The algiorithm is executed by nn.DataParallel on devices: {}".format(args.device_ids))
         model = torch.nn.DataParallel(model, device_ids=args.device_ids, output_device=args.device_ids[0])
 
-    lr_scheduler = get_lr_scheduler(optimizer, dataloader, args.epochs, args.lr_warmup_epochs, \
+    lr_scheduler = get_lr_scheduler(optimizer, args.lr_scheduler_type, dataloader, args.epochs, args.lr_warmup_epochs, \
                                         args.lr_warmup_method, args.lr_warmup_decay)
 
     if args.resume:
@@ -157,8 +157,8 @@ if __name__ == "__main__":
     # data = './data/_unittests/single_rois_wo_patches.yml'
     # data = './data/_unittests/single_rois_w_patches.yml'
     # data = './data/_unittests/multiple_rois_wo_patches.yml'
-    data = './data/_unittests/multiple_rois_w_patches.yml'
-    # data = './data/projects/sungwoo_poland.yml'
+    # data = './data/_unittests/multiple_rois_w_patches.yml'
+    data = './data/projects/sungwoo_u_top_bottom.yml'
     with open(data, 'r') as yf:
         try:
             data = yaml.safe_load(yf)
@@ -183,4 +183,5 @@ if __name__ == "__main__":
     _vars = cfgs
     set_params(cfgs, _vars)
 
+    # print(_vars)
     main(_vars)
