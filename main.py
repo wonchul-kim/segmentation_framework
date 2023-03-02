@@ -10,7 +10,7 @@ from models.modeling import get_model
 from src.pytorch.ds_utils import get_dataset
 from src.pytorch.dataloaders import get_dataloader 
 from src.pytorch.optimizers import get_optimizer
-from src.pytorch.losses import criterion
+from src.pytorch.losses import get_criterion
 from src.pytorch.lr_schedulers import get_lr_scheduler
 from src.pytorch.train import train_one_epoch
 from src.pytorch.validate import evaluate, save_validation
@@ -63,6 +63,8 @@ def main(args):
 
     optimizer = get_optimizer(params_to_optimize, args.init_lr, args.momentum, args.weight_decay)
     scaler = torch.cuda.amp.GradScaler() if args.amp else None
+
+    criterion = get_criterion(args.loss_fn)
 
     ###############################################################################################################    
     ### Need to locate parallel training settings after parameter settings for optimization !!!!!!!!!!!!!!!!!!!!!!!
@@ -150,8 +152,8 @@ if __name__ == "__main__":
     # data = './data/_unittests/single_rois_wo_patches.yml'
     # data = './data/_unittests/single_rois_w_patches.yml'
     # data = './data/_unittests/multiple_rois_wo_patches.yml'
-    # data = './data/_unittests/multiple_rois_w_patches.yml'
-    data = './data/projects/sungwoo_poland.yml'
+    data = './data/_unittests/multiple_rois_w_patches.yml'
+    # data = './data/projects/sungwoo_poland.yml'
     with open(data, 'r') as yf:
         try:
             data = yaml.safe_load(yf)
