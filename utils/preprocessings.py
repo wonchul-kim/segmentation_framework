@@ -9,6 +9,9 @@ import utils.transforms as T
 import torchvision
 from torchvision.transforms import functional as F, InterpolationMode
 
+MEAN = (0.485, 0.456, 0.406)
+STD = (0.229, 0.224, 0.225)
+
 def denormalize(tensor, mean, std):
     mean = np.array(mean)
     std = np.array(std)
@@ -32,7 +35,8 @@ class Denormalize(object):
 
 def get_transform(train, args):
     if train:
-        return SegmentationPresetTrain(base_size=args.input_height, crop_size=args.input_height)
+        return SegmentationPresetTrain(input_height=args.input_height, input_width=args.input_width, \
+                                        preprocessing_norm=args.preprocessing_norm)
     elif args.weights and args.test_only:
         weights = torchvision.models.get_weight(args.weights)
         trans = weights.transforms()
@@ -45,16 +49,17 @@ def get_transform(train, args):
 
         return preprocessing
     else:
-        return SegmentationPresetEval(base_size=args.input_height)
+        return SegmentationPresetEval(input_height=args.input_height, input_width=args.input_width, \
+                                        preprocessing_norm=args.preprocessing_norm)
 
 class SegmentationPresetTrain:
-    def __init__(self, *, base_size, crop_size, hflip_prob=0.5, mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)):
-        trans = [T.Resize(base_size, base_size)]
+    def __init__(self, *, input_height, input_width, preprocessing_norm=None):
+        trans = [T.Resize(input_height, input_width)]
         trans.extend(
             [
                 T.PILToTensor(),
                 T.ConvertImageDtype(torch.float),
-                T.Normalize(mean=mean, std=std),
+                # # T.Normalize(mean=MEAN, std=STD),
             ]
         )
         self.transforms = T.Compose(trans)
@@ -64,13 +69,13 @@ class SegmentationPresetTrain:
 
 
 class SegmentationPresetEval:
-    def __init__(self, *, base_size, mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)):
-        trans = [T.Resize(base_size, base_size)]
+    def __init__(self, *, input_height, input_width, preprocessing_norm=None):
+        trans = [T.Resize(input_height, input_width)]
         self.transforms = T.Compose(
             [
                 T.PILToTensor(),
                 T.ConvertImageDtype(torch.float),
-                T.Normalize(mean=mean, std=std),
+                # # T.Normalize(mean=MEAN, std=STD),
             ]
         )
 

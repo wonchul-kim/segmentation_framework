@@ -16,7 +16,7 @@ from src.pytorch.train import train_one_epoch
 from src.pytorch.validate import evaluate, save_validation
 from utils.params import set_params
 from utils.torch_utils import set_envs, save_on_master
-from utils.preprocessing import get_transform
+from utils.preprocessings import get_transform
 import utils.helpers as utils
 import matplotlib.pyplot as plt 
 from src.pytorch.validate import save_validation
