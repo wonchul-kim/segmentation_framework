@@ -18,12 +18,12 @@ aux_loss: false
 device: cuda
 device_ids: 0,1,2,3
 start_epoch: 0
-epochs: 200
-batch_size: 64
-num_workers: 32
+epochs: 100
+batch_size: 4
+num_workers: 4
 loss_fn: ce
 optimizer: 'sgd'
-lr_scheduler_type: lambda
+lr_scheduler_type: poly
 init_lr: 0.01
 momentum: 0.9
 weight_decay: 0.0001
@@ -33,7 +33,7 @@ lr_warmup_decay: 0.01
 amp: false # Mixed precision training parameters
 
 ### for debugging #######################
-debug_dataset: true
+debug_dataset: false
 debug_dataset_ratio: 0.1
 
 ### for logging #######################
@@ -41,7 +41,7 @@ print_freq: 10
 save_model_freq: 10
 save_val_img: True 
 save_val_img_ratio: 1
-save_val_img_freq: 9
+save_val_img_freq: 1
 save_val_img_iou: 0.6
 
 

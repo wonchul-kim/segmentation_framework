@@ -19,12 +19,12 @@ def get_model(model_name, num_classes, weights=None, weights_backbone=None, aux_
     if 'plus' in model_name:
         # FIXME: Need to take it into params.
         # https://github.com/VainF/DeepLabV3Plus-Pytorch
-        separable_conv = True
+        separable_conv = False
         output_stride = 8 # 8 or 16
         model = deeplabv3plus.modeling.__dict__[model_name](num_classes=num_classes, output_stride=output_stride)
         if separable_conv and 'plus' in model_name:
             convert_to_separable_conv(model.classifier)
-            set_bn_momentum(model.backbone, momentum=0.01)
+        set_bn_momentum(model.backbone, momentum=0.01)
             
     elif model_name == 'ddrnet':
         model = DDRNet(num_classes=num_classes)

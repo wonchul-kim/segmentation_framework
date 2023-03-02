@@ -157,8 +157,8 @@ if __name__ == "__main__":
     # data = './data/_unittests/single_rois_wo_patches.yml'
     # data = './data/_unittests/single_rois_w_patches.yml'
     # data = './data/_unittests/multiple_rois_wo_patches.yml'
-    # data = './data/_unittests/multiple_rois_w_patches.yml'
-    data = './data/projects/sungwoo_u_top_bottom.yml'
+    data = './data/_unittests/multiple_rois_w_patches.yml'
+    # data = './data/projects/sungwoo_u_top_bottom.yml'
     with open(data, 'r') as yf:
         try:
             data = yaml.safe_load(yf)
