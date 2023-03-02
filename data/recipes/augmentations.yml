@@ -1,0 +1,67 @@
+# ### version 1 ---------------------------------------------------------
+# horizontal_flip: 0.3 # probability
+# vertical_flip: 0.3 # probability
+# random_rotate90: 0.1 # probability - randomly rotate by 0, 90, 180, 270 degrees
+# transpose: 0.1 # probability - switch X and Y axis
+
+# ### Add Noise
+# gaussian_noise: 0.1
+# sharpen: 0.1
+# blur: 0.1
+# motion_blur: 0.1
+# clahe: 0.1
+# ### Color Distortion
+# random_brightness: 0.1
+# random_gamma: 0.1
+# random_contrast: 0.1
+# hue_saturation_value: 0.1
+
+# grid_distortion: 0.1
+
+
+### version 2 ---------------------------------------------------------
+### normalize
+normalize: null 
+
+###
+horizontal_flip:
+  p: 0.3 # probability
+vertical_flip:
+  p: 0.3 # probability
+random_rotate90:
+  p: 0.1 # probability - randomly rotate by 0, 90, 180, 270 degrees
+transpose:
+  p: 0.1 # probability - switch X and Y axis
+
+### Add Noise
+gaussian_noise:
+  p: 0.1
+sharpen:
+  p: 0.1
+blur:
+  p: 0.1
+motion_blur:
+  p: 0.1
+clahe:
+  p: 0.1
+### Color Distortion
+random_brightness:
+  p: 0.1
+random_gamma:
+  p: 0.1
+random_contrast:
+  p: 0.1
+hue_saturation_value:
+  p: 0.1
+
+elastic_transform:
+  p: 0.1
+  alpha: 30
+grid_distortion:
+  p: 0.1
+optical_distortion:
+  p: 0.1
+  distort_limit: 2
+  shift_limit: 0.5
+## non-spatial transformations
+
