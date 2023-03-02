@@ -53,15 +53,18 @@ def get_transform(train, args):
                                         preprocessing_norm=args.preprocessing_norm)
 
 class SegmentationPresetTrain:
-    def __init__(self, *, input_height, input_width, preprocessing_norm=None):
+    def __init__(self, *, input_height, input_width, preprocessing_norm=False):
         trans = [T.Resize(input_height, input_width)]
         trans.extend(
             [
                 T.PILToTensor(),
                 T.ConvertImageDtype(torch.float),
-                # # T.Normalize(mean=MEAN, std=STD),
             ]
         )
+        
+        if preprocessing_norm:
+            trans.append(T.Normalize(mean=MEAN, std=STD))
+        
         self.transforms = T.Compose(trans)
 
     def __call__(self, img, target):
@@ -69,15 +72,18 @@ class SegmentationPresetTrain:
 
 
 class SegmentationPresetEval:
-    def __init__(self, *, input_height, input_width, preprocessing_norm=None):
+    def __init__(self, *, input_height, input_width, preprocessing_norm=False):
         trans = [T.Resize(input_height, input_width)]
-        self.transforms = T.Compose(
+        trans.extend(
             [
                 T.PILToTensor(),
                 T.ConvertImageDtype(torch.float),
-                # # T.Normalize(mean=MEAN, std=STD),
             ]
         )
+        if preprocessing_norm:
+            trans.append(T.Normalize(mean=MEAN, std=STD))
+
+        self.transforms = T.Compose(trans)
 
     def __call__(self, img, target):
         return self.transforms(img, target)

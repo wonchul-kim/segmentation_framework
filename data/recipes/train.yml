@@ -7,7 +7,7 @@ weights: null #the weights enum name to load
 weights_backbone: null #the backbone weights enum name to load
 
 ### for image processing #######################
-preprocessing_norm: false 
+preprocessing_norm: true 
 image_loading_mode: 'rgb'
 
 ### for loss params. #######################
