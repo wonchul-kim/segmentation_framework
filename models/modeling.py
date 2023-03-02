@@ -2,6 +2,8 @@ import torch
 import torchvision 
 import models.deeplabv3plus as deeplabv3plus
 from models.ddrnet.ddernet import DDRNet
+from models.deeplabv3plus.utils import set_bn_momentum
+from models.deeplabv3plus._deeplab import convert_to_separable_conv
 # def get_model(model_name, weights, weights_backbone, num_classes, aux_loss):
 #     model = torchvision.models.get_model(
 #             model_name,
@@ -15,9 +17,18 @@ from models.ddrnet.ddernet import DDRNet
 
 def get_model(model_name, num_classes, weights=None, weights_backbone=None, aux_loss=False):
     if 'plus' in model_name:
-        model = deeplabv3plus.modeling.__dict__[model_name](num_classes=num_classes, output_stride=8)
+        # FIXME: Need to take it into params.
+        # https://github.com/VainF/DeepLabV3Plus-Pytorch
+        separable_conv = True
+        output_stride = 8 # 8 or 16
+        model = deeplabv3plus.modeling.__dict__[model_name](num_classes=num_classes, output_stride=output_stride)
+        if separable_conv and 'plus' in model_name:
+            convert_to_separable_conv(model.classifier)
+            set_bn_momentum(model.backbone, momentum=0.01)
+            
     elif model_name == 'ddrnet':
         model = DDRNet(num_classes=num_classes)
+        
     else:
         model = torchvision.models.segmentation.__dict__[model_name](pretrained=True, aux_loss=aux_loss)
         if 'fcn' in model_name:
