@@ -243,7 +243,7 @@ class DDRNet(nn.Module):
         if self.aux_loss:
             return {'out': x_, 'aux': x_aux}
         else:
-            x_
+            return x_
 
 
 if __name__ == '__main__':

@@ -41,8 +41,10 @@ class CELoss(nn.Module):
                 return losses[0]
             else:
                 return losses[0] + losses[1]
-        else:
+        elif isinstance(inputs, torch.Tensor):
             return nn.functional.cross_entropy(inputs, targets, ignore_index=255)
+        else:
+            raise RuntimeError(f"There is no such type({type(inputs)}) of outputs of model")
 
 class FocalLoss(nn.Module):
     def __init__(self, alpha=1, gamma=0, size_average=True, ignore_index=255):
