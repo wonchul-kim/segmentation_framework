@@ -24,7 +24,8 @@ def evaluate(model, dataloader, device, num_classes):
                 fname = None
             image, target = image.to(device), target.to(device)
             output = model(image)
-            output = output["out"]
+            if isinstance(output, dict):
+                output = output["out"]
 
             confmat.update(target.flatten(), output.argmax(1).flatten())
             # FIXME need to take into account that the datasets

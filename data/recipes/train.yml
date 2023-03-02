@@ -1,5 +1,5 @@
 ### for model params #######################
-model_name: deeplabv3_resnet101
+model_name: deeplabv3plus_resnet101 #deeplabv3_resnet101
 input_height: 512
 input_width: 512
 input_channel: 3
