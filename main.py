@@ -61,7 +61,7 @@ def main(args):
         params = [p for p in model_without_ddp.aux_classifier.parameters() if p.requires_grad]
         params_to_optimize.append({"params": params, "lr": args.init_lr * 10})
 
-    optimizer = get_optimizer(params_to_optimize, args.init_lr, args.momentum, args.weight_decay)
+    optimizer = get_optimizer(params_to_optimize, args.optimizer, args.init_lr, args.momentum, args.weight_decay)
     scaler = torch.cuda.amp.GradScaler() if args.amp else None
 
     criterion = get_criterion(args.loss_fn)

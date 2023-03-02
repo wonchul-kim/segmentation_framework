@@ -20,7 +20,7 @@ epochs: 100
 batch_size: 2
 num_workers: 2
 loss_fn: focal
-
+optimizer: 'sgd'
 init_lr: 0.01
 momentum: 0.9
 weight_decay: 0.0001
