@@ -57,6 +57,10 @@ def main(args):
         params_to_optimize = [
             {"params": [p for p in model_without_ddp.parameters() if p.requires_grad]},
         ]
+    elif 'deeplabv3plus' in args.model_name:
+        params_to_optimize = [{'params': model.backbone.parameters(), 'lr': 0.1 * args.init_lr},
+                              {'params': model.classifier.parameters(), 'lr': args.init_lr}
+                            ]
     else:
         params_to_optimize = [
             {"params": [p for p in model_without_ddp.backbone.parameters() if p.requires_grad]},
@@ -157,8 +161,8 @@ if __name__ == "__main__":
     # data = './data/_unittests/single_rois_wo_patches.yml'
     # data = './data/_unittests/single_rois_w_patches.yml'
     # data = './data/_unittests/multiple_rois_wo_patches.yml'
-    data = './data/_unittests/multiple_rois_w_patches.yml'
-    # data = './data/projects/sungwoo_u_top_bottom.yml'
+    # data = './data/_unittests/multiple_rois_w_patches.yml'
+    data = './data/projects/sungwoo_u_top_bottom.yml'
     with open(data, 'r') as yf:
         try:
             data = yaml.safe_load(yf)
