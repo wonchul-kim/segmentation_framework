@@ -9,6 +9,27 @@ import utils.transforms as T
 import torchvision
 from torchvision.transforms import functional as F, InterpolationMode
 
+def denormalize(tensor, mean, std):
+    mean = np.array(mean)
+    std = np.array(std)
+
+    _mean = -mean/std
+    _std = 1/std
+    return torchvision.transforms.functional.normalize(tensor, _mean, _std)
+
+class Denormalize(object):
+    def __init__(self, mean, std):
+        mean = np.array(mean)
+        std = np.array(std)
+        self._mean = -mean/std
+        self._std = 1/std
+
+    def __call__(self, tensor):
+        if isinstance(tensor, np.ndarray):
+            return (tensor - self._mean.reshape(-1,1,1)) / self._std.reshape(-1,1,1)
+        return torchvision.transforms.functional.normalize(tensor, self._mean, self._std)
+
+
 def get_transform(train, args):
     if train:
         return SegmentationPresetTrain(base_size=args.input_height, crop_size=args.input_height)
@@ -33,7 +54,7 @@ class SegmentationPresetTrain:
             [
                 T.PILToTensor(),
                 T.ConvertImageDtype(torch.float),
-                # T.Normalize(mean=mean, std=std),
+                T.Normalize(mean=mean, std=std),
             ]
         )
         self.transforms = T.Compose(trans)
@@ -49,7 +70,7 @@ class SegmentationPresetEval:
             [
                 T.PILToTensor(),
                 T.ConvertImageDtype(torch.float),
-                # T.Normalize(mean=mean, std=std),
+                T.Normalize(mean=mean, std=std),
             ]
         )
 

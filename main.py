@@ -64,7 +64,7 @@ def main(args):
     optimizer = get_optimizer(params_to_optimize, args.optimizer, args.init_lr, args.momentum, args.weight_decay)
     scaler = torch.cuda.amp.GradScaler() if args.amp else None
 
-    criterion = get_criterion(args.loss_fn)
+    criterion = get_criterion(args.loss_fn, num_classes=num_classes)
 
     ###############################################################################################################    
     ### Need to locate parallel training settings after parameter settings for optimization !!!!!!!!!!!!!!!!!!!!!!!

@@ -1,5 +1,5 @@
 ### for model params #######################
-model_name: deeplabv3_resnet50
+model_name: deeplabv3_resnet101
 input_height: 512
 input_width: 512
 input_channel: 3
@@ -19,7 +19,7 @@ start_epoch: 0
 epochs: 100
 batch_size: 2
 num_workers: 2
-loss_fn: focal
+loss_fn: ce
 optimizer: 'sgd'
 init_lr: 0.01
 momentum: 0.9
