@@ -73,7 +73,11 @@ def save_validation(model, device, dataset, num_classes, epoch, output_dir, prep
                 
             image = image.to(device)
             image = image.unsqueeze(0)
-            preds = model(image)['out'][0]
+            preds = model(image)
+            if isinstance(preds, dict):
+                preds = preds['out'][0]
+            else:
+                preds = preds[0]
             preds = torch.nn.functional.softmax(preds, dim=0)
             preds = torch.argmax(preds, dim=0)
             preds = preds.detach().float().to('cpu')
