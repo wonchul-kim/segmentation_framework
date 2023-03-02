@@ -27,10 +27,10 @@ def main(args):
 
     device = set_envs(args)
     dataset, num_classes = get_dataset(args.input_dir, args.dataset_format, "train", get_transform(True, args), \
-                                        args.classes, args.debug_dir, args.roi_info, args.patch_info, \
+                                        args.classes, args.preprocessing_norm, args.debug_dir, args.roi_info, args.patch_info, \
                                         args.debug_dataset, args.debug_dataset_ratio)
     dataset_val, _ = get_dataset(args.input_dir, args.dataset_format, "val", get_transform(False, args), \
-                                    args.classes, args.debug_dir, args.roi_info, args.patch_info, \
+                                    args.classes, args.preprocessing_norm, args.debug_dir, args.roi_info, args.patch_info, \
                                     args.debug_dataset, args.debug_dataset_ratio)
 
     dataloader, dataloader_val = get_dataloader(dataset, dataset_val, args)

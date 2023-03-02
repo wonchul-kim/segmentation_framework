@@ -6,7 +6,7 @@ from src.pytorch.datasets import COCODataset, MaskDataset, LabelmeDatasets, Labe
 from utils.coco_utils import FilterAndRemapCocoCategories, ConvertCocoPolysToMask, _coco_remove_images_without_annotations
 from utils.helpers import debug_dataset
 
-def get_dataset(dir_path, name, image_set, transform, classes, debug_dir=None, roi_info=None, patch_info=None, \
+def get_dataset(dir_path, name, image_set, transform, classes, preprocessing_norm=False, debug_dir=None, roi_info=None, patch_info=None, \
                 debug=True, debug_dataset_ratio=1):
     def sbd(*args, **kwargs):
         return torchvision.datasets.SBDataset(*args, mode="segmentation", **kwargs)
@@ -24,8 +24,8 @@ def get_dataset(dir_path, name, image_set, transform, classes, debug_dir=None, r
                 roi_info=roi_info, patch_info=patch_info)
 
     if debug:
-        Thread(target=debug_dataset, args=(ds, debug_dir, image_set, num_classes, debug_dataset_ratio))
-        # debug_dataset(ds, debug_dir, image_set, num_classes, debug_dataset_ratio)
+        # Thread(target=debug_dataset, args=(ds, debug_dir, image_set, num_classes, preprocessing_norm, debug_dataset_ratio))
+        debug_dataset(ds, debug_dir, image_set, num_classes, preprocessing_norm, debug_dataset_ratio)
     return ds, num_classes
 
 def get_coco(root, image_set, transforms, classes, roi_info=None, patch_info=None):

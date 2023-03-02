@@ -9,7 +9,7 @@ import numpy as np
 import cv2 
 import math
 from src.pytorch.datasets import LabelmeIterableDatasets
-
+from utils.preprocessings import denormalize
 def cat_list(images, fill_value=0):
     max_size = tuple(max(s) for s in zip(*[img.shape for img in images]))
     batch_shape = (len(images),) + max_size
@@ -67,7 +67,7 @@ def increment_path(path, exist_ok=False, sep='', mkdir=False):
         path.mkdir(parents=True, exist_ok=True)  # make directory
     return path
 
-def debug_dataset(dataset, debug_dir, mode, num_classes, ratio=1, channel_first=True, input_channel=3,\
+def debug_dataset(dataset, debug_dir, mode, num_classes, preprocessing_norm=False, ratio=1, channel_first=True, input_channel=3,\
                     denormalization_fn=None, image_loading_mode='rgb', width=256, height=256, rows=4, cols=4):
 
     if isinstance(dataset, LabelmeIterableDatasets):
@@ -96,6 +96,8 @@ def debug_dataset(dataset, debug_dir, mode, num_classes, ratio=1, channel_first=
                     image, mask = batch[0].detach(), batch[1].detach()
                     fname = None
                     # torchvision.utils.save_image(image, osp.join(debug_dir, '{}_tensor.png'.format(fname)))
+                if preprocessing_norm:
+                    image = denormalize(image)
                 image, mask = image.numpy(), mask.numpy()
                 image = image.transpose((1, 2, 0))*255
                 image = cv2.resize(image, (width, height))
@@ -163,6 +165,8 @@ def debug_dataset(dataset, debug_dir, mode, num_classes, ratio=1, channel_first=
                 image, mask = batch[0].detach(), batch[1].detach()
                 fname = None
                 # torchvision.utils.save_image(image, osp.join(debug_dir, '{}_tensor.png'.format(fname)))
+            if preprocessing_norm:
+                image = denormalize(image)
             image, mask = image.numpy(), mask.numpy()
             image = image.transpose((1, 2, 0))*255
             image = cv2.resize(image, (width, height))
