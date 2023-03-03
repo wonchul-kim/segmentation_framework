@@ -4,10 +4,8 @@ from utils.transforms import Compose
 import torchvision
 from src.pytorch.datasets import COCODataset, MaskDataset, LabelmeDatasets, LabelmeIterableDatasets
 from utils.coco_utils import FilterAndRemapCocoCategories, ConvertCocoPolysToMask, _coco_remove_images_without_annotations
-from utils.helpers import debug_dataset
 
-def get_dataset(dir_path, name, image_set, transform, classes, preprocessing_norm=False, debug_dir=None, roi_info=None, patch_info=None, \
-                debug=True, debug_dataset_ratio=1):
+def get_dataset(dir_path, name, image_set, transform, classes, roi_info=None, patch_info=None):
     def sbd(*args, **kwargs):
         return torchvision.datasets.SBDataset(*args, mode="segmentation", **kwargs)
 
@@ -23,9 +21,7 @@ def get_dataset(dir_path, name, image_set, transform, classes, preprocessing_nor
     ds = ds_fn(p, image_set=image_set, transforms=transform, classes=classes, \
                 roi_info=roi_info, patch_info=patch_info)
 
-    if debug:
-        # Thread(target=debug_dataset, args=(ds, debug_dir, image_set, num_classes, preprocessing_norm, debug_dataset_ratio))
-        debug_dataset(ds, debug_dir, image_set, num_classes, preprocessing_norm, debug_dataset_ratio)
+
     return ds, num_classes
 
 def get_coco(root, image_set, transforms, classes, roi_info=None, patch_info=None):

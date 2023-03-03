@@ -130,7 +130,7 @@ def get_images_info(mode, img_folder, img_exts, classes=None, roi_info=None, pat
         imgs_info: {
                     'img_files' : str(image file name),
                     'rois': [[x1, y1, x2, y2], [x1, y1, x2, y2], ...],
-                    'count': [0, 0, ...]
+                    'counts': [0, 0, ...]
                 }
     '''
     img_files = []

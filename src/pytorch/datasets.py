@@ -103,7 +103,6 @@ class LabelmeIterableDatasets(torch.utils.data.IterableDataset):
         print(f"  - There are {len(self.imgs_info)} image files") 
 
         self.image, self.mask, self.fname = None, None, None
-        self.test = 0
 
     def __iter__(self):
         for idx, img_info in enumerate(self.imgs_info):
@@ -113,6 +112,7 @@ class LabelmeIterableDatasets(torch.utils.data.IterableDataset):
             self.fname = osp.split(osp.splitext(img_file)[0])[-1]
             w, h = self.image.size
             self.mask = make_mask(osp.join(osp.split(img_file)[0], self.fname + '.json'), w, h, self.class2label, 'pil')
+            print(self.imgs_info[idx]['counts'], img_info['counts'], rois)
 
             if rois == None:
                 self.imgs_info[idx]['counts'][0] += 1
