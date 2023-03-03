@@ -6,16 +6,21 @@ from utils.torch_utils import worker_init_fn
 def get_dataloader(dataset, dataset_test, args):
     if isinstance(dataset, LabelmeIterableDatasets):
         data_loader = torch.utils.data.DataLoader(
-        dataset,
-        batch_size=args.batch_size,
-        num_workers=args.num_workers,
-        collate_fn=utils.collate_fn,
-        drop_last=True,
-        worker_init_fn=worker_init_fn
+            dataset,
+            batch_size=args.batch_size,
+            num_workers=args.num_workers,
+            collate_fn=utils.collate_fn,
+            drop_last=True,
+            worker_init_fn=worker_init_fn
         )
 
-        data_loader_test = torch.utils.data.DataLoader(dataset_test, batch_size=1, num_workers=args.num_workers, collate_fn=utils.collate_fn, \
-                                                    worker_init_fn=worker_init_fn)
+        data_loader_test = torch.utils.data.DataLoader(
+            dataset_test, 
+            batch_size=1, 
+            num_workers=args.num_workers, 
+            collate_fn=utils.collate_fn,
+            worker_init_fn=worker_init_fn
+        )
     
         return data_loader, data_loader_test
 

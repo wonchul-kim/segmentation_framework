@@ -1,8 +1,8 @@
 ### for model params #######################
 model_name: deeplabv3plus_resnet101
 #ddrnet #deeplabv3plus_resnet101 #deeplabv3_resnet101
-input_height: 256
-input_width: 256
+input_height: 512
+input_width: 512
 input_channel: 3
 weights: null #the weights enum name to load
 weights_backbone: null #the backbone weights enum name to load
@@ -16,11 +16,11 @@ aux_loss: false
 
 ### for training params. #######################
 device: cuda
-device_ids: 0,1,2,3
+device_ids: 0,1
 start_epoch: 0
-epochs: 600
-batch_size: 32
-num_workers: 32
+epochs: 300
+batch_size: 2
+num_workers: 2
 loss_fn: ce
 optimizer: 'sgd'
 lr_scheduler_type: lambda
@@ -41,7 +41,7 @@ print_freq: 10
 save_model_freq: 10
 save_val_img: True 
 save_val_img_ratio: 1
-save_val_img_freq: 1
+save_val_img_freq: 10
 save_val_img_iou: 0.6
 
 
