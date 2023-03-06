@@ -12,7 +12,7 @@ roi_width: 512,3200,3200,512
 roi_height: 4352,512,512,4352
 
 ### patches
-patches: true
+patches: false
 patch_include_point_positive: false
 patch_centric: true ### centric
 shake_patch: 0

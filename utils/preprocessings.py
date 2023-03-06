@@ -192,11 +192,11 @@ def get_imgs_info_from_patches(mode, img_file, classes, patch_info, roi=None):
                 if is_points_not_in_roi(_points, roi):
                     continue
 
+            points.append(_points)
             if patch_info['patch_centric']:
                 centric_patches_rois, centric_patches_num_data = get_centric_patches(_points, patch_info, img_width, img_height, roi=roi)
                 rois += centric_patches_rois
                 num_data += centric_patches_num_data
-            points.append(_points)
 
         if patch_info['patch_slide']:
             if mode == 'train':

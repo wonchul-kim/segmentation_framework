@@ -1,6 +1,6 @@
 input_dir: /HDD/datasets/_unittests/single_roi/w_patches/sungwoo_intops/split_datasets
 output_dir: "./res/sungwoo"
-classes: ["SCRATCH", "STABBED", "DUST"]
+classes: ["SCRATCH", "STABBED", "DUST", "WRINKLE"]
 dataset_format: labelme
 
 ### roi
@@ -21,4 +21,4 @@ patch_width: 512
 patch_height: 512
 patch_overlap_ratio: 0.1
 patch_num_involved_pixel: 10
-patch_bg_ratio: 0.1
+patch_bg_ratio: 0.0

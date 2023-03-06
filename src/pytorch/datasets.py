@@ -88,6 +88,7 @@ class MaskDataset(torch.utils.data.Dataset):
 
         return image, target, fname
 
+            
 class LabelmeIterableDatasets(torch.utils.data.IterableDataset):
     def __init__(self, mode, img_folder, classes, transforms=None, roi_info=None, patch_info=None, img_exts=['png', 'bmp']):
         
@@ -101,18 +102,21 @@ class LabelmeIterableDatasets(torch.utils.data.IterableDataset):
             self.class2label[label.lower()] = int(idx) + 1
         print(f"There are {self.class2label} classes")
         print(f"  - There are {len(self.imgs_info)} image files") 
-
-        self.image, self.mask, self.fname = None, None, None
-
+        
+        self.image, self.mask, self.fname = None, None, None     
+        
     def __iter__(self):
         for idx, img_info in enumerate(self.imgs_info):
+            if idx != 0:
+                if 0 in self.imgs_info[idx - 1]['counts']:
+                    raise RuntimeError(f"There is image not included in training dataset: {self.imgs_info[idx - 1]}")
+                    
             img_file = img_info['img_file']
             rois = img_info['rois'] 
             self.image = Image.open(img_file)
             self.fname = osp.split(osp.splitext(img_file)[0])[-1]
             w, h = self.image.size
             self.mask = make_mask(osp.join(osp.split(img_file)[0], self.fname + '.json'), w, h, self.class2label, 'pil')
-            print(self.imgs_info[idx]['counts'], img_info['counts'], rois)
 
             if rois == None:
                 self.imgs_info[idx]['counts'][0] += 1
@@ -120,8 +124,9 @@ class LabelmeIterableDatasets(torch.utils.data.IterableDataset):
                 if self.transforms is not None:
                     image, mask = self.transforms(self.image, self.mask)
 
-                yield image, mask, self.fname 
+                yield image, mask, self.fname
             else:
+                assert len(rois) != 0, RuntimeError(f"There is Null in rois of imgs_info: {img_info}")
                 for jdx, roi in enumerate(rois):
                     self.imgs_info[idx]['counts'][jdx] += 1
                     ####### To crop image with RoI
@@ -137,7 +142,7 @@ class LabelmeIterableDatasets(torch.utils.data.IterableDataset):
                     if self.transforms is not None:
                         image, mask = self.transforms(image, mask)
 
-                    yield image, mask, self.fname 
+                    yield image, mask, self.fname
 
     def __len__(self):
         return self.num_data
