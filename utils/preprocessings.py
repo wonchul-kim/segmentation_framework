@@ -159,7 +159,10 @@ def get_images_info(mode, img_folder, img_exts, classes=None, roi_info=None, pat
                     rois, _num_data = get_imgs_info_from_patches(mode, img_file, classes, patch_info, roi=roi)
                     img_info['rois'] += rois
                     num_data += _num_data
-                    
+                
+        if len(img_info['rois']) == 0:
+            continue
+                                    
         ### to debug dataset if all data is used
         if roi_info == None and patch_info == None:
             img_info['counts'] = [0]
