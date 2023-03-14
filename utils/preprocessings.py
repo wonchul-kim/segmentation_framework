@@ -141,34 +141,28 @@ def get_images_info(mode, img_folder, img_exts, classes=None, roi_info=None, pat
     imgs_info = []
     num_data = 0
     for img_file in img_files:
+        img_info = {'img_file': img_file, 'rois': []} 
         if patch_info == None and roi_info == None:
-            img_info = {'img_file': img_file, 'rois': []} 
             img_info['rois'] = None
             num_data += 1
         elif patch_info == None and roi_info != None:
             for roi in roi_info:
-                img_info = {'img_file': img_file, 'rois': []} 
                 img_info['rois'].append(roi)  
                 num_data += 1
         elif patch_info != None:
             if roi_info == None:
                 rois, _num_data = get_imgs_info_from_patches(mode, img_file, classes, patch_info, roi=None)
-                if len(rois) != 0 and _num_data != 0:
-                    img_info = {'img_file': img_file, 'rois': []} 
-                    img_info['rois'] += rois
-                    num_data += _num_data
-                else:
-                    continue
+                img_info['rois'] += rois
+                num_data += _num_data
             else:
                 for roi in roi_info:
                     rois, _num_data = get_imgs_info_from_patches(mode, img_file, classes, patch_info, roi=roi)
-                    if len(rois) != 0 and _num_data != 0:
-                        img_info = {'img_file': img_file, 'rois': []} 
-                        img_info['rois'] += rois
-                        num_data += _num_data
-                    else:
-                        continue
-                    
+                    img_info['rois'] += rois
+                    num_data += _num_data
+                
+        if len(img_info['rois']) == 0:
+            continue
+                                    
         ### to debug dataset if all data is used
         if roi_info == None and patch_info == None:
             img_info['counts'] = [0]
@@ -227,7 +221,7 @@ def get_imgs_info_from_patches(mode, img_file, classes, patch_info, roi=None):
                 assert patch_coord[2] - patch_coord[0] == patch_info['patch_width'] and patch_coord[3] - patch_coord[1] == patch_info['patch_height'], f"patch coord is wrong"
                 rois.append(patch_coord)
             num_data += num_patch_slide
-    print(".......................... ", num_data)
+
     return rois, num_data
 
 
