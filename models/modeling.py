@@ -26,8 +26,19 @@ def get_model(model_name, num_classes, weights=None, weights_backbone=None, aux_
             convert_to_separable_conv(model.classifier)
         set_bn_momentum(model.backbone, momentum=0.01)
             
-    elif model_name == 'ddrnet':
-        model = DDRNet(num_classes=num_classes)
+    elif 'ddrnet' in model_name:
+        if model_name == 'ddrnet_23_slim':
+                      
+        def DualResNet_imagenet(pretrained=False, weights_path="/projects/DDRNet23s_imagenet.pth"):
+            model = DualResNet(BasicBlock, [2, 2, 2, 2], num_classes=19, planes=32, spp_planes=128, head_planes=64, augment=True)
+            if pretrained:
+                pretrained_state = torch.load(weights_path, map_location='cpu') 
+                model_dict = model.state_dict()
+                pretrained_state = {k: v for k, v in pretrained_state.items() if (k in model_dict and v.shape == model_dict[k].shape)}
+                model_dict.update(pretrained_state)
+                
+                model.load_state_dict(model_dict, strict = False)
+            return model
         
     else:
         model = torchvision.models.segmentation.__dict__[model_name](pretrained=True, aux_loss=aux_loss)
