@@ -19,7 +19,7 @@ device: cuda
 device_ids: 0,1
 start_epoch: 0
 epochs: 300
-batch_size: 2
+batch_size: 4
 num_workers: 16
 loss_fn: ce
 optimizer: 'sgd'
@@ -33,7 +33,7 @@ lr_warmup_decay: 0.01
 amp: false # Mixed precision training parameters
 
 ### for debugging #######################
-debug_dataset: false
+debug_dataset: true
 debug_dataset_ratio: 1
 
 ### for logging #######################

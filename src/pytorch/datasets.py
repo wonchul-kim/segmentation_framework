@@ -92,6 +92,8 @@ class MaskDataset(torch.utils.data.Dataset):
 class LabelmeIterableDatasets(torch.utils.data.IterableDataset):
     def __init__(self, mode, img_folder, classes, transforms=None, roi_info=None, patch_info=None, img_exts=['png', 'bmp']):
         
+        assert osp.exists(img_folder), ValueError(f"There is no such image folder: {img_folder}")
+        
         self.imgs_info, self.num_data = get_images_info(mode, img_folder, img_exts=img_exts, classes=classes, roi_info=roi_info, patch_info=patch_info)
         assert self.num_data != 0, f"There is NO images in dataset directory: {osp.join(img_folder)} with {img_exts}"
         print(f"There are {self.num_data} images with roi({roi_info}) and patch_info({patch_info})")
