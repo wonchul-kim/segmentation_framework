@@ -23,7 +23,7 @@ def train_one_epoch(model, criterion, optimizer, dataloader, lr_scheduler, devic
         with torch.cuda.amp.autocast(enabled=scaler is not None):
             output = model(image)
             loss = criterion(output, target)
-
+            
         optimizer.zero_grad()
         if scaler is not None:
             scaler.scale(loss).backward()

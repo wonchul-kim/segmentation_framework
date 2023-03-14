@@ -26,6 +26,8 @@ def evaluate(model, dataloader, device, num_classes):
             output = model(image)
             if isinstance(output, dict):
                 output = output["out"]
+            elif isinstance(output, list):
+                output = output[0]
 
             confmat.update(target.flatten(), output.argmax(1).flatten())
             # FIXME need to take into account that the datasets
@@ -75,9 +77,11 @@ def save_validation(model, device, dataset, num_classes, epoch, output_dir, prep
             image = image.unsqueeze(0)
             preds = model(image)
             if isinstance(preds, dict):
-                preds = preds['out'][0]
-            else:
+                preds = preds['out']
+            elif isinstance(preds, list):
                 preds = preds[0]
+            
+            preds = preds[0]
             preds = torch.nn.functional.softmax(preds, dim=0)
             preds = torch.argmax(preds, dim=0)
             preds = preds.detach().float().to('cpu')

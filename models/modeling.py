@@ -1,7 +1,9 @@
+from tkinter import N
 import torch 
 import torchvision 
 import models.deeplabv3plus as deeplabv3plus
-from models.ddrnet.ddernet import DDRNet
+from models.ddrnet.ddrnet import DDRNet
+from models.ddrnet.ddrnet_23 import get_ddrnet23
 from models.deeplabv3plus.utils import set_bn_momentum
 from models.deeplabv3plus._deeplab import convert_to_separable_conv
 # def get_model(model_name, weights, weights_backbone, num_classes, aux_loss):
@@ -27,19 +29,11 @@ def get_model(model_name, num_classes, weights=None, weights_backbone=None, aux_
         set_bn_momentum(model.backbone, momentum=0.01)
             
     elif 'ddrnet' in model_name:
-        if model_name == 'ddrnet_23_slim':
-                      
-        def DualResNet_imagenet(pretrained=False, weights_path="/projects/DDRNet23s_imagenet.pth"):
-            model = DualResNet(BasicBlock, [2, 2, 2, 2], num_classes=19, planes=32, spp_planes=128, head_planes=64, augment=True)
-            if pretrained:
-                pretrained_state = torch.load(weights_path, map_location='cpu') 
-                model_dict = model.state_dict()
-                pretrained_state = {k: v for k, v in pretrained_state.items() if (k in model_dict and v.shape == model_dict[k].shape)}
-                model_dict.update(pretrained_state)
-                
-                model.load_state_dict(model_dict, strict = False)
-            return model
-        
+        if '23' in model_name:
+            model = get_ddrnet23(model_name, num_classes=num_classes)
+            # model = DDRNet(num_classes=num_classes)
+        elif '39' in model_name:
+            NotImplementedError
     else:
         model = torchvision.models.segmentation.__dict__[model_name](pretrained=True, aux_loss=aux_loss)
         if 'fcn' in model_name:

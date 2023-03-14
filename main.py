@@ -68,7 +68,7 @@ def main(args):
         model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu])
         model_without_ddp = model.module
 
-    if args.model_name == 'ddrnet':
+    if 'ddrnet' in args.model_name:
         params_to_optimize = [
             {"params": [p for p in model_without_ddp.parameters() if p.requires_grad]},
         ]

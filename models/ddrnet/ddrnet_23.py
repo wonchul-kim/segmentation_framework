@@ -194,9 +194,7 @@ class segmenthead(nn.Module):
         if self.scale_factor is not None:
             height = x.shape[-2] * self.scale_factor
             width = x.shape[-1] * self.scale_factor
-            out = F.interpolate(out,
-                        size=[height, width],
-                        mode='bilinear')
+            out = F.interpolate(out, size=[height, width], mode='bilinear')
 
         return out
 
@@ -257,9 +255,9 @@ class DualResNet(nn.Module):
         self.spp = DAPPM(planes * 16, spp_planes, planes * 4)
 
         if self.augment:
-            self.seghead_extra = segmenthead(highres_planes, head_planes, num_classes)            
+            self.seghead_extra = segmenthead(highres_planes, head_planes, num_classes, 8)            
 
-        self.final_layer = segmenthead(planes * 4, head_planes, num_classes)
+        self.final_layer = segmenthead(planes * 4, head_planes, num_classes, 8)
 
 
         for m in self.modules():
@@ -337,12 +335,17 @@ class DualResNet(nn.Module):
 
         if self.augment: 
             x_extra = self.seghead_extra(temp)
-            return [x_extra, x_]
+            # return {'out': x_, 'aux': x_extra}
+            return [x_, x_extra]
         else:
             return x_      
 
-def DualResNet_imagenet(pretrained=False, weights_path="/projects/DDRNet23s_imagenet.pth"):
-    model = DualResNet(BasicBlock, [2, 2, 2, 2], num_classes=19, planes=64, spp_planes=128, head_planes=128, augment=True)
+def get_ddrnet23(model_name, num_classes, pretrained=False, weights_path="/DeepLearning/__weights/segmentation/ddrnet/DDRNet23s_imagenet.pth"):
+    if 'slim' in model_name:
+        model = DualResNet(BasicBlock, [2, 2, 2, 2], num_classes=num_classes, planes=32, spp_planes=128, head_planes=64, augment=True)
+    else:
+        model = DualResNet(BasicBlock, [2, 2, 2, 2], num_classes=num_classes, planes=64, spp_planes=128, head_planes=128, augment=True)
+        
     if pretrained:
         pretrained_state = torch.load(weights_path, map_location='cpu') 
         model_dict = model.state_dict()
@@ -350,11 +353,13 @@ def DualResNet_imagenet(pretrained=False, weights_path="/projects/DDRNet23s_imag
         model_dict.update(pretrained_state)
         
         model.load_state_dict(model_dict, strict=False)
+    
     return model
 
 if __name__ == '__main__':
-    x = torch.rand(4, 3, 800, 800)
-    net = DualResNet_imagenet(pretrained=True)
+    x = torch.zeros(2, 3, 224, 224)
+    net = get_ddrnet23('ddrnet_23_slim', 19, pretrained=True)
     y = net(x)
     print(len(y))
     print(y[0].shape, y[1].shape)
+    

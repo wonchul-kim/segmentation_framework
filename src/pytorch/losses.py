@@ -12,6 +12,8 @@ def get_criterion(loss_fn, num_classes=None, bce_loss=False, aux_loss=False):
         assert num_classes != None and isinstance(num_classes, int), \
             ValueError(f"In order to use dice-loss, num_classes must be defined, not ({num_classes})")
         criterion = DiceLoss(num_classes=num_classes, bce_loss=bce_loss)
+    elif loss_fn == 'ohem':
+        criterion = OhemCrossEntropy(num_classes=num_classes)
     else:
         raise ValueError(f"There is no such loss function({loss_fn})")
     
@@ -43,6 +45,15 @@ class CELoss(nn.Module):
                 return losses[0] + losses[1]
         elif isinstance(inputs, torch.Tensor):
             return nn.functional.cross_entropy(inputs, targets, ignore_index=255)
+        elif isinstance(inputs, list):
+            losses = []
+            for x in inputs:
+                losses.append(nn.functional.cross_entropy(x, targets, ignore_index=255))
+
+            if not self.aux_loss:
+                return losses[0]
+            else:
+                return losses[0] + 0.5 * losses[1]
         else:
             raise RuntimeError(f"There is no such type({type(inputs)}) of outputs of model")
 
@@ -126,4 +137,72 @@ class DiceLoss(nn.Module):
         
         return loss
 
+class OhemCrossEntropy(nn.Module):
+    def __init__(self, num_classes, ignore_label=-1, thres=0.7,
+                 min_kept=100000, weight=None):
+        super(OhemCrossEntropy, self).__init__()
+        self.num_classes = num_classes
+        self.thresh = thres
+        self.min_kept = max(1, min_kept)
+        self.ignore_label = ignore_label
+        self.criterion = nn.CrossEntropyLoss(
+            weight=weight,
+            ignore_index=ignore_label,
+            reduction='none'
+        )
+
+    def _ce_forward(self, score, target):
+        ph, pw = score.size(2), score.size(3)
+        h, w = target.size(1), target.size(2)
+        if ph != h or pw != w:
+            score = F.interpolate(input=score, size=(
+                h, w), mode='bilinear', align_corners=False)
+
+        loss = self.criterion(score, target)
+
+        return loss
+
+    def _ohem_forward(self, score, target, **kwargs):
+        ph, pw = score.size(2), score.size(3)
+        h, w = target.size(1), target.size(2)
+        if ph != h or pw != w:
+            score = F.interpolate(input=score, size=(
+                h, w), mode='bilinear', align_corners=False)
+        pred = F.softmax(score, dim=1)
+        pixel_losses = self.criterion(score, target).contiguous().view(-1)
+        mask = target.contiguous().view(-1) != self.ignore_label
+
+        tmp_target = target.clone()
+        tmp_target[tmp_target == self.ignore_label] = 0
+        pred = pred.gather(1, tmp_target.unsqueeze(1))
+        pred, ind = pred.contiguous().view(-1,)[mask].contiguous().sort()
+        min_value = pred[min(self.min_kept, pred.numel() - 1)]
+        threshold = max(min_value, self.thresh)
+
+        pixel_losses = pixel_losses[mask][ind]
+        pixel_losses = pixel_losses[pred < threshold]
+        return pixel_losses.mean()
+
+    def forward(self, score, target):
+
+        if self.num_classes == 1:
+            score = [score]
+
+        # weights = config.LOSS.BALANCE_WEIGHTS
+        # assert len(weights) == len(score)
+
+        # functions = [self._ce_forward] * \
+        #     (len(weights) - 1) + [self._ohem_forward]
+        # return sum([
+        #     w * func(x, target)
+        #     for (w, x, func) in zip(weights, score, functions)
+        # ])
+        weights = [1]*self.num_classes
+        functions = [self._ce_forward]*(len(weights) - 1) + [self._ohem_forward]
+        
+        losses = sum([w * func(x, target) for (w, x, func) in zip(weights, score, functions)])
+        
+        losses = torch.unsqueeze(losses, 0)
+        
+        return losses.mean()
 

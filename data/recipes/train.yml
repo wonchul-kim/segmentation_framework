@@ -1,5 +1,5 @@
 ### for model params #######################
-model_name: deeplabv3plus_resnet101
+model_name: ddrnet_23_slim
 #ddrnet #deeplabv3plus_resnet101 #deeplabv3_resnet101
 input_height: 256
 input_width: 256
@@ -19,12 +19,12 @@ device: cuda
 device_ids: 0,1
 start_epoch: 0
 epochs: 300
-batch_size: 2
+batch_size: 4
 num_workers: 16
-loss_fn: ce
-optimizer: 'sgd'
+loss_fn: ohem
+optimizer: adam
 lr_scheduler_type: lambda
-init_lr: 0.01
+init_lr: 0.001
 momentum: 0.9
 weight_decay: 0.0001
 lr_warmup_epochs: 0
@@ -33,7 +33,7 @@ lr_warmup_decay: 0.01
 amp: false # Mixed precision training parameters
 
 ### for debugging #######################
-debug_dataset: false
+debug_dataset: true
 debug_dataset_ratio: 1
 
 ### for logging #######################
@@ -41,7 +41,7 @@ print_freq: 10
 save_model_freq: 10
 save_val_img: True 
 save_val_img_ratio: 1
-save_val_img_freq: 10
+save_val_img_freq: 5
 save_val_img_iou: 0.6
 
 

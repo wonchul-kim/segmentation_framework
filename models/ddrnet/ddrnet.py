@@ -2,6 +2,35 @@ import torch
 from torch import nn, Tensor
 from torch.nn import functional as F
 
+class FullModel(nn.Module):
+  """
+  Distribute the loss on multi-gpu to reduce 
+  the memory cost in the main gpu.
+  You can check the following discussion.
+  https://discuss.pytorch.org/t/dataparallel-imbalanced-memory-usage/22551/21
+  """
+  def __init__(self, model, loss):
+    super(FullModel, self).__init__()
+    self.model = model
+    self.loss = loss
+
+  def pixel_acc(self, pred, label):
+    if pred.shape[2] != label.shape[1] and pred.shape[3] != label.shape[2]:
+        pred = F.interpolate(pred, (label.shape[1:]), mode="bilinear")
+    _, preds = torch.max(pred, dim=1)
+    valid = (label >= 0).long()
+    acc_sum = torch.sum(valid * (preds == label).long())
+    pixel_sum = torch.sum(valid)
+    acc = acc_sum.float() / (pixel_sum.float() + 1e-10)
+    return acc
+
+  def forward(self, inputs, labels, *args, **kwargs):
+    outputs = self.model(inputs, *args, **kwargs)
+    loss = self.loss(outputs, labels)
+    acc  = self.pixel_acc(outputs[1], labels)
+    
+    return torch.unsqueeze(loss,0), outputs, acc
+
 class BasicBlock(nn.Module):
     expansion = 1
     def __init__(self, c1, c2, s=1, downsample= None, no_relu=False) -> None:
