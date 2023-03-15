@@ -55,6 +55,7 @@ def main(args):
 
     model = get_model(model_name=args.model_name, weights=args.weights, weights_backbone=args.weights_backbone, \
                         num_classes=num_classes, aux_loss=args.aux_loss)
+    
     model.to(device)
     model_without_ddp = model
 

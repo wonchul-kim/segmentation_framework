@@ -1,6 +1,9 @@
 ### for model params #######################
-model_name: ddrnet_23_slim
-#ddrnet #deeplabv3plus_resnet101 #deeplabv3_resnet101
+model_name: deeplabv3plus_resnet50
+# deeplabv3plus_mobilenet, deeplabv3plus_resnet101, deeplabv3plus_resnet50, 
+# deeplabv3plus_hrnetv2_48, deeplabv3plus_hrnetv2_32, deeplabv3plus_xception
+# ddrnet_39, ddrnet_23, ddrnet_23_slim
+# deeplabv3_resnet101, deeplabv3_resnet50
 input_height: 256
 input_width: 256
 input_channel: 3

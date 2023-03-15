@@ -1,4 +1,5 @@
-from tkinter import N
+from typing import OrderedDict
+import os.path as osp
 import torch 
 import torchvision 
 import models.deeplabv3plus as deeplabv3plus
@@ -23,11 +24,22 @@ def get_model(model_name, num_classes, weights=None, weights_backbone=None, aux_
         # FIXME: Need to take it into params.
         separable_conv = False
         output_stride = 8 # 8 or 16
+        pretrained = False 
+        weights_path = "/DeepLearning/__weights/segmentation/deeplabv3/best_{}_voc_os16.pth".format(model_name)
         model = deeplabv3plus.modeling.__dict__[model_name](num_classes=num_classes, output_stride=output_stride)
+        if pretrained and osp.exists(weights_path):
+            checkpoint = torch.load(weights_path)
+            model_state_dict = checkpoint['model_state']
+            new_state_dict = OrderedDict()
+            for key, val in model_state_dict.items():
+                if not 'classifier' in key:
+                    new_state_dict[key] = val
+            model.load_state_dict(new_state_dict, strict=False)
+            print(f"*** Having loaded pretrained {weights_path}")
         if separable_conv and 'plus' in model_name:
             convert_to_separable_conv(model.classifier)
         set_bn_momentum(model.backbone, momentum=0.01)
-            
+        
     elif 'ddrnet' in model_name:
         if '23' in model_name:
             model = get_ddrnet23(model_name, num_classes=num_classes, augment=True, pretrained=True, scale_factor=8)
