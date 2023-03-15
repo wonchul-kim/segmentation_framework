@@ -171,12 +171,12 @@ if __name__ == "__main__":
     cfgs = argparse.Namespace()
     # _vars = argparse.Namespace()
     # data = './data/_unittests/coco.yml'
-    data = './data/_unittests/camvid.yml'
+    # data = './data/_unittests/camvid.yml'
     # data = './data/_unittests/no_roi_no_patches.yml'
     # data = './data/_unittests/single_rois_wo_patches.yml'
     # data = './data/_unittests/multiple_rois_wo_patches.yml'
     # data = './data/_unittests/single_rois_w_patches.yml'
-    # data = './data/_unittests/multiple_rois_w_patches.yml'
+    data = './data/_unittests/multiple_rois_w_patches.yml'
     # data = './data/projects/sungwoo_u_top_bottom.yml'
     with open(data, 'r') as yf:
         try:

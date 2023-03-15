@@ -4,8 +4,8 @@ model_name: segformer
 # deeplabv3plus_hrnetv2_48, deeplabv3plus_hrnetv2_32, deeplabv3plus_xception
 # ddrnet_39, ddrnet_23, ddrnet_23_slim
 # deeplabv3_resnet101, deeplabv3_resnet50
-input_height: 512
-input_width: 512
+input_height: 256
+input_width: 256
 input_channel: 3
 weights: null #the weights enum name to load
 weights_backbone: null #the backbone weights enum name to load
@@ -27,7 +27,7 @@ num_workers: 4
 loss_fn: ce
 optimizer: 'sgd'
 lr_scheduler_type: lambda
-init_lr: 0.01
+init_lr: 0.001
 momentum: 0.9
 weight_decay: 0.0001
 lr_warmup_epochs: 0
