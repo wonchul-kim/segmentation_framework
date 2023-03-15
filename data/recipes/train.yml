@@ -18,13 +18,13 @@ aux_loss: false
 device: cuda
 device_ids: 0,1
 start_epoch: 0
-epochs: 300
-batch_size: 2
+epochs: 50
+batch_size: 8
 num_workers: 4
 loss_fn: ce
 optimizer: 'sgd'
 lr_scheduler_type: lambda
-init_lr: 0.001
+init_lr: 0.01
 momentum: 0.9
 weight_decay: 0.0001
 lr_warmup_epochs: 0

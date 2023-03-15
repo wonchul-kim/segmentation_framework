@@ -2,8 +2,9 @@ from tkinter import N
 import torch 
 import torchvision 
 import models.deeplabv3plus as deeplabv3plus
-from models.ddrnet.ddrnet import DDRNet
+# from models.ddrnet.ddrnet import DDRNet
 from models.ddrnet.ddrnet_23 import get_ddrnet23
+from models.ddrnet.ddrnet_39 import get_ddrnet39
 from models.deeplabv3plus.utils import set_bn_momentum
 from models.deeplabv3plus._deeplab import convert_to_separable_conv
 # def get_model(model_name, weights, weights_backbone, num_classes, aux_loss):
@@ -30,10 +31,9 @@ def get_model(model_name, num_classes, weights=None, weights_backbone=None, aux_
             
     elif 'ddrnet' in model_name:
         if '23' in model_name:
-            model = get_ddrnet23(model_name, num_classes=num_classes)
-            # model = DDRNet(num_classes=num_classes)
+            model = get_ddrnet23(model_name, num_classes=num_classes, augment=True, pretrained=True, scale_factor=8)
         elif '39' in model_name:
-            NotImplementedError
+            model = get_ddrnet39(model_name, num_classes=num_classes)
     else:
         model = torchvision.models.segmentation.__dict__[model_name](pretrained=True, aux_loss=aux_loss)
         if 'fcn' in model_name:
