@@ -1,4 +1,4 @@
-from typing import OrderedDict
+from hashlib import new
 import os.path as osp
 import torch 
 import torchvision 
@@ -9,6 +9,7 @@ from models.ddrnet.ddrnet_39 import get_ddrnet39
 from models.deeplabv3plus.utils import set_bn_momentum
 from models.deeplabv3plus._deeplab import convert_to_separable_conv
 from models.segformer.segformer import SegFormer
+import collections
 
 # def get_model(model_name, weights, weights_backbone, num_classes, aux_loss):
 #     model = torchvision.models.get_model(
@@ -32,7 +33,7 @@ def get_model(model_name, num_classes, weights=None, weights_backbone=None, aux_
         if pretrained and osp.exists(weights_path):
             checkpoint = torch.load(weights_path)
             model_state_dict = checkpoint['model_state']
-            new_state_dict = OrderedDict()
+            new_state_dict = collections.OrderedDict()
             for key, val in model_state_dict.items():
                 if not 'classifier' in key:
                     new_state_dict[key] = val
@@ -48,21 +49,36 @@ def get_model(model_name, num_classes, weights=None, weights_backbone=None, aux_
         elif '39' in model_name:
             model = get_ddrnet39(model_name, num_classes=num_classes)
     elif 'segformer' in model_name:
-        backbone = 'MiT-B0'
+        backbone = 'MiT-B1'
         weights_path = '/DeepLearning/__weights/segmentation/segformer/segformer.{}.512x512.ade.160k.pth'.format(backbone.split("-")[1].lower())
+        # weights_path = '/DeepLearning/__weights/segmentation/segformer/imagenet_1k/mit_{}.pth'.format(backbone.split("-")[1].lower())
+        
         model = SegFormer(backbone , num_classes)
         checkpoint = torch.load(weights_path, map_location='cpu')
-        checkpoint_state_dict = checkpoint['state_dict']
-        new_state_dict = OrderedDict()
+        if isinstance(checkpoint, collections.OrderedDict):
+            checkpoint_state_dict = checkpoint
+        elif isinstance(checkpoint, dict):
+            if 'state_dict' in checkpoint.keys():
+                checkpoint_state_dict = checkpoint['state_dict']
+            else:
+                raise RuntimeError(f"There is no state_dict in pretrained weights")
+        else:
+            raise RuntimeError(f"There is ERROR when loading the pretrained weights: {weights_path}")
+        new_state_dict = collections.OrderedDict()
         model_state_dict = model.state_dict()
         idx = 0
         for key, val in model_state_dict.items():
-            if key in checkpoint_state_dict.keys():
+            tmp = ""
+            for k in key.split(".")[1:]:
+                tmp += k
+                tmp += "."
+            tmp = tmp[:-1]   
+            if key in checkpoint_state_dict.keys() or tmp in checkpoint_state_dict.keys():
                 new_state_dict[key] = val
                 idx += 1
                 print(idx, key)
             
-        model.load_state_dict(new_state_dict)
+        model.load_state_dict(new_state_dict, strict=False)
         print(f"*** Having loaded pretrained {weights_path}")
 
     else:
