@@ -350,17 +350,14 @@ def get_ddrnet23(model_name, num_classes, augment=True, pretrained=True, scale_f
         model = DualResNet(BasicBlock, [2, 2, 2, 2], num_classes=num_classes, planes=64, spp_planes=128, head_planes=128, augment=augment, scale_factor=scale_factor)
         
     if pretrained:
-        checkpoint = torch.load(weights_path, map_location='cpu') 
-        model.load_state_dict(checkpoint, strict=False)
-        print(f"*** Having loaded imagenet-pretrained successfully!")
+        pretrained_state = torch.load(weights_path, map_location='cpu') 
+        model_dict = model.state_dict()
+        pretrained_state = {k : v for k, v in pretrained_state.items() if (k in model_dict and v.shape == model_dict[k].shape)}
+        model_dict.update(pretrained_state)
         
-        # model_dict = model.state_dict()
-        # pretrained_state = {k: v for k, v in pretrained_state.items() if (k in model_dict and v.shape == model_dict[k].shape)}
-        # model_dict.update(pretrained_state)
-        # model.load_state_dict(model_dict, strict=True)
-        
-        # print(f"** Loaded pretrained {model_name} from {weights_path}")
+        model.load_state_dict(model_dict, strict=False)
     
+        print(f"** Having loaded imagenet-pretrained {model_name} from {weights_path}")
     return model
 
 if __name__ == '__main__':

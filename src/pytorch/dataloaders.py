@@ -45,5 +45,5 @@ def get_dataloader(dataset, dataset_val, args):
             dataset_val, batch_size=1, sampler=test_sampler, num_workers=args.num_workers, collate_fn=utils.collate_fn
         )
         
-        return data_loader, data_loader_val, train_sampler
+        return data_loader, data_loader_val#, train_sampler
     

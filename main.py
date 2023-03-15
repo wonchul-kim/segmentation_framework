@@ -21,7 +21,6 @@ from utils.preprocessings import get_transform
 import utils.helpers as utils
 import matplotlib.pyplot as plt 
 from src.pytorch.validate import save_validation
-import copy
 
 def main(args):
     if args.output_dir:
@@ -33,7 +32,10 @@ def main(args):
     dataset_val, _ = get_dataset(args.input_dir, args.dataset_format, "val", get_transform(False, args), \
                                     args.classes, args.roi_info, args.patch_info)
 
-    print(f"There are {dataset.num_data} images to train and {dataset_val.num_data} image to validate")
+    try:
+        print(f"There are {dataset.num_data} images to train and {dataset_val.num_data} image to validate")
+    except:
+        pass
 
     if args.debug_dataset:
         debug_dataset(dataset, args.debug_dir, 'train', num_classes, args.preprocessing_norm, args.debug_dataset_ratio)
@@ -58,9 +60,6 @@ def main(args):
     
     model.to(device)
     model_without_ddp = model
-
-    # save_validation(model, device, dataset_val, num_classes, 0, args.val_dir, input_channel=3, denormalization_fn=None, image_loading_mode='rgb')
-    # save_validation(model, device, args.classes, dataset, args.val_dir, args.num_classes, epoch)
 
     if args.distributed:
         model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
@@ -138,6 +137,7 @@ def main(args):
         plt.close()
 
         if args.save_val_img and (epoch != 0 and epoch%args.save_val_img_freq == 0):
+            print("---------------------------------------------------------------------------")
             save_validation(model, device, dataset_val, num_classes, epoch, args.val_dir, args.preprocessing_norm)
             checkpoint = {
             "model": model_without_ddp.state_dict(),
@@ -172,12 +172,12 @@ if __name__ == "__main__":
     cfgs = argparse.Namespace()
     # _vars = argparse.Namespace()
     # data = './data/_unittests/coco.yml'
-    # data = './data/_unittests/camvid.yml'
+    data = './data/_unittests/camvid.yml'
     # data = './data/_unittests/no_roi_no_patches.yml'
     # data = './data/_unittests/single_rois_wo_patches.yml'
     # data = './data/_unittests/multiple_rois_wo_patches.yml'
     # data = './data/_unittests/single_rois_w_patches.yml'
-    data = './data/_unittests/multiple_rois_w_patches.yml'
+    # data = './data/_unittests/multiple_rois_w_patches.yml'
     # data = './data/projects/sungwoo_u_top_bottom.yml'
     with open(data, 'r') as yf:
         try:
