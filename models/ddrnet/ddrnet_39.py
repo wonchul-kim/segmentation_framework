@@ -202,11 +202,12 @@ class segmenthead(nn.Module):
 
 class DualResNet(nn.Module):
 
-    def __init__(self, block, layers, num_classes=19, planes=64, spp_planes=128, head_planes=128, augment=False):
+    def __init__(self, block, layers, num_classes=19, planes=64, spp_planes=128, head_planes=128, augment=False, scale_factor=None):
         super(DualResNet, self).__init__()
 
         highres_planes = planes * 2
         self.augment = augment
+        self.scale_factor = scale_factor
 
         self.conv1 =  nn.Sequential(
                           nn.Conv2d(3,planes,kernel_size=3, stride=2, padding=1),
@@ -270,9 +271,9 @@ class DualResNet(nn.Module):
         self.spp = DAPPM(planes * 16, spp_planes, planes * 4)
 
         if self.augment:
-            self.seghead_extra = segmenthead(highres_planes, head_planes, num_classes, 8)
+            self.seghead_extra = segmenthead(highres_planes, head_planes, num_classes, self.scale_factor)
 
-        self.final_layer = segmenthead(planes * 4, head_planes, num_classes, 8)
+        self.final_layer = segmenthead(planes * 4, head_planes, num_classes, self.scale_factor)
 
 
         for m in self.modules():
@@ -361,9 +362,9 @@ class DualResNet(nn.Module):
         else:
             return x_      
 
-def get_ddrnet39(model_name, num_classes, augment=True, pretrained=False, \
+def get_ddrnet39(model_name, num_classes, augment=True, pretrained=False, scale_factor=None, \
                     weights_path="/DeepLearning/__weights/segmentation/ddrnet/DDRNet39_imagenet.pth"):
-    model = DualResNet(BasicBlock, [3, 4, 6, 3], num_classes=num_classes, planes=64, spp_planes=128, head_planes=256, augment=augment)
+    model = DualResNet(BasicBlock, [3, 4, 6, 3], num_classes=num_classes, planes=64, spp_planes=128, head_planes=256, augment=augment, scale_factor=scale_factor)
     if pretrained:
         checkpoint = torch.load(weights_path, map_location='cpu') 
         model.load_state_dict(checkpoint, strict=False)
