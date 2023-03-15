@@ -21,7 +21,6 @@ from models.deeplabv3plus._deeplab import convert_to_separable_conv
 def get_model(model_name, num_classes, weights=None, weights_backbone=None, aux_loss=False):
     if 'plus' in model_name:
         # FIXME: Need to take it into params.
-        # https://github.com/VainF/DeepLabV3Plus-Pytorch
         separable_conv = False
         output_stride = 8 # 8 or 16
         model = deeplabv3plus.modeling.__dict__[model_name](num_classes=num_classes, output_stride=output_stride)
