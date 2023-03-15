@@ -68,7 +68,7 @@ def main(args):
         model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu])
         model_without_ddp = model.module
 
-    if 'ddrnet' in args.model_name:
+    if 'ddrnet' in args.model_name or 'segformer' in args.model_name:
         params_to_optimize = [
             {"params": [p for p in model_without_ddp.parameters() if p.requires_grad]},
         ]
@@ -137,7 +137,6 @@ def main(args):
         plt.close()
 
         if args.save_val_img and (epoch != 0 and epoch%args.save_val_img_freq == 0):
-            print("---------------------------------------------------------------------------")
             save_validation(model, device, dataset_val, num_classes, epoch, args.val_dir, args.preprocessing_norm)
             checkpoint = {
             "model": model_without_ddp.state_dict(),

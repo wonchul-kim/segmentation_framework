@@ -8,6 +8,8 @@ from models.ddrnet.ddrnet_23 import get_ddrnet23
 from models.ddrnet.ddrnet_39 import get_ddrnet39
 from models.deeplabv3plus.utils import set_bn_momentum
 from models.deeplabv3plus._deeplab import convert_to_separable_conv
+from models.segformer.segformer import SegFormer
+
 # def get_model(model_name, weights, weights_backbone, num_classes, aux_loss):
 #     model = torchvision.models.get_model(
 #             model_name,
@@ -45,6 +47,24 @@ def get_model(model_name, num_classes, weights=None, weights_backbone=None, aux_
             model = get_ddrnet23(model_name, num_classes=num_classes, augment=True, pretrained=True, scale_factor=8)
         elif '39' in model_name:
             model = get_ddrnet39(model_name, num_classes=num_classes)
+    elif 'segformer' in model_name:
+        backbone = 'MiT-B0'
+        weights_path = '/DeepLearning/__weights/segmentation/segformer/segformer.{}.512x512.ade.160k.pth'.format(backbone.split("-")[1].lower())
+        model = SegFormer(backbone , num_classes)
+        checkpoint = torch.load(weights_path, map_location='cpu')
+        checkpoint_state_dict = checkpoint['state_dict']
+        new_state_dict = OrderedDict()
+        model_state_dict = model.state_dict()
+        idx = 0
+        for key, val in model_state_dict.items():
+            if key in checkpoint_state_dict.keys():
+                new_state_dict[key] = val
+                idx += 1
+                print(idx, key)
+            
+        model.load_state_dict(new_state_dict)
+        print(f"*** Having loaded pretrained {weights_path}")
+
     else:
         model = torchvision.models.segmentation.__dict__[model_name](pretrained=True, aux_loss=aux_loss)
         if 'fcn' in model_name:
@@ -66,6 +86,10 @@ def get_model(model_name, num_classes, weights=None, weights_backbone=None, aux_
                 model.aux_classifier[4] = torch.nn.Conv2d(10, num_classes, kernel_size=(1, 1), stride=(1, 1))
             else:
                 raise ValueError(f"There is no such model({model_name})")
+   
+    x = torch.zeros(1, 3, 512, 512)
+    y = model(x)
+    print(y.shape)
     
     return model
 
