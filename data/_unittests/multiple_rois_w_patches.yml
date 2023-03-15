@@ -17,7 +17,7 @@ patch_include_point_positive: false
 patch_centric: true ### centric
 shake_patch: 0
 shake_dist_ratio: 3
-patch_slide: true ### sliding
+patch_slide: false ### sliding
 patch_width: 256
 patch_height: 256
 patch_overlap_ratio: 0.1

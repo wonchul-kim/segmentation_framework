@@ -47,7 +47,7 @@ def main(args):
     # for _ in range(2):
     #     for idx, batch in enumerate(dataloader):
     #         image, target, fname = batch 
-    #         print("\r{}".format(idx), end='')
+    #         print("\r{}: {}".format(idx, image.shape), end='')
         
     #     print("=============================================================")
         

@@ -3,7 +3,7 @@ import utils.helpers as utils
 from src.pytorch.datasets import COCODataset, MaskDataset, LabelmeDatasets, LabelmeIterableDatasets
 from utils.torch_utils import worker_init_fn
 
-def get_dataloader(dataset, dataset_test, args):
+def get_dataloader(dataset, dataset_val, args):
     if isinstance(dataset, LabelmeIterableDatasets):
         data_loader = torch.utils.data.DataLoader(
             dataset,
@@ -14,23 +14,23 @@ def get_dataloader(dataset, dataset_test, args):
             worker_init_fn=worker_init_fn
         )
 
-        data_loader_test = torch.utils.data.DataLoader(
-            dataset_test, 
+        data_loader_val = torch.utils.data.DataLoader(
+            dataset_val, 
             batch_size=1, 
-            num_workers=args.num_workers, 
+            num_workers=2, 
             collate_fn=utils.collate_fn,
             worker_init_fn=worker_init_fn
         )
     
-        return data_loader, data_loader_test
+        return data_loader, data_loader_val
 
     else:
         if args.distributed:
             train_sampler = torch.utils.data.distributed.DistributedSampler(dataset)
-            test_sampler = torch.utils.data.distributed.DistributedSampler(dataset_test, shuffle=True)
+            test_sampler = torch.utils.data.distributed.DistributedSampler(dataset_val, shuffle=True)
         else:
             train_sampler = torch.utils.data.RandomSampler(dataset)
-            test_sampler = torch.utils.data.SequentialSampler(dataset_test)
+            test_sampler = torch.utils.data.SequentialSampler(dataset_val)
 
         data_loader = torch.utils.data.DataLoader(
             dataset,
@@ -41,9 +41,9 @@ def get_dataloader(dataset, dataset_test, args):
             drop_last=True,
         )
 
-        data_loader_test = torch.utils.data.DataLoader(
-            dataset_test, batch_size=1, sampler=test_sampler, num_workers=args.num_workers, collate_fn=utils.collate_fn
+        data_loader_val = torch.utils.data.DataLoader(
+            dataset_val, batch_size=1, sampler=test_sampler, num_workers=args.num_workers, collate_fn=utils.collate_fn
         )
         
-        return data_loader, data_loader_test, train_sampler
+        return data_loader, data_loader_val, train_sampler
     
