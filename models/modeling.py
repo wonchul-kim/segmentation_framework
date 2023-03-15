@@ -23,9 +23,9 @@ def get_model(model_name, num_classes, weights=None, weights_backbone=None, aux_
     if 'plus' in model_name:
         # FIXME: Need to take it into params.
         separable_conv = False
-        output_stride = 8 # 8 or 16
-        pretrained = False 
-        weights_path = "/DeepLearning/__weights/segmentation/deeplabv3/best_{}_voc_os16.pth".format(model_name)
+        output_stride = 16 # 8 or 16
+        pretrained = True 
+        weights_path = "/DeepLearning/__weights/segmentation/deeplabv3/best_{}_voc_os{}.pth".format(model_name, output_stride)
         model = deeplabv3plus.modeling.__dict__[model_name](num_classes=num_classes, output_stride=output_stride)
         if pretrained and osp.exists(weights_path):
             checkpoint = torch.load(weights_path)
