@@ -23,12 +23,21 @@
 
 #### references
 
-- https://github.com/ydhongHIT/DDRNet
+- network & weights: https://github.com/ydhongHIT/DDRNet
 
 ### Deeplabv3+
 
 #### references
 
 - https://github.com/VainF/DeepLabV3Plus-Pytorch
+
+### Segformer
+
+#### references
+
+- weights:
+  - https://github.com/NVlabs/SegFormer
+  - https://github.com/open-mmlab/mmsegmentation/tree/master/configs/segformer
+- network: https://github.com/sithu31296/semantic-segmentation
 
 ---

@@ -49,7 +49,7 @@ def get_model(model_name, num_classes, weights=None, weights_backbone=None, aux_
         elif '39' in model_name:
             model = get_ddrnet39(model_name, num_classes=num_classes)
     elif 'segformer' in model_name:
-        backbone = 'MiT-B1'
+        backbone = 'MiT-B2'
         weights_path = '/DeepLearning/__weights/segmentation/segformer/segformer.{}.512x512.ade.160k.pth'.format(backbone.split("-")[1].lower())
         # weights_path = '/DeepLearning/__weights/segmentation/segformer/imagenet_1k/mit_{}.pth'.format(backbone.split("-")[1].lower())
         
