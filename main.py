@@ -68,7 +68,7 @@ def main(args):
         model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu])
         model_without_ddp = model.module
 
-    if 'ddrnet' in args.model_name:
+    if 'ddrnet' in args.model_name or 'segformer' in args.model_name:
         params_to_optimize = [
             {"params": [p for p in model_without_ddp.parameters() if p.requires_grad]},
         ]
@@ -137,7 +137,6 @@ def main(args):
         plt.close()
 
         if args.save_val_img and (epoch != 0 and epoch%args.save_val_img_freq == 0):
-            print("---------------------------------------------------------------------------")
             save_validation(model, device, dataset_val, num_classes, epoch, args.val_dir, args.preprocessing_norm)
             checkpoint = {
             "model": model_without_ddp.state_dict(),
@@ -172,12 +171,12 @@ if __name__ == "__main__":
     cfgs = argparse.Namespace()
     # _vars = argparse.Namespace()
     # data = './data/_unittests/coco.yml'
-    data = './data/_unittests/camvid.yml'
+    # data = './data/_unittests/camvid.yml'
     # data = './data/_unittests/no_roi_no_patches.yml'
     # data = './data/_unittests/single_rois_wo_patches.yml'
     # data = './data/_unittests/multiple_rois_wo_patches.yml'
     # data = './data/_unittests/single_rois_w_patches.yml'
-    # data = './data/_unittests/multiple_rois_w_patches.yml'
+    data = './data/_unittests/multiple_rois_w_patches.yml'
     # data = './data/projects/sungwoo_u_top_bottom.yml'
     with open(data, 'r') as yf:
         try:
