@@ -22,6 +22,11 @@ def get_dataset(dir_path, name, image_set, transform, classes, roi_info=None, pa
                 roi_info=roi_info, patch_info=patch_info)
 
 
+    if isinstance(ds, LabelmeIterableDatasets):
+        print(f"* There are {ds.num_data} images to {image_set}")
+    else:
+        print(f"* There are {len(ds)} images to {image_set}")
+
     return ds, num_classes
 
 def get_coco(root, image_set, transforms, classes, roi_info=None, patch_info=None):

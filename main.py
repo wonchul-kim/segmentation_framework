@@ -31,12 +31,6 @@ def main(args):
                                         args.classes, args.roi_info, args.patch_info)
     dataset_val, _ = get_dataset(args.input_dir, args.dataset_format, "val", get_transform(False, args), \
                                     args.classes, args.roi_info, args.patch_info)
-
-    try:
-        print(f"There are {dataset.num_data} images to train and {dataset_val.num_data} image to validate")
-    except:
-        pass
-
     if args.debug_dataset:
         debug_dataset(dataset, args.debug_dir, 'train', num_classes, args.preprocessing_norm, args.debug_dataset_ratio)
         debug_dataset(dataset_val, args.debug_dir, 'val', num_classes, args.preprocessing_norm, args.debug_dataset_ratio)
@@ -171,12 +165,12 @@ if __name__ == "__main__":
     cfgs = argparse.Namespace()
     # _vars = argparse.Namespace()
     # data = './data/_unittests/coco.yml'
-    # data = './data/_unittests/camvid.yml'
+    data = './data/_unittests/camvid.yml'
     # data = './data/_unittests/no_roi_no_patches.yml'
     # data = './data/_unittests/single_rois_wo_patches.yml'
     # data = './data/_unittests/multiple_rois_wo_patches.yml'
     # data = './data/_unittests/single_rois_w_patches.yml'
-    data = './data/_unittests/multiple_rois_w_patches.yml'
+    # data = './data/_unittests/multiple_rois_w_patches.yml'
     # data = './data/projects/sungwoo_u_top_bottom.yml'
     with open(data, 'r') as yf:
         try:

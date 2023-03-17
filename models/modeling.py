@@ -103,10 +103,6 @@ def get_model(model_name, num_classes, weights=None, weights_backbone=None, aux_
             else:
                 raise ValueError(f"There is no such model({model_name})")
    
-    x = torch.zeros(1, 3, 512, 512)
-    y = model(x)
-    print(y.shape)
-    
     return model
 
 if __name__ == '__main__':

@@ -44,7 +44,7 @@ class COCODataset(torchvision.datasets.vision.VisionDataset):
         if self.transforms is not None:
             image, target = self.transforms(image, target)
 
-        return image, target
+        return image, target, fname
 
     def __len__(self) -> int:
         return len(self.ids)
