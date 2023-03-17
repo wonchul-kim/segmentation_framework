@@ -26,7 +26,7 @@ def get_model(model_name, num_classes, weights=None, weights_backbone=None, aux_
     if 'plus' in model_name:
         # FIXME: Need to take it into params.
         separable_conv = False
-        output_stride = 16 # 8 or 16
+        output_stride = 8 # 8 or 16
         pretrained = True 
         weights_path = "/DeepLearning/__weights/segmentation/deeplabv3/best_{}_voc_os{}.pth".format(model_name, output_stride)
         model = deeplabv3plus.modeling.__dict__[model_name](num_classes=num_classes, output_stride=output_stride)
@@ -39,6 +39,8 @@ def get_model(model_name, num_classes, weights=None, weights_backbone=None, aux_
                     new_state_dict[key] = val
             model.load_state_dict(new_state_dict, strict=False)
             print(f"*** Having loaded pretrained {weights_path}")
+        else:
+            print(f"*** NOT loaded pretrained {weights_path}")
         if separable_conv and 'plus' in model_name:
             convert_to_separable_conv(model.classifier)
         set_bn_momentum(model.backbone, momentum=0.01)

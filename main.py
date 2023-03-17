@@ -49,6 +49,7 @@ def main(args):
         
     # print(dataset.imgs_info)
 
+
     model = get_model(model_name=args.model_name, weights=args.weights, weights_backbone=args.weights_backbone, \
                         num_classes=num_classes, aux_loss=args.aux_loss)
     
@@ -139,7 +140,7 @@ def main(args):
             "epoch": epoch,
             "args": args,
             }   
-        
+    
         if epoch != 0 and epoch%args.save_model_freq == 0:
             save_on_master(checkpoint, os.path.join(args.weights_dir, f"model_{epoch}.pth"))
             
@@ -164,8 +165,8 @@ if __name__ == "__main__":
     
     cfgs = argparse.Namespace()
     # _vars = argparse.Namespace()
-    # data = './data/_unittests/coco.yml'
-    data = './data/_unittests/camvid.yml'
+    data = './data/_unittests/coco.yml'
+    # data = './data/_unittests/camvid.yml'
     # data = './data/_unittests/no_roi_no_patches.yml'
     # data = './data/_unittests/single_rois_wo_patches.yml'
     # data = './data/_unittests/multiple_rois_wo_patches.yml'

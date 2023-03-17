@@ -3,7 +3,7 @@ from threading import Thread
 from utils.transforms import Compose
 import torchvision
 from src.pytorch.datasets import COCODataset, MaskDataset, LabelmeDatasets, LabelmeIterableDatasets
-from utils.coco_utils import FilterAndRemapCocoCategories, ConvertCocoPolysToMask, _coco_remove_images_without_annotations
+from utils.coco_utils import FilterAndRemapCocoCategories, ConvertCocoPolysToMask, _coco_remove_images_without_annotations, get_coco_cat_list
 
 def get_dataset(dir_path, name, image_set, transform, classes, roi_info=None, patch_info=None):
     def sbd(*args, **kwargs):
@@ -12,7 +12,7 @@ def get_dataset(dir_path, name, image_set, transform, classes, roi_info=None, pa
     paths = {
         "voc": (dir_path, torchvision.datasets.VOCSegmentation, 21),
         "voc_aug": (dir_path, sbd, 21),
-        "coco": (dir_path, get_coco, 21),
+        "coco": (dir_path, get_coco, 21),#len(classes)),
         "mask": (dir_path, get_mask, len(classes) + 1),
         "labelme": (dir_path, get_labelme, len(classes) + 1),
     }
@@ -34,9 +34,9 @@ def get_coco(root, image_set, transforms, classes, roi_info=None, patch_info=Non
         "train": ("train2017", osp.join("annotations", "instances_train2017.json")),
         "val": ("val2017", osp.join("annotations", "instances_val2017.json")),
     }
-    CAT_LIST = [0, 5, 2, 16, 9, 44, 6, 3, 17, 62, 21, 67, 18, 19, 4, 1, 64, 20, 63, 7, 72]
-
-    transforms = Compose([FilterAndRemapCocoCategories(CAT_LIST, remap=True), \
+    
+    cat_list = get_coco_cat_list(classes)    
+    transforms = Compose([FilterAndRemapCocoCategories(cat_list, remap=True), \
                         ConvertCocoPolysToMask(), transforms])
 
     img_folder, ann_file = PATHS[image_set]
@@ -47,7 +47,7 @@ def get_coco(root, image_set, transforms, classes, roi_info=None, patch_info=Non
     dataset = COCODataset(img_folder, ann_file, transforms=transforms)
 
     if image_set == "train": #FIXME: Need to make this option 
-        dataset = _coco_remove_images_without_annotations(dataset, CAT_LIST)
+        dataset = _coco_remove_images_without_annotations(dataset, cat_list)
 
     return dataset
 
