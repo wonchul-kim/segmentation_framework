@@ -33,7 +33,7 @@ def evaluate(model, dataloader, device, num_classes):
             # FIXME need to take into account that the datasets
             # could have been padded in distributed setup
             num_processed_samples += image.shape[0]
-
+            
         confmat.reduce_from_all_processes()
 
     num_processed_samples = reduce_across_processes(num_processed_samples)
@@ -58,6 +58,7 @@ RGBs = [[255, 0, 0], [0, 255, 0], [0, 0, 255], \
 
 def save_validation(model, device, dataset, num_classes, epoch, output_dir, preprocessing_norm=False, input_channel=3, \
                         image_loading_mode='bgr', validation_image_idxes_list=[]):
+    model.eval()
     origin = 25,25
     font = cv2.FONT_HERSHEY_SIMPLEX
 
@@ -113,13 +114,14 @@ def save_validation(model, device, dataset, num_classes, epoch, output_dir, prep
         preds = cv2.addWeighted(image, 0.1, preds, 0.9, 0)
         mask = cv2.addWeighted(image, 0.1, mask, 0.9, 0)
 
-        text1 = np.zeros((50, image.shape[0], input_channel), np.uint8)
-        text2 = np.zeros((50, image.shape[0], input_channel), np.uint8)
-        text3 = np.zeros((50, image.shape[0], input_channel), np.uint8)
+        text1 = np.zeros((50, image.shape[1], input_channel), np.uint8)
+        text2 = np.zeros((50, image.shape[1], input_channel), np.uint8)
+        text3 = np.zeros((50, image.shape[1], input_channel), np.uint8)
         cv2.putText(text1, "(a) original", origin, font, 0.6, (255,255,255), 1)
         cv2.putText(text2, "(b) ground truth" , origin, font, 0.6, (255,255,255), 1)
         cv2.putText(text3, "(c) predicted" , origin, font, 0.6, (255,255,255), 1)
 
+        print(text1.shape, image.shape, mask.shape)
         image = cv2.vconcat([text1, image])
         mask = cv2.vconcat([text2, mask])
         preds = cv2.vconcat([text3, preds.astype(np.uint8)])
