@@ -27,7 +27,7 @@ num_workers: 16
 loss_fn: dice
 optimizer: 'sgd'
 lr_scheduler_type: lambda
-init_lr: 0.001
+init_lr: 0.01
 momentum: 0.9
 weight_decay: 0.0001
 lr_warmup_epochs: 0
@@ -37,14 +37,14 @@ amp: false # Mixed precision training parameters
 
 ### for debugging #######################
 debug_dataset: true
-debug_dataset_ratio: 0.0001
+debug_dataset_ratio: 0.001
 
 ### for logging #######################
 print_freq: 10
 save_model_freq: 10
 save_val_img: True 
 save_val_img_ratio: 1
-save_val_img_freq: 1
+save_val_img_freq: 10
 save_val_img_iou: 0.6
 
 

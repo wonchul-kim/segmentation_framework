@@ -131,7 +131,7 @@ def main(args):
         plt.savefig(os.path.join(args.log_dir, 'train_plot.png'))
         plt.close()
 
-        if args.save_val_img and (epoch != 0 and epoch%args.save_val_img_freq == 0):
+        if args.save_val_img and (epoch != 0 and (epoch%args.save_val_img_freq == 0 or epoch == 1)):
             save_validation(model, device, dataset_val, num_classes, epoch, args.val_dir, args.preprocessing_norm)
             checkpoint = {
             "model": model_without_ddp.state_dict(),
