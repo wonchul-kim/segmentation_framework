@@ -9,7 +9,7 @@ import json
 import math
 import numpy as np
 from typing import Any, Callable, Optional, Tuple, List
-from utils.labelme_utils import make_mask
+from utils.labelme_utils import get_mask_from_labelme
 from utils.preprocessings import get_images_info
 
 class COCODataset(torchvision.datasets.vision.VisionDataset):
@@ -118,7 +118,7 @@ class LabelmeIterableDatasets(torch.utils.data.IterableDataset):
             self.image = Image.open(img_file)
             self.fname = osp.split(osp.splitext(img_file)[0])[-1]
             w, h = self.image.size
-            self.mask = make_mask(osp.join(osp.split(img_file)[0], self.fname + '.json'), w, h, self.class2label, 'pil')
+            self.mask = get_mask_from_labelme(osp.join(osp.split(img_file)[0], self.fname + '.json'), w, h, self.class2label, 'pil')
 
             if rois == None:
                 self.imgs_info[idx]['counts'][0] += 1
@@ -170,7 +170,7 @@ class LabelmeIterableDatasets(torch.utils.data.IterableDataset):
 #             self.image = Image.open(img_file)
 #             self.fname = osp.split(osp.splitext(img_file)[0])[-1]
 #             w, h = self.image.size
-#             self.mask = make_mask(osp.join(osp.split(img_file)[0], self.fname + '.json'), w, h, self.class2label, 'pil')
+#             self.mask = get_mask_from_labelme(osp.join(osp.split(img_file)[0], self.fname + '.json'), w, h, self.class2label, 'pil')
 
 #             if rois == None:
 #                 ####### To transform
@@ -229,7 +229,7 @@ class LabelmeDatasets(torch.utils.data.Dataset):
         # self.image = cv2.imread(self.imgs_info[idx])
         # (w, h, _) = (self.image.shape)
 
-        mask = make_mask(json_file, w, h, self.class2label, 'pil')
+        mask = get_mask_from_labelme(json_file, w, h, self.class2label, 'pil')
 
         ### Crop image with RoI
         if roi != None:
@@ -281,7 +281,7 @@ class LabelmeDatasets(torch.utils.data.Dataset):
 #         # self.image = cv2.imread(self.img_files[idx])
 #         # (w, h, _) = (self.image.shape)
 
-#         mask = make_mask(json_file, w, h, self.class2label, 'pil')
+#         mask = get_mask_from_labelme(json_file, w, h, self.class2label, 'pil')
 
 #         # ### Crop image with RoI
 #         # if self.roi_info != None:

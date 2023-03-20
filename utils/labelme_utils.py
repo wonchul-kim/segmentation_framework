@@ -41,7 +41,7 @@ def get_points_from_labelme(shape, shape_type, points, patch_info, mode):
 
     return _points
 
-def make_mask(json_file, width, height, class2label, format='pil'):
+def get_mask_from_labelme(json_file, width, height, class2label, format='pil'):
     with open(json_file) as f:
         anns = json.load(f)
     mask = np.zeros((height, width))
@@ -68,7 +68,7 @@ if __name__ == '__main__':
     # height = 1080
     # class2label = {'bubble': 0, 'dust': 1, 'line': 2, 'crack': 3, 'black': 4, 'peeling': 5, 'burr': 6}
 
-    # mask = make_mask(json_file, width, height, class2label, 'cv2')
+    # mask = get_mask_from_labelme(json_file, width, height, class2label, 'cv2')
     # print(mask.shape)
     # cv2.imwrite("/projects/mask.png", mask)
 
@@ -77,6 +77,6 @@ if __name__ == '__main__':
     height = 7000
     class2label = {'_background_': 0, 'stabbed': 1, 'pop': 2}
 
-    mask = make_mask(json_file, width, height, class2label, 'cv2')
+    mask = get_mask_from_labelme(json_file, width, height, class2label, 'cv2')
     print(mask.shape)
     cv2.imwrite("/projects/mask.png", mask)
