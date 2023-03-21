@@ -10,14 +10,12 @@ import numpy as np
 def save():
     model = get_model(model_name="deeplabv3_resnet101", weights=None, weights_backbone=None, num_classes=2, aux_loss=False)
     
-   
-
 def pth2onnx():
-    model_weights = "/projects/github/pytorch_segmentation/res/sungwoo/outputs/segmentation/2023_02_27_23_14/train/weights/last.pth"
+    model_weights = "/projects/github/pytorch_segmentation/res/sungwoo/outputs/segmentation/2023_03_21_15_51/train/weights/last.pth"
 
     model_name = "deeplabv3_resnet101"
-    input_height = 512
-    input_width = 512
+    input_height = 256
+    input_width = 256
     input_channel = 3
     weights = None 
     weights_backbone = None
@@ -48,8 +46,7 @@ def pth2onnx():
     img.save("/projects/github/pytorch_segmentation/res/origin.png")
     cv2.imwrite("/projects/github/pytorch_segmentation/res/torch.png", output)
     
-  
-    torch.onnx.export(model, torch.randn(1, 3, 512, 512, requires_grad=True),
+    torch.onnx.export(model, torch.randn(1, input_channel, input_height, input_width, requires_grad=True),
           "/projects/github/pytorch_segmentation/res/sungwoo/outputs/segmentation/2023_02_27_23_14/train/weights/last.onnx",
           export_params=True,        # store the trained parameter weights inside the model file
           opset_version=13,          # the ONNX version to export the model to
@@ -99,6 +96,7 @@ def run_onnx():
     out *= 255//2
     out = cv2.cvtColor(out.astype(np.uint8), cv2.COLOR_GRAY2BGR)
     cv2.imwrite("/projects/github/pytorch_segmentation/res/onnx.png", out)
+    
 if __name__ == '__main__':
-    # pth2onnx()
-    run_onnx()
+    pth2onnx()
+    # run_onnx()

@@ -36,8 +36,7 @@ def main(args):
         debug_dataset(dataset_val, args.debug_dir, 'val', num_classes, args.preprocessing_norm, args.debug_dataset_ratio)
         # Thread(target=debug_dataset, args=(dataset, args.debug_dir, 'train', num_classes, args.preprocessing_norm, args.debug_dataset_ratio))
         # Thread(target=debug_dataset, args=(dataset_val, args.debug_dir, 'val', num_classes, args.preprocessing_norm, args.debug_dataset_ratio))
-    
-    
+        
     dataloader, dataloader_val = get_dataloader(dataset, dataset_val, args)
 
     # for _ in range(2):
@@ -48,7 +47,6 @@ def main(args):
     #     print("=============================================================")
         
     # print(dataset.imgs_info)
-
 
     model = get_model(model_name=args.model_name, weights=args.weights, weights_backbone=args.weights_backbone, \
                         num_classes=num_classes, aux_loss=args.aux_loss)
@@ -134,7 +132,7 @@ def main(args):
         if args.save_val_img and (epoch != 0 and (epoch%args.save_val_img_freq == 0 or epoch == 1)):
             save_validation(model, device, dataset_val, num_classes, epoch, args.val_dir, args.preprocessing_norm)
             checkpoint = {
-            "model": model_without_ddp.state_dict(),
+            "model_state": model_without_ddp.state_dict(),
             "optimizer": optimizer.state_dict(),
             "lr_scheduler": lr_scheduler.state_dict(),
             "epoch": epoch,
@@ -145,7 +143,7 @@ def main(args):
             save_on_master(checkpoint, os.path.join(args.weights_dir, f"model_{epoch}.pth"))
             
         checkpoint = {
-            "model": model_without_ddp.state_dict(),
+            "model_state": model_without_ddp.state_dict(),
             "optimizer": optimizer.state_dict(),
             "lr_scheduler": lr_scheduler.state_dict(),
             "epoch": epoch,
@@ -165,13 +163,13 @@ if __name__ == "__main__":
     
     cfgs = argparse.Namespace()
     # _vars = argparse.Namespace()
-    data = './data/_unittests/coco.yml'
+    # data = './data/_unittests/coco.yml'
     # data = './data/_unittests/camvid.yml'
     # data = './data/_unittests/no_roi_no_patches.yml'
     # data = './data/_unittests/single_rois_wo_patches.yml'
     # data = './data/_unittests/multiple_rois_wo_patches.yml'
     # data = './data/_unittests/single_rois_w_patches.yml'
-    # data = './data/_unittests/multiple_rois_w_patches.yml'
+    data = './data/_unittests/multiple_rois_w_patches.yml'
     # data = './data/projects/sungwoo_u_top_bottom.yml'
     with open(data, 'r') as yf:
         try:

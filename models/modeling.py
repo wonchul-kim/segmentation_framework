@@ -29,12 +29,23 @@ def get_model(model_name, num_classes, weights=None, weights_backbone=None, aux_
         output_stride = 8 # 8 or 16
         pretrained = True 
         weights_path = "/DeepLearning/__weights/segmentation/deeplabv3/best_{}_voc_os{}.pth".format(model_name, output_stride)
+        # weights_path = "/DeepLearning/_unittest/public/coco/outputs/segmentation/2023_03_17_17_26/train/weights/model_130.pth"
         model = deeplabv3plus.modeling.__dict__[model_name](num_classes=num_classes, output_stride=output_stride)
         if pretrained and osp.exists(weights_path):
             checkpoint = torch.load(weights_path)
-            model_state_dict = checkpoint['model_state']
+
+            if isinstance(checkpoint, collections.OrderedDict) or isinstance(checkpoint, dict):
+                checkpoint_state_dict = checkpoint 
+            else:
+                if 'model_state' in checkpoint.keys():
+                    checkpoint_state_dict = checkpoint['model_state']
+                elif 'model' in checkpoint.keys():
+                    checkpoint_state_dict = checkpoint['model']
+                else:
+                    raise RuntimeError(f"There is no model related kyes in {checkpoint.keys()}")
+
             new_state_dict = collections.OrderedDict()
-            for key, val in model_state_dict.items():
+            for key, val in checkpoint_state_dict.items():
                 if not 'classifier' in key:
                     new_state_dict[key] = val
             model.load_state_dict(new_state_dict, strict=False)
@@ -50,6 +61,7 @@ def get_model(model_name, num_classes, weights=None, weights_backbone=None, aux_
             model = get_ddrnet23(model_name, num_classes=num_classes, augment=True, pretrained=True, scale_factor=8)
         elif '39' in model_name:
             model = get_ddrnet39(model_name, num_classes=num_classes)
+
     elif 'segformer' in model_name:
         backbone = 'MiT-B2'
         weights_path = '/DeepLearning/__weights/segmentation/segformer/segformer.{}.512x512.ade.160k.pth'.format(backbone.split("-")[1].lower())

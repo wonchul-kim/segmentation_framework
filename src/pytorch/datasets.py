@@ -220,7 +220,7 @@ class LabelmeDatasets(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         print(idx)
         img_file = self.imgs_info[idx]['img_file']
-        roi = self.imgs_info[idx]['roi']
+        roi = self.imgs_info[idx]['rois']
         fname = osp.split(osp.splitext(img_file)[0])[-1]
         json_file = osp.join(osp.split(img_file)[0], fname + '.json')
         image = Image.open(img_file)
