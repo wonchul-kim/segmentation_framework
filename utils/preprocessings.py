@@ -184,34 +184,54 @@ def get_imgs_info_from_patches(mode, img_file, classes, patch_info, roi=None):
     img_width, img_height = anns['imageWidth'], anns['imageHeight']
     num_data = 0
     rois, points = [], []
-    for shape in anns['shapes']:
-        shape_type = str(shape['shape_type']).lower()
-        label = shape['label'].lower()
+    if len(anns['shapes']) != 0:
+        for shape in anns['shapes']:
+            shape_type = str(shape['shape_type']).lower()
+            label = shape['label'].lower()
 
-        if label in classes or label.upper() in classes: 
-            _points = get_points_from_labelme(shape, shape_type, points, patch_info, mode)
-            if not _points:
-                continue
-
-            if roi != None:
-                if is_points_not_in_roi(_points, roi):
+            if label in classes or label.upper() in classes: 
+                _points = get_points_from_labelme(shape, shape_type, points, patch_info, mode)
+                if not _points:
                     continue
 
-            points.append(_points)
-            if patch_info['patch_centric']:
-                centric_patches_rois, centric_patches_num_data = get_centric_patches(_points, patch_info, img_width, img_height, roi=roi)
-                rois += centric_patches_rois
-                num_data += centric_patches_num_data
+                if roi != None:
+                    if is_points_not_in_roi(_points, roi):
+                        continue
 
+                points.append(_points)
+                if patch_info['patch_centric']:
+                    centric_patches_rois, centric_patches_num_data = get_centric_patches(_points, patch_info, img_width, img_height, roi=roi)
+                    rois += centric_patches_rois
+                    num_data += centric_patches_num_data
+
+            if patch_info['patch_slide']:
+                if mode == 'train':
+                    patch_coords, num_patch_slide = get_sliding_patches(img_height=img_height, img_width=img_width, \
+                        patch_height=patch_info['patch_height'], patch_width=patch_info['patch_width'], points=points, \
+                        overlap_ratio=patch_info['patch_overlap_ratio'], num_involved_pixel=patch_info['patch_num_involved_pixel'], \
+                        bg_ratio=patch_info['patch_bg_ratio'], roi=roi, skip_highly_overlapped_tiles=False)
+                elif mode == 'val':
+                    patch_coords, num_patch_slide = get_sliding_patches(img_height=img_height, img_width=img_width, \
+                        patch_height=patch_info['patch_height'], patch_width=patch_info['patch_width'], points=points, \
+                        overlap_ratio=patch_info['patch_overlap_ratio'], num_involved_pixel=patch_info['patch_num_involved_pixel'], \
+                        bg_ratio=patch_info['patch_bg_ratio'], roi=roi, skip_highly_overlapped_tiles=True)
+                else:
+                    raise ValueError(f"There is no such mode({mode})")
+
+                for patch_coord in patch_coords:
+                    assert patch_coord[2] - patch_coord[0] == patch_info['patch_width'] and patch_coord[3] - patch_coord[1] == patch_info['patch_height'], f"patch coord is wrong"
+                    rois.append(patch_coord)
+                num_data += num_patch_slide
+    else:
         if patch_info['patch_slide']:
             if mode == 'train':
                 patch_coords, num_patch_slide = get_sliding_patches(img_height=img_height, img_width=img_width, \
-                    patch_height=patch_info['patch_height'], patch_width=patch_info['patch_width'], points=points, \
+                    patch_height=patch_info['patch_height'], patch_width=patch_info['patch_width'], points=[], \
                     overlap_ratio=patch_info['patch_overlap_ratio'], num_involved_pixel=patch_info['patch_num_involved_pixel'], \
                     bg_ratio=patch_info['patch_bg_ratio'], roi=roi, skip_highly_overlapped_tiles=False)
             elif mode == 'val':
                 patch_coords, num_patch_slide = get_sliding_patches(img_height=img_height, img_width=img_width, \
-                    patch_height=patch_info['patch_height'], patch_width=patch_info['patch_width'], points=points, \
+                    patch_height=patch_info['patch_height'], patch_width=patch_info['patch_width'], points=[], \
                     overlap_ratio=patch_info['patch_overlap_ratio'], num_involved_pixel=patch_info['patch_num_involved_pixel'], \
                     bg_ratio=patch_info['patch_bg_ratio'], roi=roi, skip_highly_overlapped_tiles=True)
             else:
@@ -364,13 +384,15 @@ def get_sliding_patches(img_width, img_height, patch_height, patch_width, points
                         if count_involved_defect_pixel > num_involved_pixel:
                             is_inside = True 
                             break
-            else:
+            elif len(points) == 0:
                 '''
                     When there is any labeling points in the image, 
                     This image will be used as backgrounds 
                 '''
                 is_inside = True
-                
+            else:
+                pass
+            
             if not is_inside:
                 if not bg_ratio >= random.random():
                     continue
