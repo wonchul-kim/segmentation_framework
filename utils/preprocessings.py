@@ -364,7 +364,13 @@ def get_sliding_patches(img_width, img_height, patch_height, patch_width, points
                         if count_involved_defect_pixel > num_involved_pixel:
                             is_inside = True 
                             break
-
+            else:
+                '''
+                    When there is any labeling points in the image, 
+                    This image will be used as backgrounds 
+                '''
+                is_inside = True
+                
             if not is_inside:
                 if not bg_ratio >= random.random():
                     continue
