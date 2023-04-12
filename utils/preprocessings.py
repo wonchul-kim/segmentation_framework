@@ -159,9 +159,9 @@ def get_images_info(mode, img_folder, img_exts, classes=None, roi_info=None, pat
                     rois, _num_data = get_imgs_info_from_patches(mode, img_file, classes, patch_info, roi=roi)
                     img_info['rois'] += rois
                     num_data += _num_data
-                
-        if img_info['rois'] != None:
-            assert (img_info['rois']) != 0, ValueError(f"There is no rois for {img_info}")
+        
+        if img_info['rois'] != None and len(img_info['rois']) == 0:
+            continue
                                     
         ### to debug dataset if all data is used
         if roi_info == None and patch_info == None:
@@ -189,19 +189,21 @@ def get_imgs_info_from_patches(mode, img_file, classes, patch_info, roi=None):
             label = shape['label'].lower()
 
             if label in classes or label.upper() in classes: 
-                _points = get_points_from_labelme(shape, shape_type, points, patch_info, mode)
-                if not _points:
+                points, _points = get_points_from_labelme(shape, shape_type, points, patch_info, mode)
+
+                if not _points: ### there is no points
                     continue
 
                 if roi != None:
-                    if is_points_not_in_roi(_points, roi):
+                    if is_points_not_in_roi(_points, roi): ### when out of roi
                         continue
 
                 points.append(_points)
-                if patch_info['patch_centric']:
-                    centric_patches_rois, centric_patches_num_data = get_centric_patches(_points, patch_info, img_width, img_height, roi=roi)
-                    rois += centric_patches_rois
-                    num_data += centric_patches_num_data
+                
+        if patch_info['patch_centric']:
+            centric_patches_rois, centric_patches_num_data = get_centric_patches(points, patch_info, img_width, img_height, roi=roi)
+            rois += centric_patches_rois
+            num_data += centric_patches_num_data
 
         if patch_info['patch_slide']:
             if mode == 'train':
@@ -218,9 +220,11 @@ def get_imgs_info_from_patches(mode, img_file, classes, patch_info, roi=None):
                 raise ValueError(f"There is no such mode({mode})")
 
             for patch_coord in patch_coords:
-                assert patch_coord[2] - patch_coord[0] == patch_info['patch_width'] and patch_coord[3] - patch_coord[1] == patch_info['patch_height'], f"patch coord is wrong"
+                assert patch_coord[2] - patch_coord[0] == patch_info['patch_width'] and \
+                        patch_coord[3] - patch_coord[1] == patch_info['patch_height'], f"patch coord is wrong"
                 rois.append(patch_coord)
             num_data += num_patch_slide
+            
     else:
         if patch_info['patch_slide']:
             overlap_ratio=patch_info['patch_overlap_ratio']
@@ -277,7 +281,7 @@ def is_points_not_in_roi(points, roi):
     
     return not_in_roi
 
-def get_centric_patches(_points, patch_info, img_width, img_height, roi=None):
+def get_centric_patches(points, patch_info, img_width, img_height, roi=None):
     if roi != None:
         tl_x, tl_y, br_x, br_y = roi[0], roi[1], roi[2], roi[3]
     else:
@@ -288,54 +292,55 @@ def get_centric_patches(_points, patch_info, img_width, img_height, roi=None):
     assert patch_info['patch_height'] <= br_y - tl_y, \
                     ValueError(f"patch height({patch_info['patch_height']}) should be bigger than height({br_y - tl_y})")
 
-    cxs, cys = [], []
     centric_patches_rois = []
     centric_patches_num_data = 0
-    for _point in _points:
-        cxs.append(_point[0])
-        cys.append(_point[1])
+    for _points in points:
+        cxs, cys = [], []
+        for _point in _points:
+            cxs.append(_point[0])
+            cys.append(_point[1])
 
-    avg_cx = int(np.mean(cxs))
-    avg_cy = int(np.mean(cys))
-    
-    if roi != None and is_points_not_in_roi([avg_cx, avg_cy], roi):
-        return [], 0
+        avg_cx = int(np.mean(cxs))
+        avg_cy = int(np.mean(cys))
+        
+        if roi != None and is_points_not_in_roi([avg_cx, avg_cy], roi):
+            return [], 0
 
-    shake_x = int(patch_info['patch_width']/patch_info['shake_dist_ratio'])
-    shake_y = int(patch_info['patch_height']/patch_info['shake_dist_ratio'])
+        shake_x = int(patch_info['patch_width']/patch_info['shake_dist_ratio'])
+        shake_y = int(patch_info['patch_height']/patch_info['shake_dist_ratio'])
 
-    shake_directions = [[avg_cx, avg_cy], \
-                        [avg_cx + shake_x, avg_cy], [avg_cx - shake_x, avg_cy], \
-                        [avg_cx, avg_cy - shake_y], [avg_cx, avg_cy + shake_y], \
-                        [avg_cx + shake_x, avg_cy + shake_y], [avg_cx + shake_x, avg_cy - shake_y], \
-                        [avg_cx - shake_x, avg_cy + shake_y], [avg_cx - shake_x, avg_cy - shake_y]
-                    ]
-    
-    for shake_idx in range(0, patch_info['shake_patch'] + 1):
-        avg_cx = shake_directions[shake_idx][0]
-        avg_cy = shake_directions[shake_idx][1]
+        shake_directions = [[avg_cx, avg_cy], \
+                            [avg_cx + shake_x, avg_cy], [avg_cx - shake_x, avg_cy], \
+                            [avg_cx, avg_cy - shake_y], [avg_cx, avg_cy + shake_y], \
+                            [avg_cx + shake_x, avg_cy + shake_y], [avg_cx + shake_x, avg_cy - shake_y], \
+                            [avg_cx - shake_x, avg_cy + shake_y], [avg_cx - shake_x, avg_cy - shake_y]
+                        ]
+        
+        for shake_idx in range(0, patch_info['shake_patch'] + 1):
+            avg_cx = shake_directions[shake_idx][0]
+            avg_cy = shake_directions[shake_idx][1]
 
-        br_offset_x = int(avg_cx + patch_info['patch_width']/2 - br_x)
-        br_offset_y = int(avg_cy + patch_info['patch_height']/2 - br_y)
-        if br_offset_x > 0:
-            avg_cx -= br_offset_x 
-        if br_offset_y > 0:
-            avg_cy -= br_offset_y
-            
-        tl_offset_x = int(avg_cx - patch_info['patch_width']/2)
-        tl_offset_y = int(avg_cy - patch_info['patch_height']/2)
-        if tl_offset_x < 0:
-            avg_cx -= tl_offset_x 
-        if tl_offset_y < 0:
-            avg_cy -= tl_offset_y
+            br_offset_x = int(avg_cx + patch_info['patch_width']/2 - br_x)
+            br_offset_y = int(avg_cy + patch_info['patch_height']/2 - br_y)
+            if br_offset_x > 0:
+                avg_cx -= br_offset_x 
+            if br_offset_y > 0:
+                avg_cy -= br_offset_y
+                
+            tl_offset_x = int(avg_cx - patch_info['patch_width']/2)
+            tl_offset_y = int(avg_cy - patch_info['patch_height']/2)
+            if tl_offset_x < 0:
+                avg_cx -= tl_offset_x 
+            if tl_offset_y < 0:
+                avg_cy -= tl_offset_y
 
-        patch_coord = [int(avg_cx - int(patch_info['patch_width']/2)), int(avg_cy - int(patch_info['patch_height']/2)), \
-                                        int(avg_cx + int(patch_info['patch_width']/2)), int(avg_cy + int(patch_info['patch_height']/2))]
-        assert patch_coord[2] - patch_coord[0] == patch_info['patch_width'] and patch_coord[3] - patch_coord[1] == patch_info['patch_height'], \
-                ValueError(f"patch coord is wrong")
+            patch_coord = [int(avg_cx - int(patch_info['patch_width']/2)), int(avg_cy - int(patch_info['patch_height']/2)), \
+                                            int(avg_cx + int(patch_info['patch_width']/2)), int(avg_cy + int(patch_info['patch_height']/2))]
+            assert patch_coord[2] - patch_coord[0] == patch_info['patch_width'] and patch_coord[3] - patch_coord[1] == patch_info['patch_height'], \
+                    ValueError(f"patch coord is wrong")
 
-        centric_patches_rois.append(patch_coord)
-        centric_patches_num_data += 1
+            centric_patches_rois.append(patch_coord)
+            centric_patches_num_data += 1
 
     return centric_patches_rois, centric_patches_num_data
 
