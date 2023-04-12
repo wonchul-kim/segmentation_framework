@@ -10,7 +10,7 @@ import math
 import numpy as np
 from typing import Any, Callable, Optional, Tuple, List
 from utils.labelme_utils import get_mask_from_labelme
-from utils.preprocessings import get_images_info
+from utils.patches import get_images_info
 
 class COCODataset(torchvision.datasets.vision.VisionDataset):
     def __init__(

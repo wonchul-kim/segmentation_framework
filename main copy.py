@@ -22,11 +22,6 @@ import utils.helpers as utils
 import matplotlib.pyplot as plt 
 from src.pytorch.validate import save_validation
 
-
-# class TrainEngine():
-#     def __init__(self):
-        
-
 def main(args):
     if args.output_dir:
         utils.mkdir(args.output_dir)

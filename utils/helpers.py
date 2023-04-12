@@ -9,7 +9,8 @@ import numpy as np
 import cv2 
 import math
 from src.pytorch.datasets import LabelmeIterableDatasets
-from utils.preprocessings import denormalize
+from utils.preprocess import denormalize
+
 def cat_list(images, fill_value=0):
     max_size = tuple(max(s) for s in zip(*[img.shape for img in images]))
     batch_shape = (len(images),) + max_size
@@ -17,7 +18,6 @@ def cat_list(images, fill_value=0):
     for img, pad_img in zip(images, batched_imgs):
         pad_img[..., : img.shape[-2], : img.shape[-1]].copy_(img)
     return batched_imgs
-
 
 def collate_fn(batch):
     """
