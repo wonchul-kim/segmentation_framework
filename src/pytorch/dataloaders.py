@@ -1,10 +1,10 @@
 import torch 
 import utils.helpers as utils
-from src.pytorch.datasets import COCODataset, MaskDataset, LabelmeDatasets, LabelmeIterableDatasets
+from src.pytorch.datasets import COCODataset, MaskDataset, LabelmeDatasets, IterableLabelmeDatasets
 from utils.torch_utils import worker_init_fn
 
 def get_dataloader(dataset, dataset_val, args):
-    if isinstance(dataset, LabelmeIterableDatasets):
+    if isinstance(dataset, IterableLabelmeDatasets):
         data_loader = torch.utils.data.DataLoader(
             dataset,
             batch_size=args.batch_size,

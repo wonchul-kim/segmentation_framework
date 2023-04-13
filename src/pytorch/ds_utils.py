@@ -2,7 +2,7 @@ import os.path as osp
 from threading import Thread
 from utils.transforms import Compose
 import torchvision
-from src.pytorch.datasets import COCODataset, MaskDataset, LabelmeDatasets, LabelmeIterableDatasets
+from src.pytorch.datasets import COCODataset, MaskDataset, LabelmeDatasets, IterableLabelmeDatasets
 from utils.coco_utils import FilterAndRemapCocoCategories, ConvertCocoPolysToMask, _coco_remove_images_without_annotations, get_coco_cat_list
 
 def get_dataset(dir_path, name, image_set, transform, classes, roi_info=None, patch_info=None):
@@ -22,10 +22,10 @@ def get_dataset(dir_path, name, image_set, transform, classes, roi_info=None, pa
                 roi_info=roi_info, patch_info=patch_info)
 
 
-    if isinstance(ds, LabelmeIterableDatasets):
-        print(f"* There are {ds.num_data} images to {image_set}")
+    if isinstance(ds, IterableLabelmeDatasets):
+        print(f"* There are {ds.num_data} rois for {image_set} dataset")
     else:
-        print(f"* There are {len(ds)} images to {image_set}")
+        print(f"* There are {len(ds)} rois for {image_set} dataset")
 
     return ds, num_classes
 
@@ -80,7 +80,7 @@ def get_labelme(root, image_set, transforms, classes, roi_info=None, patch_info=
     img_folder = PATHS[image_set]
     img_folder = osp.join(root, img_folder)
 
-    dataset = LabelmeIterableDatasets(image_set, img_folder, classes, transforms=transforms, roi_info=roi_info, patch_info=patch_info)
+    dataset = IterableLabelmeDatasets(image_set, img_folder, classes, transforms=transforms, roi_info=roi_info, patch_info=patch_info)
 
     # if image_set == "train": #FIXME: Need to make this option 
     #     dataset = _coco_remove_images_without_annotations(dataset, CAT_LIST)

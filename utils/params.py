@@ -6,6 +6,35 @@ from datetime import datetime
 import yaml
 
 def set_params(cfgs, _vars, _augs=None):
+    _vars.input_dir = cfgs.input_dir
+    _vars.dataset_format = cfgs.dataset_format
+    _vars.input_height = cfgs.input_height
+    _vars.input_width = cfgs.input_width
+    _vars.weights = cfgs.weights
+    _vars.use_deterministic_algorithms = cfgs.use_deterministic_algorithms
+    _vars.batch_size = cfgs.batch_size
+    _vars.num_workers = cfgs.num_workers
+    _vars.model_name = cfgs.model_name
+    _vars.weights_backbone = cfgs.weights_backbone
+    _vars.aux_loss = cfgs.aux_loss
+    _vars.optimizer = cfgs.optimizer
+    _vars.lr_warmup_epochs = cfgs.lr_warmup_epochs
+    _vars.lr_warmup_method = cfgs.lr_warmup_method
+    _vars.lr_warmup_decay = cfgs.lr_warmup_decay
+    _vars.amp = cfgs.amp
+    _vars.lr_scheduler_type = cfgs.lr_scheduler_type
+    _vars.init_lr = cfgs.init_lr
+    _vars.momentum = cfgs.momentum
+    _vars.weight_decay = cfgs.weight_decay
+    _vars.loss_fn = cfgs.loss_fn
+    _vars.start_epoch = cfgs.start_epoch
+    _vars.epochs = cfgs.epochs
+    _vars.resume = cfgs.resume
+    _vars.world_size = cfgs.world_size
+    _vars.dist_url = cfgs.dist_url
+    _vars.test_only = cfgs.test_only
+    _vars.print_freq = cfgs.print_freq
+    
     if hasattr(cfgs, "output_dir"):
         if cfgs.output_dir == None or cfgs.output_dir == "None" or cfgs.output_dir == "none":
             _vars.output_dir = str(Path(cfgs.input_dir).parent)
@@ -17,6 +46,8 @@ def set_params(cfgs, _vars, _augs=None):
     ### classes
     if isinstance(cfgs.classes, str):
         _vars.classes = list(map(str, cfgs.classes.split(",")))
+    elif isinstance(cfgs.classes, list):
+        _vars.classes = cfgs.classes
     
     for idx, _class in enumerate(_vars.classes):
         _vars.classes[idx] = _class.lower()
@@ -68,9 +99,9 @@ def set_params(cfgs, _vars, _augs=None):
             _vars.roi_start_y = list(map(int, cfgs.roi_start_y.split(',')))
             _vars.roi_width = list(map(int, cfgs.roi_width.split(',')))
             _vars.roi_height = list(map(int, cfgs.roi_height.split(',')))
-
+            
             _vars.roi_info = []
-            for roi_start_x, roi_start_y, roi_width, roi_height in zip(cfgs.roi_start_x, cfgs.roi_start_y, cfgs.roi_width, cfgs.roi_height):
+            for roi_start_x, roi_start_y, roi_width, roi_height in zip(_vars.roi_start_x, _vars.roi_start_y, _vars.roi_width, _vars.roi_height):
                 _vars.roi_info.append([int(roi_start_x), int(roi_start_y), int(roi_start_x + roi_width), int(roi_start_y + roi_height)])
         else:
             _vars.roi_info = [[int(cfgs.roi_start_x), int(cfgs.roi_start_y), int(cfgs.roi_start_x) + int(cfgs.roi_width), int(cfgs.roi_start_y) + int(cfgs.roi_height)]]

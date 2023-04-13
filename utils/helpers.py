@@ -8,7 +8,7 @@ import re
 import numpy as np
 import cv2 
 import math
-from src.pytorch.datasets import LabelmeIterableDatasets
+from src.pytorch.datasets import IterableLabelmeDatasets
 from utils.preprocess import denormalize
 
 def cat_list(images, fill_value=0):
@@ -70,7 +70,7 @@ def increment_path(path, exist_ok=False, sep='', mkdir=False):
 def debug_dataset(dataset, debug_dir, mode, num_classes, preprocessing_norm=False, ratio=1, channel_first=True, input_channel=3,\
                     denormalization_fn=None, image_loading_mode='rgb', width=256, height=256, rows=4, cols=4):
 
-    if isinstance(dataset, LabelmeIterableDatasets):
+    if isinstance(dataset, IterableLabelmeDatasets):
         # imgsz_h, imgsz_w = dataset[0][1].shape
 
         # width = min(imgsz_w, width)

@@ -6,11 +6,11 @@ def set_envs(args):
     init_distributed_mode(args)
     device = torch.device(args.device)
 
-    if args.use_deterministic_algorithms:
-        torch.backends.cudnn.benchmark = False
-        torch.use_deterministic_algorithms(True)
-    else:
-        torch.backends.cudnn.benchmark = True
+    # if args.use_deterministic_algorithms:
+    #     torch.backends.cudnn.benchmark = False
+    #     torch.use_deterministic_algorithms(True)
+    # else:
+    #     torch.backends.cudnn.benchmark = True
 
     return device
 

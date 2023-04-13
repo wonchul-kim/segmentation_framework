@@ -89,7 +89,7 @@ class MaskDataset(torch.utils.data.Dataset):
         return image, target, fname
 
             
-class LabelmeIterableDatasets(torch.utils.data.IterableDataset):
+class IterableLabelmeDatasets(torch.utils.data.IterableDataset):
     def __init__(self, mode, img_folder, classes, transforms=None, roi_info=None, patch_info=None, img_exts=['png', 'bmp']):
         
         assert osp.exists(img_folder), ValueError(f"There is no such image folder: {img_folder}")
@@ -149,7 +149,7 @@ class LabelmeIterableDatasets(torch.utils.data.IterableDataset):
     def __len__(self):
         return self.num_data
 
-# class LabelmeIterableDatasets(torch.utils.data.IterableDataset):
+# class IterableLabelmeDatasets(torch.utils.data.IterableDataset):
 #     def __init__(self, img_folder, classes, transforms=None, roi_info=None, patch_info=None, img_exts=['png', 'bmp']):
 #         self.imgs_info, self.num_data = get_images_info(img_folder, img_exts=img_exts, roi_info=roi_info, patch_info=patch_info)
 #         assert len(self.imgs_info) != 0, f"There is no images in dataset directory: {osp.join(self.root_dir)} with {img_exts}"
