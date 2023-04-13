@@ -1,0 +1,27 @@
+### for model params
+weights: null #the weights enum name to load
+weights_backbone: null #the backbone weights enum name to load
+
+### for image #######################
+img_exts: ["bmp"]
+
+### for loss params. #######################
+aux_loss: false
+
+### for training params. #######################
+momentum: 0.9
+weight_decay: 0.0001
+
+### for debugging #######################
+
+### for logging #######################
+
+### for distributed training params. #######################
+world_size: 1 #number of distributed processes
+dist_url: env:// #url used to set up distributed training
+
+### etc. #######################
+
+#Forces the use of deterministic algorithms only ?????????????????????
+use_deterministic_algorithms: false
+test_only: false

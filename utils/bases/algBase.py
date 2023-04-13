@@ -5,7 +5,7 @@ import argparse
 
 from utils.loggers.logger import get_root_logger
 from utils.bases.commBase import CommBase
-from utils.helpers.parsing import set_cfgs, yaml2dict, set_augs
+from utils.parsing import get_cfgs, yaml2dict, get_augs
 
 class AlgBase(CommBase, metaclass=ABCMeta):
     def __init__(self):
@@ -16,16 +16,18 @@ class AlgBase(CommBase, metaclass=ABCMeta):
         self._flags = argparse.Namespace() # set internal flags
         self._augs = dict() # set aug parameters
 
-        self.config_fp = None, 
-        self.recipe_fp = None, 
-        self.option_fp = None, 
+        self.configs = None 
+        self.info = None 
+        self.recipe = None 
+        self.option = None 
 
         self._alg_status = "IDLE"
         self._alg_logger  = None 
 
     def _alg_set_status(self, status="", func_name="", class_name=""):
         self._alg_status = status
-        self._alg_logger.debug(f"[{class_name}] - [{func_name}] - {self._alg_status}")
+        if self._alg_logger is not None:
+            self._alg_logger.debug(f"[{class_name}] - [{func_name}] - {self._alg_status}")
 
     def get_logger_handlers_info(self):
         return self._alg_logger.root.handlers
@@ -56,31 +58,22 @@ class AlgBase(CommBase, metaclass=ABCMeta):
         self._alg_logger = get_root_logger(name=__class__.__name__, log_file=log_fname, log_level=log_level)
 
     @abstractmethod
-    def alg_set_cfgs(self, config, recipe=None, option=None, mode=None, augmentations=None):
+    def alg_set_cfgs(self, config, info=None, recipe=None, augs=None, option=None):
         '''
         read or get parameters or configurations
         '''
-        self.config_fp = config 
-        self.recipe_fp = recipe 
-        self.option_fp = option 
+        self.config = config 
+        self.info = info
+        self.recipe = recipe 
+        assert self.config != None or self.info != None or self.recipe != None, RuntimeError(f"One of config, info, and recipe must be provided")
 
-        self.cfgs = set_cfgs(config=config, recipe=recipe, option=option, mode=mode)
+        self.option = option 
+
+        self.cfgs = get_cfgs(config=config, info=info, recipe=recipe, option=option)
         
-        if augmentations: 
-            self._augs = set_augs(augmentations=augmentations)
+        if augs: 
+            self._augs = get_augs(augmentations=augs)
         # self._alg_set_status("GET cfgs.", self.alg_get_cfgs.__name__)
-
-    def get_cfgs(self):
-        return self.cfgs 
-
-    def get_cfgs_config_dict(self):
-        return yaml2dict(self.config_fp)
-    
-    def get_cfgs_recipe_dict(self):
-        return yaml2dict(self.recipe_fp)
-
-    def get_cfgs_option_dict(self):
-        return yaml2dict(self.option_fp)
 
     @abstractmethod
     def alg_set_params(self):

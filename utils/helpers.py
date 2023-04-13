@@ -9,7 +9,7 @@ import numpy as np
 import cv2 
 import math
 from src.pytorch.datasets import IterableLabelmeDatasets
-from utils.preprocess import denormalize
+from src.pytorch.preprocess import denormalize
 
 def cat_list(images, fill_value=0):
     max_size = tuple(max(s) for s in zip(*[img.shape for img in images]))

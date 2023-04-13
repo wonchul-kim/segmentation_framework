@@ -1,7 +1,7 @@
 import argparse
 import yaml
-import copy
 import csv
+import os.path as osp 
 
 def csv_to_dict(csv_fname):
     
@@ -29,47 +29,27 @@ def yaml2dict(fp):
             
     return _dict
 
-def set_cfgs(config, recipe=None, option=None, mode=None):
+def get_cfgs(config, info=None, recipe=None, option=None):
     cfgs = argparse.Namespace()
-    if isinstance(config, str):
-        with open(config, 'r') as yf:
-            try:
-                config = yaml.safe_load(yf)
-            except yaml.YAMLError as exc:
-                print(exc)
-
     _cfgs = vars(cfgs)
-    if config != None:
-        for key, val in config.items():
-            _cfgs[key] = val 
-        
-    if recipe != None:
-        if isinstance(recipe, str):
-            if mode == "" or mode == None:
-                with open(recipe) as f:
-                    recipe = yaml.safe_load(f)
-            else:
-                with open(recipe) as f:
-                    recipe = yaml.safe_load(f)[mode]
+    for obj in [config, info, recipe, option]:
+        if obj is not None:
+            if isinstance(obj, str):
+                assert osp.exists(obj), ValueError(f"There is no such file: {obj}")
+                _dict = None
+                with open(obj, 'r') as yf:
+                    try:
+                        _dict = yaml.safe_load(yf)
+                    except yaml.YAMLError as exc:
+                        print(exc)
 
-        for key, val in recipe.items():
-            _cfgs[key] = val
-
-    if option != None:
-        if isinstance(option, str):
-            if mode == "" or mode == None:
-                with open(option) as f:
-                    option = yaml.safe_load(f)
-            else:
-                with open(option) as f:
-                    option = yaml.safe_load(f)[mode]
-
-        for key, val in option.items():
-            _cfgs[key] = val
+            if _dict != None:
+                for key, val in _dict.items():
+                    _cfgs[key] = val 
 
     return cfgs
 
-def set_augs(augmentations, format='dict'):
+def get_augs(augmentations, format='dict'):
     augs = argparse.Namespace()
     if isinstance(augmentations, str):
         with open(augmentations, 'r') as yf:

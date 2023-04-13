@@ -3,11 +3,7 @@ import os.path as osp
 import torchvision
 import torch
 from PIL import Image
-import cv2
 import os
-import json
-import math
-import numpy as np
 from typing import Any, Callable, Optional, Tuple, List
 from utils.labelme_utils import get_mask_from_labelme
 from utils.patches import get_images_info
@@ -55,7 +51,7 @@ class MaskDataset(torch.utils.data.Dataset):
             'tree', 'signsymbol', 'fence', 'car', 
             'pedestrian', 'bicyclist', 'unlabelled']
 
-    def __init__(self, img_folder, classes, roi=None, transforms=None, img_exts=['png', 'jpg']):
+    def __init__(self, img_folder, classes, roi=None, transforms=None, img_exts=['png', 'bmp']):
         self.img_folder = img_folder
         self.roi = roi
         self.transforms = transforms
@@ -90,7 +86,8 @@ class MaskDataset(torch.utils.data.Dataset):
 
             
 class IterableLabelmeDatasets(torch.utils.data.IterableDataset):
-    def __init__(self, mode, img_folder, classes, transforms=None, roi_info=None, patch_info=None, img_exts=['png', 'bmp']):
+    def __init__(self, mode, img_folder, classes, transforms=None, roi_info=None, patch_info=None, \
+                image_loading_mode='rgb', img_exts=['png', 'bmp']):
         
         assert osp.exists(img_folder), ValueError(f"There is no such image folder: {img_folder}")
         

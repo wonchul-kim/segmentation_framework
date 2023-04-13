@@ -7,7 +7,7 @@ import torch
 from utils.torch_utils import reduce_across_processes
 from utils.metrics import ConfusionMatrix, MetricLogger
 from src.pytorch.datasets import IterableLabelmeDatasets
-from utils.preprocess import denormalize
+from src.pytorch.preprocess import denormalize
 
 def evaluate(model, dataloader, device, num_classes):
     model.eval()

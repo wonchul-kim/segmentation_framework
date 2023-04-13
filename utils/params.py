@@ -6,42 +6,36 @@ from datetime import datetime
 import yaml
 
 def set_params(cfgs, _vars, _augs=None):
-    _vars.input_dir = cfgs.input_dir
-    _vars.dataset_format = cfgs.dataset_format
-    _vars.input_height = cfgs.input_height
-    _vars.input_width = cfgs.input_width
-    _vars.weights = cfgs.weights
-    _vars.use_deterministic_algorithms = cfgs.use_deterministic_algorithms
-    _vars.batch_size = cfgs.batch_size
-    _vars.num_workers = cfgs.num_workers
-    _vars.model_name = cfgs.model_name
-    _vars.weights_backbone = cfgs.weights_backbone
-    _vars.aux_loss = cfgs.aux_loss
-    _vars.optimizer = cfgs.optimizer
-    _vars.lr_warmup_epochs = cfgs.lr_warmup_epochs
-    _vars.lr_warmup_method = cfgs.lr_warmup_method
-    _vars.lr_warmup_decay = cfgs.lr_warmup_decay
-    _vars.amp = cfgs.amp
-    _vars.lr_scheduler_type = cfgs.lr_scheduler_type
-    _vars.init_lr = cfgs.init_lr
-    _vars.momentum = cfgs.momentum
-    _vars.weight_decay = cfgs.weight_decay
-    _vars.loss_fn = cfgs.loss_fn
-    _vars.start_epoch = cfgs.start_epoch
-    _vars.epochs = cfgs.epochs
-    _vars.resume = cfgs.resume
-    _vars.world_size = cfgs.world_size
-    _vars.dist_url = cfgs.dist_url
-    _vars.test_only = cfgs.test_only
-    _vars.print_freq = cfgs.print_freq
+    ### info
+    _cfgs = vars(cfgs)
+    __vars = vars(_vars)
     
-    if hasattr(cfgs, "output_dir"):
-        if cfgs.output_dir == None or cfgs.output_dir == "None" or cfgs.output_dir == "none":
-            _vars.output_dir = str(Path(cfgs.input_dir).parent)
-        else:
-            _vars.output_dir = str(cfgs.output_dir)
-    else:
-        _vars.output_dir = str(Path(cfgs.input_dir).parent)
+    str_variables = ['input_dir', 'output_dir', 'dataset_format', 'weights', 'model_name', 'weights_backbone', 'optimizer', \
+                    'lr_warmup_method', 'lr_scheduler_type', 'loss_fn', 'dist_url']
+    int_variables = ['input_height', 'input_width', 'input_channel', 'batch_size', 'num_workers', 'lr_warmup_epochs', 'start_epoch', \
+                    'epochs', 'world_size', 'print_freq']
+    boolean_variables = ['use_deterministic_algorithms', 'aux_loss', 'amp', 'resume', 'test_only']
+    float_variables = ['lr_warmup_decay', 'init_lr', 'momentum', 'weight_decay']
+    
+    for variable in str_variables:
+        __vars[variable] = str(_cfgs[variable])
+        
+    for variable in int_variables:
+        __vars[variable] = int(_cfgs[variable])
+    
+    for variable in boolean_variables:
+        __vars[variable] = bool(_cfgs[variable])
+    
+    for variable in float_variables:
+        __vars[variable] = float(_cfgs[variable])
+    
+    # if hasattr(cfgs, "output_dir"):
+    #     if cfgs.output_dir == None or cfgs.output_dir == "None" or cfgs.output_dir == "none":
+    #         _vars.output_dir = str(Path(cfgs.input_dir).parent)
+    #     else:
+    #         _vars.output_dir = str(cfgs.output_dir)
+    # else:
+    #     _vars.output_dir = str(Path(cfgs.input_dir).parent)
 
     ### classes
     if isinstance(cfgs.classes, str):

@@ -1,5 +1,5 @@
 ### for model params #######################
-model_name: deeplabv3_resnet101
+model_name: deeplabv3_resnet50
 # deeplabv3plus_mobilenet, deeplabv3plus_resnet101, deeplabv3plus_resnet50,
 # deeplabv3plus_hrnetv2_48, deeplabv3plus_hrnetv2_32, deeplabv3plus_xception
 # ddrnet_39, ddrnet_23, ddrnet_23_slim
@@ -7,39 +7,33 @@ model_name: deeplabv3_resnet101
 input_height: 512
 input_width: 512
 input_channel: 3
-weights: null #the weights enum name to load
-weights_backbone: null #the backbone weights enum name to load
 
-### for image processing #######################
+### for image #######################
 preprocessing_norm: true
 image_loading_mode: "rgb"
 
 ### for loss params. #######################
-aux_loss: false
 
 ### for training params. #######################
 device: cuda
-device_ids: 0,1
+device_ids: 0,1,2,3
 start_epoch: 0
 epochs: 3000
-batch_size: 4
+batch_size: 64
 num_workers: 16
 loss_fn: dice
 optimizer: "sgd"
 lr_scheduler_type: lambda
 init_lr: 0.01
-momentum: 0.9
-weight_decay: 0.0001
 lr_warmup_epochs: 0
 lr_warmup_method: linear
 lr_warmup_decay: 0.01
 amp: false # Mixed precision training parameters
 
-### for debugging #######################
-debug_dataset: false
+### for logs #######################
+debug_dataset: true
 debug_dataset_ratio: 0.1
 
-### for logging #######################
 print_freq: 10
 save_model_freq: 10
 save_val_img: true
@@ -47,13 +41,8 @@ save_val_img_ratio: 1
 save_val_img_freq: 10
 save_val_img_iou: 0.6
 
-### for distributed training params. #######################
-world_size: 1 #number of distributed processes
-dist_url: env:// #url used to set up distributed training
+### for envs #######################
 
 ### etc. #######################
 resume: false # str >> seed_model
 
-#Forces the use of deterministic algorithms only ?????????????????????
-use_deterministic_algorithms: false
-test_only: false

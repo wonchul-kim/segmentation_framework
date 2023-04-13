@@ -3,7 +3,7 @@ output_dir: "./res/sungwoo"
 classes: ["STABBED", "POP"]
 dataset_format: labelme
 
-### roi
+### rois
 roi: true
 roi_from_json: false
 roi_start_x: 10,960,5100,8800
