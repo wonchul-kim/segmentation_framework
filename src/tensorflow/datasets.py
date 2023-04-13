@@ -2,18 +2,14 @@ import os
 import os.path as osp 
 import numpy as np
 import cv2 
-import json
 import random
-import glob 
-import math
 from pathlib import Path
 from utils.patches import get_images_info
 from utils.labelme_utils import get_mask_from_labelme
 
 class IterableLabelmeDatasets():
-    def __init__(self, mode, root_dir, classes, roi_info=None, patch_info=None, input_formats=['png', 'bmp'], image_loading_mode='bgr', \
+    def __init__(self, img_folder, mode, classes, roi_info=None, patch_info=None, img_exts=['png', 'bmp'], image_loading_mode='bgr', \
                                 augmentations=None, preprocessing=None, configs_dir=None, logger=None):
-        img_folder = osp.join(root_dir, mode)
         self.mode = mode 
         self.roi_info = roi_info
         self.classes = classes
@@ -25,11 +21,12 @@ class IterableLabelmeDatasets():
         self.logger = logger
         
         ### To check applied augmentations in configs directory
-        aug_txt = open(Path(configs_dir) / 'augmentations_{}.txt'.format(mode), 'a')
-        for aug in self.augmentations:
-            aug_txt.write(str(aug))
-            aug_txt.write("\n")
-        aug_txt.close()
+        if configs_dir is not None:
+            aug_txt = open(Path(configs_dir) / 'augmentations_{}.txt'.format(mode), 'a')
+            for aug in self.augmentations:
+                aug_txt.write(str(aug))
+                aug_txt.write("\n")
+            aug_txt.close()
 
         for idx, _class in enumerate(classes):
             self.class2idx[_class.lower()] = int(idx) + 1
@@ -39,8 +36,8 @@ class IterableLabelmeDatasets():
 
         print(f"* roi_info: {roi_info}")
         print(f"* patch_info: {patch_info}")
-        self.imgs_info, self.num_data = get_images_info(mode, img_folder, classes=self.classes, img_exts=input_formats, roi_info=roi_info, patch_info=patch_info)
-        assert self.num_data != 0, f"There is NO images in dataset directory: {osp.join(img_folder)} with {input_formats}"
+        self.imgs_info, self.num_data = get_images_info(mode, img_folder, classes=self.classes, img_exts=img_exts, roi_info=roi_info, patch_info=patch_info)
+        assert self.num_data != 0, f"There is NO images in dataset directory: {osp.join(img_folder)} with {img_exts}"
         print(f"*** There are {self.num_data} images with roi({roi_info}) and patch_info({patch_info})")
         
         self.class2label = {'_background_': 0}

@@ -1,5 +1,6 @@
 ### for model params #######################
 model_name: deeplabv3_resnet50
+backbone: "resnet50"
 # deeplabv3plus_mobilenet, deeplabv3plus_resnet101, deeplabv3plus_resnet50,
 # deeplabv3plus_hrnetv2_48, deeplabv3plus_hrnetv2_32, deeplabv3plus_xception
 # ddrnet_39, ddrnet_23, ddrnet_23_slim

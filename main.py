@@ -6,6 +6,7 @@ from pathlib import Path
 
 from src.ds_utils import get_dataset
 from src.modeling import get_model
+import tensorflow as tf
 
 from src.pytorch.train import train_one_epoch
 from src.pytorch.validate import evaluate, save_validation
@@ -13,6 +14,9 @@ from src.params.vars import set_vars
 from utils.torch_utils import set_envs, save_on_master
 import matplotlib.pyplot as plt 
 from src.pytorch.validate import save_validation
+
+from src.tensorflow.preprocess import get_normalization_fn
+
 
 from utils.bases.algBase import AlgBase
 import argparse
@@ -36,8 +40,11 @@ class TrainSegmentation(AlgBase):
         super().alg_reset()
         self.train_losses, self.train_lrs = [], []
         self._current_epoch = 0
-        # self._ml_framework = "tensorflow"
-        self._ml_framework = "pytorch"
+        self._ml_framework = "tensorflow"
+        # self._ml_framework = "pytorch"
+        
+        self._tf_variables = argparse.Namespace()
+        self._torch_variables = argparse.Namespace()
         
     def alg_set_cfgs(self, config="./data/configs/train.yml", info=None, recipe=None, augs=None, option=None):
         super().alg_set_cfgs(config=config, info=info, recipe=recipe, augs=augs, option=option)
@@ -47,6 +54,13 @@ class TrainSegmentation(AlgBase):
         set_vars(self.cfgs, self._vars, self._augs)
 
         self._device = set_envs(self._vars)
+        self.normalization_fn, self.denormalization_fn = get_normalization_fn(self._vars.model_name, self._vars.backbone, self._vars.preprocessing_norm, self._vars.configs_dir)
+
+    def alg_set_variables(self):
+        if self._ml_framework == 'tensorflow':
+            self._tf_variables.strategy = tf.distribute.MirroredStrategy()
+        else:
+            pass
         
     def alg_set_datasets(self):
         super().alg_set_datasets()
@@ -122,14 +136,15 @@ if __name__ == "__main__":
     engine = TrainSegmentation()
     engine.alg_set_cfgs(config=config, info=info, recipe=recipe, augs=None, option=None)
     engine.alg_set_params()
+    engine.alg_set_variables()
     engine.alg_set_datasets()
-    engine.alg_set_model()
+    # engine.alg_set_model()
 
-    start_time = time.time()
-    for _ in range(engine._vars.start_epoch, engine._vars.epochs):
-        engine.alg_run_one_epoch()
-        engine.alg_validate()
+    # start_time = time.time()
+    # for _ in range(engine._vars.start_epoch, engine._vars.epochs):
+    #     engine.alg_run_one_epoch()
+    #     engine.alg_validate()
         
-    total_time = time.time() - start_time
-    total_time_str = str(datetime.timedelta(seconds=int(total_time)))
-    print(f"Training time {total_time_str}")
+    # total_time = time.time() - start_time
+    # total_time_str = str(datetime.timedelta(seconds=int(total_time)))
+    # print(f"Training time {total_time_str}")

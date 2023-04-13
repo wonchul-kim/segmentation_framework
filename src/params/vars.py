@@ -9,7 +9,7 @@ def set_vars(cfgs, _vars, _augs=None):
     __vars = vars(_vars)
     
     str_variables = ['input_dir', 'output_dir', 'dataset_format', 'weights', 'model_name', 'weights_backbone', 'optimizer', \
-                    'lr_warmup_method', 'lr_scheduler_type', 'loss_fn', 'dist_url']
+                    'lr_warmup_method', 'lr_scheduler_type', 'loss_fn', 'dist_url', "backbone"]
     int_variables = ['input_height', 'input_width', 'input_channel', 'batch_size', 'num_workers', 'lr_warmup_epochs', 'start_epoch', \
                     'epochs', 'world_size', 'print_freq']
     boolean_variables = ['use_deterministic_algorithms', 'aux_loss', 'amp', 'resume', 'test_only']
