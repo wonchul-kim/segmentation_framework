@@ -1,8 +1,8 @@
 import torch
 from torch import Tensor
 from torch.nn import functional as F
-from models.segformer.base import BaseModel
-from models.segformer.head import SegFormerHead
+from models.pytorch.segformer.base import BaseModel
+from models.pytorch.segformer.head import SegFormerHead
 
 class SegFormer(BaseModel):
     def __init__(self, backbone: str = 'MiT-B0', num_classes: int = 19) -> None:

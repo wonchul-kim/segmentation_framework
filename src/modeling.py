@@ -1,6 +1,6 @@
 import torch
 
-from models.modeling import get_model as get_pytorch_model
+from models.pytorch.modeling import get_model as get_pytorch_model
 from src.pytorch.optimizers import get_optimizer
 from src.pytorch.losses import get_criterion
 from src.pytorch.lr_schedulers import get_lr_scheduler
