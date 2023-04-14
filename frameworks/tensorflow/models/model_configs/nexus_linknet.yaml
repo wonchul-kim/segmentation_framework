@@ -1,0 +1,4 @@
+standardization: false
+num_filters: 32
+depth_multiplier: 4
+crl: false

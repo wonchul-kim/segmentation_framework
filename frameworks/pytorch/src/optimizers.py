@@ -1,4 +1,3 @@
-from tkinter import W
 import torch 
 
 def get_optimizer(params_to_optimize, optimizer_fn, init_lr, momentum, weight_decay):

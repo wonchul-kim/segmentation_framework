@@ -72,12 +72,12 @@ def get_dataset(self):
                                 self._vars.debug_dataset_ratio, self._fn_denormalize, self._vars.image_channel_order)
         
         train_dataloader = IterableDataloader(train_dataset, batch_size=self._vars.batch_size, shuffle=True, drop_last=False)
-        if self._tf.strategy != None:
-            val_dataloader = IterableDataloader(self._dataset_val, batch_size=self._tf.strategy.num_replicas_in_sync, shuffle=False, drop_last=False)
+        if self._var_strategy != None:
+            val_dataloader = IterableDataloader(self._dataset_val, batch_size=self._var_strategy.num_replicas_in_sync, shuffle=False, drop_last=False)
         else:
             val_dataloader = IterableDataloader(self._dataset_val, batch_size=1, shuffle=False, drop_last=False)
         
-        if self._tf.strategy != None:
+        if self._var_strategy != None:
             _train_dataset = tf.data.Dataset.from_generator(lambda: train_dataloader,
                                                     output_types=(tf.float32, tf.float32, tf.string),
                                                     # output_shapes=(tf.TensorShape([None, None, None, None]),
@@ -94,9 +94,9 @@ def get_dataset(self):
             # logger(f"_self._dataset_val is loaded from dataset_generator" , get_dataset.__name__)
 
 
-            train_dist_dataset = self._tf.strategy.experimental_distribute_dataset(_train_dataset)
+            train_dist_dataset = self._var_strategy.experimental_distribute_dataset(_train_dataset)
             # logger(f"train_dist_dataset is loaded from experimental_distribute_dataset" , get_dataset.__name__)
-            val_dist_dataset = self._tf.strategy.experimental_distribute_dataset(self._dataset_val)
+            val_dist_dataset = self._var_strategy.experimental_distribute_dataset(self._dataset_val)
             # logger(f"val_dist_dataset is loaded from experimental_distribute_dataset" , get_dataset.__name__)
             
         self._dataloader, self._dataloader_val = train_dist_dataset, val_dist_dataset

@@ -82,7 +82,8 @@ if __name__ == "__main__":
     # info = './data/_unit_tests/projects/train/single_rois_w_patches.yml'
     info = './data/_unit_tests/projects/train/multiple_rois_w_patches.yml'
     # info = './data/projects/sungwoo_u_top_bottom.yml'
-    recipe = './data/recipes/train.yml'
+    # recipe = './data/recipes/train.yml'
+    recipe = './data/recipes/train_tf.yml'
     augs = "./data/recipes/augs.yml"
     option = None
 

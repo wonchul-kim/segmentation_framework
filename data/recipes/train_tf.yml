@@ -1,16 +1,8 @@
 ### for model params #######################
-model_name: deeplabv3_resnet50
+model_name: deeplabv3plus
 backbone: "resnet50"
-backbone_weights: "imagenet" # ---------------------------- tf
-include_tops: False # ---------------------------- tf
-pooling: null # ---------------------------- tf
-backbone_trainable: false # ---------------------------- tf
-
-seed_model: null # ---------------------------- tf
-
-num_filters: 32 # linknet # ---------------------------- tf
-depth_multiplier: 4 # linknet # ---------------------------- tf
-crl: false # ---------------------------- tf
+backbone_weights: "imagenet"
+backbone_trainable: false
 # deeplabv3plus_mobilenet, deeplabv3plus_resnet101, deeplabv3plus_resnet50,
 # deeplabv3plus_hrnetv2_48, deeplabv3plus_hrnetv2_32, deeplabv3plus_xception
 # ddrnet_39, ddrnet_23, ddrnet_23_slim
@@ -18,6 +10,12 @@ crl: false # ---------------------------- tf
 input_height: 512
 input_width: 512
 input_channel: 3
+
+seed_model: null
+
+num_filters: 32 # linknet
+depth_multiplier: 4 # linknet
+crl: false
 
 ### for image #######################
 image_loading_lib: "cv2"
@@ -36,19 +34,19 @@ epochs: 3000
 batch_size: 64
 num_workers: 16
 loss_fn: dice
-focal_loss: true # ----------------------------------------- tf
+focal_loss: true
 optimizer: "sgd"
-lr_scheduler_type: lambda
-init_lr: 0.01
-end_lr: 1e-6 # ----------------------------------------- tf
-lr_warmup_epochs: 0
-lr_warmup_hold: 0 # ----------------------------------------- tf
+lr_scheduler_type: cosine
+init_lr: 0.001
+end_lr: 1e-6
+lr_warmup_epochs: 10
+lr_warmup_hold: 0
 lr_warmup_method: linear
 lr_warmup_decay: 0.01
 amp: false # Mixed precision training parameters
 
 ### for logs #######################
-debug_dataset: true
+debug_dataset: false
 debug_dataset_ratio: 0.1
 
 print_freq: 10

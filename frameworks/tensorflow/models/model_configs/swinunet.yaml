@@ -1,0 +1,9 @@
+filter_num_begin: 128 # number of channels in the first downsampling block; it is also the number of embedded dimensions
+depth: 4 # the depth of SwinUNET; depth=4 means three down/upsampling levels and a bottom level
+stack_num_down: 2 # number of Swin Transformers per downsampling level
+stack_num_up: 2 # number of Swin Transformers per upsampling level
+patch_size: (4, 4) # Extract 4-by-4 patches from the input image. Height and width of the patch must be equal.
+num_heads: [4, 8, 8, 8] # number of attention heads per down/upsampling level
+window_size: [4, 2, 2, 2] # the size of attention window per down/upsampling level
+num_mlp: 512 # number of MLP nodes within the Transformer
+shift_window: True # Apply window shifting, i.e., Swin-MSA
