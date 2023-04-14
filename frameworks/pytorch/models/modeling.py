@@ -2,13 +2,13 @@ from hashlib import new
 import os.path as osp
 import torch 
 import torchvision 
-import models.pytorch.deeplabv3plus as deeplabv3plus
 # from models.ddrnet.ddrnet import DDRNet
-from models.pytorch.ddrnet.ddrnet_23 import get_ddrnet23
-from models.pytorch.ddrnet.ddrnet_39 import get_ddrnet39
-from models.pytorch.deeplabv3plus.utils import set_bn_momentum
-from models.pytorch.deeplabv3plus._deeplab import convert_to_separable_conv
-from models.pytorch.segformer.segformer import SegFormer
+import frameworks.pytorch.models.deeplabv3plus as deeplabv3plus
+from frameworks.pytorch.models.ddrnet.ddrnet_23 import get_ddrnet23
+from frameworks.pytorch.models.ddrnet.ddrnet_39 import get_ddrnet39
+from frameworks.pytorch.models.deeplabv3plus.utils import set_bn_momentum
+from frameworks.pytorch.models.deeplabv3plus._deeplab import convert_to_separable_conv
+from frameworks.pytorch.models.segformer.segformer import SegFormer
 import collections
 
 # def get_model(model_name, weights, weights_backbone, num_classes, aux_loss):

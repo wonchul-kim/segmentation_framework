@@ -6,8 +6,8 @@ import math
 import torch 
 from utils.torch_utils import reduce_across_processes
 from utils.metrics import ConfusionMatrix, MetricLogger
-from src.pytorch.datasets import IterableLabelmeDatasets
-from src.pytorch.preprocess import denormalize
+from frameworks.pytorch.src.datasets import IterableLabelmeDatasets
+from frameworks.pytorch.src.preprocess import denormalize
 
 def evaluate(model, dataloader, device, num_classes):
     model.eval()
@@ -56,8 +56,8 @@ RGBs = [[255, 0, 0], [0, 255, 0], [0, 0, 255], \
         [255, 255, 0], [255, 0, 255], [0, 255, 255], \
         [255, 136, 0], [136, 0, 255], [255, 51, 153]]
 
-def save_validation(model, device, dataset, num_classes, epoch, output_dir, preprocessing_norm=False, input_channel=3, \
-                        image_loading_mode='bgr', validation_image_idxes_list=[]):
+def save_validation(model, device, dataset, num_classes, epoch, output_dir, denormalize=False, input_channel=3, \
+                        image_channel_order='bgr', validation_image_idxes_list=[]):
     model.eval()
     origin = 25,25
     font = cv2.FONT_HERSHEY_SIMPLEX
@@ -88,19 +88,19 @@ def save_validation(model, device, dataset, num_classes, epoch, output_dir, prep
         preds = preds.numpy()
 
         image = image.to('cpu')[0]
-        if preprocessing_norm:
-            image = denormalize(image)
         image = image.numpy()
-        image = image.transpose((1, 2, 0))*255
+        image = image.transpose((1, 2, 0))
+        if denormalize:
+            image = denormalize(image)
         image = image.astype(np.uint8)
         mask = cv2.cvtColor(mask.numpy().astype(np.uint8)*(255//num_classes), cv2.COLOR_GRAY2BGR)
         if input_channel == 3:
-            if image_loading_mode == 'rgb':
+            if image_channel_order == 'rgb':
                 image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-            elif image_loading_mode == 'bgr':
+            elif image_channel_order == 'bgr':
                 pass
             else:
-                raise ValueError(f"There is no such image_loading_mode({image_loading_mode})")
+                raise ValueError(f"There is no such image_channel_order({image_channel_order})")
 
             preds *= 255//num_classes
             preds = cv2.cvtColor(preds.astype(np.uint8), cv2.COLOR_GRAY2BGR)

@@ -8,14 +8,14 @@ from utils.patches import get_images_info
 from utils.labelme_utils import get_mask_from_labelme
 
 class IterableLabelmeDatasets():
-    def __init__(self, img_folder, mode, classes, roi_info=None, patch_info=None, img_exts=['png', 'bmp'], image_loading_mode='bgr', \
+    def __init__(self, img_folder, mode, classes, roi_info=None, patch_info=None, img_exts=['png', 'bmp'], image_channel_order='bgr', \
                                 augmentations=None, preprocessing=None, configs_dir=None, logger=None):
         self.mode = mode 
         self.roi_info = roi_info
         self.classes = classes
         self.patch_info = patch_info
         self.class2idx = {}
-        self.image_loading_mode = image_loading_mode
+        self.image_channel_order = image_channel_order
         self.augmentations = augmentations
         self.preprocessing = preprocessing
         self.logger = logger

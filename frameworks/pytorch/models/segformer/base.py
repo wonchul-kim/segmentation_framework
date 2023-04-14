@@ -1,8 +1,8 @@
 import torch
 import math
 from torch import nn
-from models.pytorch.segformer.backbones.mit import MiT
-from models.pytorch.segformer.layers.initialize import trunc_normal_
+from frameworks.pytorch.models.segformer.backbones.mit import MiT
+from frameworks.pytorch.models.segformer.layers.initialize import trunc_normal_
 
 
 class BaseModel(nn.Module):

@@ -4,7 +4,7 @@ from src.tensorflow.datasets import IterableLabelmeDatasets
 from src.tensorflow.preprocess import get_train_augmentations, get_val_augmentations
 from src.tensorflow.preprocess import get_preprocessing
 
-def get_dataset(dir_path, name, mode, classes, roi_info=None, patch_info=None, image_loading_mode='rgb', img_exts=['png', 'bmp'], \
+def get_dataset(dir_path, name, mode, classes, roi_info=None, patch_info=None, image_channel_order='rgb', img_exts=['png', 'bmp'], \
                 preprocessing=None, augs=None, input_width=None, input_height=None, configs_dir=None, logger=None):
     paths = {
         "labelme": (dir_path, get_labelme, len(classes) + 1),
@@ -13,7 +13,7 @@ def get_dataset(dir_path, name, mode, classes, roi_info=None, patch_info=None, i
 
     ds = ds_fn(p, mode=mode, classes=classes, \
                 roi_info=roi_info, patch_info=patch_info, \
-                image_loading_mode=image_loading_mode, img_exts=img_exts, \
+                image_channel_order=image_channel_order, img_exts=img_exts, \
                 augs=augs, input_width=input_width, input_height=input_height, \
                 preprocessing=preprocessing, configs_dir=configs_dir, logger=logger)
 
@@ -26,7 +26,7 @@ def get_dataset(dir_path, name, mode, classes, roi_info=None, patch_info=None, i
     return ds, num_classes
 
 
-def get_labelme(root, mode, classes, roi_info=None, patch_info=None, image_loading_mode='rgb', img_exts=['png', 'bmp'], \
+def get_labelme(root, mode, classes, roi_info=None, patch_info=None, image_channel_order='rgb', img_exts=['png', 'bmp'], \
                 preprocessing=None, augs=None, input_width=None, input_height=None, configs_dir=None, logger=None):
     PATHS = {
         "train": ("train"),
@@ -38,7 +38,7 @@ def get_labelme(root, mode, classes, roi_info=None, patch_info=None, image_loadi
 
     dataset = IterableLabelmeDatasets(img_folder, mode, classes, \
                             roi_info=roi_info, patch_info=patch_info, \
-                            image_loading_mode=image_loading_mode, img_exts=img_exts, \
+                            image_channel_order=image_channel_order, img_exts=img_exts, \
                             # augmentations=get_train_augmentations(augs, input_height, input_width), \
                             preprocessing=get_preprocessing(preprocessing), \
                             configs_dir=None, logger=None)

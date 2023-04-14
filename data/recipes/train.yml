@@ -10,8 +10,11 @@ input_width: 512
 input_channel: 3
 
 ### for image #######################
-preprocessing_norm: true
-image_loading_mode: "rgb"
+image_loading_lib: "pil"
+image_normalization: "standard"
+# standard, 255, minmax
+image_channel_order: "rgb"
+img_exts: "bmp,png"
 
 ### for loss params. #######################
 
@@ -32,7 +35,7 @@ lr_warmup_decay: 0.01
 amp: false # Mixed precision training parameters
 
 ### for logs #######################
-debug_dataset: true
+debug_dataset: false
 debug_dataset_ratio: 0.1
 
 print_freq: 10

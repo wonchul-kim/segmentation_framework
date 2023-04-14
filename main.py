@@ -8,15 +8,14 @@ from src.ds_utils import get_dataset
 from src.modeling import get_model
 import tensorflow as tf
 
-from src.pytorch.train import train_one_epoch
-from src.pytorch.validate import evaluate, save_validation
+from frameworks.pytorch.src.train import train_one_epoch
+from frameworks.pytorch.src.validate import evaluate, save_validation
 from src.params.vars import set_vars
 from utils.torch_utils import set_envs, save_on_master
 import matplotlib.pyplot as plt 
-from src.pytorch.validate import save_validation
+from frameworks.pytorch.src.validate import save_validation
 
-from src.tensorflow.preprocess import get_normalization_fn
-
+from utils.preprocess import get_normalization_fn, get_denormalization_fn
 
 from utils.bases.algBase import AlgBase
 import argparse
@@ -40,11 +39,8 @@ class TrainSegmentation(AlgBase):
         super().alg_reset()
         self.train_losses, self.train_lrs = [], []
         self._current_epoch = 0
-        self._ml_framework = "tensorflow"
-        # self._ml_framework = "pytorch"
-        
-        self._tf_variables = argparse.Namespace()
-        self._torch_variables = argparse.Namespace()
+        # self._ml_framework = "tensorflow"
+        self._ml_framework = "pytorch"
         
     def alg_set_cfgs(self, config="./data/configs/train.yml", info=None, recipe=None, augs=None, option=None):
         super().alg_set_cfgs(config=config, info=info, recipe=recipe, augs=augs, option=option)
@@ -54,13 +50,10 @@ class TrainSegmentation(AlgBase):
         set_vars(self.cfgs, self._vars, self._augs)
 
         self._device = set_envs(self._vars)
-        self.normalization_fn, self.denormalization_fn = get_normalization_fn(self._vars.model_name, self._vars.backbone, self._vars.preprocessing_norm, self._vars.configs_dir)
+        self._fn_denormalization = get_denormalization_fn(self._vars.image_normalization)
 
     def alg_set_variables(self):
-        if self._ml_framework == 'tensorflow':
-            self._tf_variables.strategy = tf.distribute.MirroredStrategy()
-        else:
-            pass
+        pass
         
     def alg_set_datasets(self):
         super().alg_set_datasets()
@@ -76,7 +69,7 @@ class TrainSegmentation(AlgBase):
         # if self._vars.distributed:
         #     train_sampler.set_epoch(epoch)
         train_loss, train_lr = train_one_epoch(self._model, self._criterion, self._optimizer, self._dataloader, self._lr_scheduler, self._device, self._current_epoch, self._vars.print_freq, self._scaler)
-        confmat = evaluate(self._model, self._dataloader_val, device=self._device, num_classes=self._num_classes)
+        confmat = evaluate(self._model, self._dataloader_val, device=self._device, num_classes=self._var_num_classes)
         print(confmat, type(confmat))
         self.train_losses.append(train_loss)
         self.train_lrs.append(train_lr)
@@ -91,8 +84,10 @@ class TrainSegmentation(AlgBase):
 
     def alg_validate(self):
         super().alg_validate()
+
         if self._vars.save_val_img and (self._current_epoch != 0 and (self._current_epoch%self._vars.save_val_img_freq == 0 or self._current_epoch == 1)):
-            save_validation(self._model, self._device, self._dataset_val, self._num_classes, self._current_epoch, self._vars.val_dir, self._vars.preprocessing_norm)
+            save_validation(self._model, self._device, self._dataset_val, self._var_num_classes, self._current_epoch, \
+                            self._vars.val_dir, self._fn_denormalize)
             checkpoint = {
             "model_state": self._model_without_ddp.state_dict(),
             "optimizer": self._optimizer.state_dict(),
@@ -138,13 +133,13 @@ if __name__ == "__main__":
     engine.alg_set_params()
     engine.alg_set_variables()
     engine.alg_set_datasets()
-    # engine.alg_set_model()
+    engine.alg_set_model()
 
-    # start_time = time.time()
-    # for _ in range(engine._vars.start_epoch, engine._vars.epochs):
-    #     engine.alg_run_one_epoch()
-    #     engine.alg_validate()
+    start_time = time.time()
+    for _ in range(engine._vars.start_epoch, engine._vars.epochs):
+        # engine.alg_run_one_epoch()
+        engine.alg_validate()
         
-    # total_time = time.time() - start_time
-    # total_time_str = str(datetime.timedelta(seconds=int(total_time)))
-    # print(f"Training time {total_time_str}")
+    total_time = time.time() - start_time
+    total_time_str = str(datetime.timedelta(seconds=int(total_time)))
+    print(f"Training time {total_time_str}")

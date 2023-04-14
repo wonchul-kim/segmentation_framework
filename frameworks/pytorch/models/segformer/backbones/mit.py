@@ -1,7 +1,7 @@
 import torch
 from torch import nn, Tensor
 from torch.nn import functional as F
-from models.pytorch.segformer.layers.common import DropPath
+from frameworks.pytorch.models.segformer.layers.common import DropPath
 
 
 class Attention(nn.Module):

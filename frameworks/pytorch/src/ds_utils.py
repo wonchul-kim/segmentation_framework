@@ -2,10 +2,11 @@ import os.path as osp
 from threading import Thread
 from utils.transforms import Compose
 import torchvision
-from src.pytorch.datasets import COCODataset, MaskDataset, LabelmeDatasets, IterableLabelmeDatasets
+from frameworks.pytorch.src.datasets import COCODataset, MaskDataset, LabelmeDatasets, IterableLabelmeDatasets
 from utils.coco_utils import FilterAndRemapCocoCategories, ConvertCocoPolysToMask, _coco_remove_images_without_annotations, get_coco_cat_list
 
-def get_dataset(dir_path, dataset_format, mode, transform, classes, roi_info=None, patch_info=None, image_loading_mode='rgb', img_exts=['png', 'bmp']):
+def get_dataset(dir_path, dataset_format, mode, transform, classes, roi_info=None, patch_info=None, \
+                image_channel_order='rgb', img_exts=['png', 'bmp']):
     def sbd(*args, **kwargs):
         return torchvision.datasets.SBDataset(*args, mode="segmentation", **kwargs)
 
@@ -20,7 +21,8 @@ def get_dataset(dir_path, dataset_format, mode, transform, classes, roi_info=Non
 
     if dataset_format == 'labelme':
         ds = ds_fn(p, mode=mode, transforms=transform, classes=classes, \
-                roi_info=roi_info, patch_info=patch_info, image_loading_mode=image_loading_mode, img_exts=img_exts)
+                roi_info=roi_info, patch_info=patch_info, \
+                image_channel_order=image_channel_order, img_exts=img_exts)
     else:
         ds = ds_fn(p, mode=mode, transforms=transform, classes=classes)
 
@@ -71,19 +73,18 @@ def get_mask(root, mode, transforms, classes):
 
     return dataset
 
-def get_labelme(root, mode, transforms, classes, roi_info=None, patch_info=None, image_loading_mode='rgb', img_exts=['png', 'bmp']):
+def get_labelme(root, mode, transforms, classes, roi_info=None, patch_info=None, \
+                image_channel_order='rgb', img_exts=['png', 'bmp']):
     PATHS = {
         "train": ("train"),
         "val": ("val"),
     }
 
-    transforms = Compose([transforms])
-
     img_folder = PATHS[mode]
     img_folder = osp.join(root, img_folder)
 
     dataset = IterableLabelmeDatasets(mode, img_folder, classes, transforms=transforms, roi_info=roi_info, patch_info=patch_info, \
-                                    image_loading_mode=image_loading_mode, img_exts=img_exts)
+                                    image_channel_order=image_channel_order, img_exts=img_exts)
 
     # if mode == "train": #FIXME: Need to make this option 
     #     dataset = _coco_remove_images_without_annotations(dataset, CAT_LIST)

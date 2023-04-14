@@ -51,21 +51,21 @@ def set_params(cfgs, _vars, _augs=None):
     _vars.num_classes = len(cfgs.classes) + 1
 
     ####### Image processing ########################################################################
-    if hasattr(cfgs, 'preprocessing_norm'):
-        if cfgs.preprocessing_norm != None:
-            _vars.preprocessing_norm = bool(cfgs.preprocessing_norm)
+    if hasattr(cfgs, 'image_normalization'):
+        if cfgs.image_normalization != None:
+            _vars.image_normalization = bool(cfgs.image_normalization)
         else:
-            _vars.preprocessing_norm = False
+            _vars.image_normalization = False
     else:
-        _vars.preprocessing_norm = False
+        _vars.image_normalization = False
 
-    if hasattr(cfgs, 'image_loading_mode'):
-        if cfgs.image_loading_mode != None:
-            _vars.image_loading_mode = str(cfgs.image_loading_mode)
+    if hasattr(cfgs, 'image_channel_order'):
+        if cfgs.image_channel_order != None:
+            _vars.image_channel_order = str(cfgs.image_channel_order)
         else:
-            _vars.image_loading_mode = 'rgb'
+            _vars.image_channel_order = 'rgb'
     else:
-        _vars.image_loading_mode = 'rgb'
+        _vars.image_channel_order = 'rgb'
     ##################################################################################################
 
     ####### RoIs ####################################################################################

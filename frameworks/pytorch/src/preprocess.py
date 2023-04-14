@@ -15,23 +15,10 @@ def denormalize(tensor, mean=MEAN, std=STD):
     _std = 1/std
     return torchvision.transforms.functional.normalize(tensor, _mean, _std)
 
-class Denormalize(object):
-    def __init__(self, mean, std):
-        mean = np.array(mean)
-        std = np.array(std)
-        self._mean = -mean/std
-        self._std = 1/std
-
-    def __call__(self, tensor):
-        if isinstance(tensor, np.ndarray):
-            return (tensor - self._mean.reshape(-1,1,1)) / self._std.reshape(-1,1,1)
-        return torchvision.transforms.functional.normalize(tensor, self._mean, self._std)
-
-
 def get_transform(train, args):
     if train:
         return SegmentationPresetTrain(input_height=args.input_height, input_width=args.input_width, \
-                                        preprocessing_norm=args.preprocessing_norm)
+                                        image_normalization=args.image_normalization)
     elif args.weights and args.test_only:
         weights = torchvision.models.get_weight(args.weights)
         trans = weights.transforms()
@@ -45,10 +32,10 @@ def get_transform(train, args):
         return preprocessing
     else:
         return SegmentationPresetEval(input_height=args.input_height, input_width=args.input_width, \
-                                        preprocessing_norm=args.preprocessing_norm)
+                                        image_normalization=args.image_normalization)
 
 class SegmentationPresetTrain:
-    def __init__(self, *, input_height, input_width, preprocessing_norm=False):
+    def __init__(self, *, input_height, input_width, image_normalization=False):
         trans = [T.Resize(input_height, input_width)]
         trans.extend(
             [
@@ -57,8 +44,10 @@ class SegmentationPresetTrain:
             ]
         )
         
-        if preprocessing_norm:
+        if image_normalization == 'standard':
             trans.append(T.Normalize(mean=MEAN, std=STD))
+        else:
+            NotImplementedError
         
         self.transforms = T.Compose(trans)
 
@@ -67,7 +56,7 @@ class SegmentationPresetTrain:
 
 
 class SegmentationPresetEval:
-    def __init__(self, *, input_height, input_width, preprocessing_norm=False):
+    def __init__(self, *, input_height, input_width, image_normalization=False):
         trans = [T.Resize(input_height, input_width)]
         trans.extend(
             [
@@ -75,8 +64,10 @@ class SegmentationPresetEval:
                 T.ConvertImageDtype(torch.float),
             ]
         )
-        if preprocessing_norm:
+        if image_normalization == 'standard':
             trans.append(T.Normalize(mean=MEAN, std=STD))
+        else:
+            NotImplementedError
 
         self.transforms = T.Compose(trans)
 

@@ -1,13 +1,13 @@
 import torch
 
-from models.pytorch.modeling import get_model as get_pytorch_model
-from src.pytorch.optimizers import get_optimizer
-from src.pytorch.losses import get_criterion
-from src.pytorch.lr_schedulers import get_lr_scheduler
+from frameworks.pytorch.models.modeling import get_model as get_pytorch_model
+from frameworks.pytorch.src.optimizers import get_optimizer
+from frameworks.pytorch.src.losses import get_criterion
+from frameworks.pytorch.src.lr_schedulers import get_lr_scheduler
 
 def get_model(self):
     self._model = get_pytorch_model(model_name=self._vars.model_name, weights=self._vars.weights, weights_backbone=self._vars.weights_backbone, \
-                        num_classes=self._num_classes, aux_loss=self._vars.aux_loss)
+                        num_classes=self._var_num_classes, aux_loss=self._vars.aux_loss)
     
     self._model.to(self._device)
     self._model_without_ddp = self._model
@@ -39,7 +39,7 @@ def get_model(self):
     self._optimizer = get_optimizer(params_to_optimize, self._vars.optimizer, self._vars.init_lr, self._vars.momentum, self._vars.weight_decay)
     self._scaler = torch.cuda.amp.GradScaler() if self._vars.amp else None
 
-    self._criterion = get_criterion(self._vars.loss_fn, num_classes=self._num_classes)
+    self._criterion = get_criterion(self._vars.loss_fn, num_classes=self._var_num_classes)
 
     ###############################################################################################################    
     ### Need to locate parallel training settings after parameter settings for optimization !!!!!!!!!!!!!!!!!!!!!!!
@@ -67,6 +67,6 @@ def get_model(self):
     #     # We disable the cudnn benchmarking because it can noticeably affect the accuracy
     #     torch.backends.cudnn.benchmark = False
     #     torch.backends.cudnn.deterministic = True
-    #     confmat = evaluate(self._model, self._dataloader_val, device=self._device, num_classes=self._num_classes)
+    #     confmat = evaluate(self._model, self._dataloader_val, device=self._device, num_classes=self._var_num_classes)
     #     print(confmat)
     #     return
