@@ -1,15 +1,44 @@
 import warnings
 import cv2 
 import numpy as np
-import os.path as osp
-import math
+import os.path as osp 
 import torch 
 from utils.torch_utils import reduce_across_processes
 from utils.metrics import ConfusionMatrix, MetricLogger
-from frameworks.pytorch.src.datasets import IterableLabelmeDatasets
-from frameworks.pytorch.src.preprocess import denormalize
+from utils.torch_utils import save_on_master
 
-def evaluate(model, dataloader, device, num_classes):
+def run_validate(self):
+    confmat = validate(self._model, self._dataloader_val, device=self._device, num_classes=self._var_num_classes)
+    print(confmat, type(confmat))
+    
+    if self._vars.save_val_img and (self._current_epoch != 0 and (self._current_epoch%self._vars.save_val_img_freq == 0 or self._current_epoch == 1)):
+        save_validation(self._model, self._device, self._dataset_val, self._var_num_classes, self._current_epoch, \
+                        self._vars.val_dir, self._fn_denormalize)
+        checkpoint = {
+        "model_state": self._model_without_ddp.state_dict(),
+        "optimizer": self._optimizer.state_dict(),
+        "lr_scheduler": self._lr_scheduler.state_dict(),
+        "epoch": self._current_epoch,
+        "args": self._vars,
+        }   
+
+    if self._current_epoch != 0 and self._current_epoch%self._vars.save_model_freq == 0:
+        save_on_master(checkpoint, osp.join(self._vars.weights_dir, f"model_{self._current_epoch}.pth"))
+        
+    checkpoint = {
+        "model_state": self._model_without_ddp.state_dict(),
+        "optimizer": self._optimizer.state_dict(),
+        "lr_scheduler": self._lr_scheduler.state_dict(),
+        "epoch": self._current_epoch,
+        "args": self._vars,
+    }
+    if self._vars.amp:
+        checkpoint["scaler"] = self._scaler.state_dict()
+    save_on_master(checkpoint, osp.join(self._vars.weights_dir, "last.pth"))
+
+
+
+def validate(model, dataloader, device, num_classes):
     model.eval()
     confmat = ConfusionMatrix(num_classes)
     metric_logger = MetricLogger(delimiter="  ")
@@ -22,7 +51,8 @@ def evaluate(model, dataloader, device, num_classes):
             else:
                 image, target = batch
                 fname = None
-            image, target = image.to(device), target.to(device)
+                
+            image, target = image.to(device, dtype=torch.float32), target.to(device, torch.float32)
             output = model(image)
             if isinstance(output, dict):
                 output = output["out"]

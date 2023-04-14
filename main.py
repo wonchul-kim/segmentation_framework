@@ -8,14 +8,11 @@ from src.ds_utils import get_dataset
 from src.modeling import get_model
 import tensorflow as tf
 
-from frameworks.pytorch.src.train import train_one_epoch
-from frameworks.pytorch.src.validate import evaluate, save_validation
+from frameworks.pytorch.src.train import run_one_epoch
+from frameworks.pytorch.src.validate import run_validate
 from src.params.vars import set_vars
-from utils.torch_utils import set_envs, save_on_master
+from utils.torch_utils import set_envs
 import matplotlib.pyplot as plt 
-from frameworks.pytorch.src.validate import save_validation
-
-from utils.preprocess import get_normalization_fn, get_denormalization_fn
 
 from utils.bases.algBase import AlgBase
 import argparse
@@ -50,7 +47,6 @@ class TrainSegmentation(AlgBase):
         set_vars(self.cfgs, self._vars, self._augs)
 
         self._device = set_envs(self._vars)
-        self._fn_denormalization = get_denormalization_fn(self._vars.image_normalization)
 
     def alg_set_variables(self):
         pass
@@ -65,51 +61,11 @@ class TrainSegmentation(AlgBase):
 
     def alg_run_one_epoch(self):
         super().alg_run_one_epoch()
-        
-        # if self._vars.distributed:
-        #     train_sampler.set_epoch(epoch)
-        train_loss, train_lr = train_one_epoch(self._model, self._criterion, self._optimizer, self._dataloader, self._lr_scheduler, self._device, self._current_epoch, self._vars.print_freq, self._scaler)
-        confmat = evaluate(self._model, self._dataloader_val, device=self._device, num_classes=self._var_num_classes)
-        print(confmat, type(confmat))
-        self.train_losses.append(train_loss)
-        self.train_lrs.append(train_lr)
-
-        plt.subplot(211)
-        plt.plot(self.train_losses)
-        plt.subplot(212)
-        plt.plot(self.train_lrs)
-        plt.savefig(os.path.join(self._vars.log_dir, 'train_plot.png'))
-        plt.close()
-
+        run_one_epoch(self)
 
     def alg_validate(self):
         super().alg_validate()
-
-        if self._vars.save_val_img and (self._current_epoch != 0 and (self._current_epoch%self._vars.save_val_img_freq == 0 or self._current_epoch == 1)):
-            save_validation(self._model, self._device, self._dataset_val, self._var_num_classes, self._current_epoch, \
-                            self._vars.val_dir, self._fn_denormalize)
-            checkpoint = {
-            "model_state": self._model_without_ddp.state_dict(),
-            "optimizer": self._optimizer.state_dict(),
-            "lr_scheduler": self._lr_scheduler.state_dict(),
-            "epoch": self._current_epoch,
-            "args": self._vars,
-            }   
-    
-        if self._current_epoch != 0 and self._current_epoch%self._vars.save_model_freq == 0:
-            save_on_master(checkpoint, os.path.join(self._vars.weights_dir, f"model_{self._current_epoch}.pth"))
-            
-        checkpoint = {
-            "model_state": self._model_without_ddp.state_dict(),
-            "optimizer": self._optimizer.state_dict(),
-            "lr_scheduler": self._lr_scheduler.state_dict(),
-            "epoch": self._current_epoch,
-            "args": self._vars,
-        }
-        if self._vars.amp:
-            checkpoint["scaler"] = self._scaler.state_dict()
-        save_on_master(checkpoint, os.path.join(self._vars.weights_dir, "last.pth"))
-
+        run_validate(self)
 
 
 if __name__ == "__main__":
@@ -137,7 +93,7 @@ if __name__ == "__main__":
 
     start_time = time.time()
     for _ in range(engine._vars.start_epoch, engine._vars.epochs):
-        # engine.alg_run_one_epoch()
+        engine.alg_run_one_epoch()
         engine.alg_validate()
         
     total_time = time.time() - start_time
