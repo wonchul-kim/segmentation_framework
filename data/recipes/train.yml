@@ -35,7 +35,7 @@ lr_warmup_decay: 0.01
 amp: false # Mixed precision training parameters
 
 ### for logs #######################
-debug_dataset: false
+debug_dataset: true
 debug_dataset_ratio: 0.1
 
 print_freq: 10

@@ -8,8 +8,8 @@ from src.ds_utils import get_dataset
 from src.modeling import get_model
 import tensorflow as tf
 
-from frameworks.pytorch.src.train import run_one_epoch
-from frameworks.pytorch.src.validate import run_validate
+from src.train import train 
+from src.validate import validate
 from src.params.vars import set_vars
 from utils.torch_utils import set_envs
 import matplotlib.pyplot as plt 
@@ -61,11 +61,11 @@ class TrainSegmentation(AlgBase):
 
     def alg_run_one_epoch(self):
         super().alg_run_one_epoch()
-        run_one_epoch(self)
+        train(self)
 
     def alg_validate(self):
         super().alg_validate()
-        run_validate(self)
+        validate(self)
 
 
 if __name__ == "__main__":

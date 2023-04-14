@@ -1,23 +1,5 @@
 import torch
-import os.path as osp
 from utils.metrics import SmoothedValue, MetricLogger
-import matplotlib.pyplot as plt 
-
-def run_one_epoch(self):
-
-    # if self._vars.distributed:
-    #     train_sampler.set_epoch(epoch)
-    train_loss, train_lr = train_one_epoch(self._model, self._criterion, self._optimizer, self._dataloader, self._lr_scheduler, self._device, self._current_epoch, self._vars.print_freq, self._scaler)
-    self.train_losses.append(train_loss)
-    self.train_lrs.append(train_lr)
-
-    plt.subplot(211)
-    plt.plot(self.train_losses)
-    plt.subplot(212)
-    plt.plot(self.train_lrs)
-    plt.savefig(osp.join(self._vars.log_dir, 'train_plot.png'))
-    plt.close()
-
 
 def train_one_epoch(model, criterion, optimizer, dataloader, lr_scheduler, device, epoch, print_freq, scaler=None):
     '''
