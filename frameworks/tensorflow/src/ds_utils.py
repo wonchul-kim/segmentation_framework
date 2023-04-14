@@ -1,8 +1,7 @@
-from distutils.command.config import config
 import os.path as osp
-from src.tensorflow.datasets import IterableLabelmeDatasets
-from src.tensorflow.preprocess import get_train_augmentations, get_val_augmentations
-from src.tensorflow.preprocess import get_preprocessing
+from frameworks.tensorflow.src.datasets import IterableLabelmeDatasets
+from frameworks.tensorflow.src.preprocess import get_train_augmentations, get_val_augmentations
+from frameworks.tensorflow.src.preprocess import get_preprocessing
 
 def get_dataset(dir_path, name, mode, classes, roi_info=None, patch_info=None, image_channel_order='rgb', img_exts=['png', 'bmp'], \
                 preprocessing=None, augs=None, input_width=None, input_height=None, configs_dir=None, logger=None):

@@ -6,7 +6,7 @@ def train(self):
 
     # if self._vars.distributed:
     #     train_sampler.set_epoch(epoch)
-    if self._ml_framework == 'pytorch':
+    if self._var_ml_framework == 'pytorch':
         train_loss, train_lr = train_pytorch_one_epoch(self._model, self._criterion, self._optimizer, self._dataloader, self._lr_scheduler, self._device, self._current_epoch, self._vars.print_freq, self._scaler)
     else:
         NotImplementedError

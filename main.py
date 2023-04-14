@@ -36,8 +36,8 @@ class TrainSegmentation(AlgBase):
         super().alg_reset()
         self.train_losses, self.train_lrs = [], []
         self._current_epoch = 0
-        # self._ml_framework = "tensorflow"
-        self._ml_framework = "pytorch"
+        self._var_ml_framework = "tensorflow"
+        # self._var_ml_framework = "pytorch"
         
     def alg_set_cfgs(self, config="./data/configs/train.yml", info=None, recipe=None, augs=None, option=None):
         super().alg_set_cfgs(config=config, info=info, recipe=recipe, augs=augs, option=option)
@@ -89,13 +89,13 @@ if __name__ == "__main__":
     engine.alg_set_params()
     engine.alg_set_variables()
     engine.alg_set_datasets()
-    engine.alg_set_model()
+    # engine.alg_set_model()
 
-    start_time = time.time()
-    for _ in range(engine._vars.start_epoch, engine._vars.epochs):
-        engine.alg_run_one_epoch()
-        engine.alg_validate()
+    # start_time = time.time()
+    # for _ in range(engine._vars.start_epoch, engine._vars.epochs):
+    #     engine.alg_run_one_epoch()
+    #     engine.alg_validate()
         
-    total_time = time.time() - start_time
-    total_time_str = str(datetime.timedelta(seconds=int(total_time)))
-    print(f"Training time {total_time_str}")
+    # total_time = time.time() - start_time
+    # total_time_str = str(datetime.timedelta(seconds=int(total_time)))
+    # print(f"Training time {total_time_str}")
