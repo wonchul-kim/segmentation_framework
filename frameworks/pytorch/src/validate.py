@@ -8,7 +8,7 @@ from utils.metrics import ConfusionMatrix, MetricLogger
 from utils.torch_utils import save_on_master
 
 def run_validate(self):
-    confmat = validate(self._model, self._dataloader_val, device=self._device, num_classes=self._var_num_classes)
+    confmat = validate_one_epoch(self._model, self._dataloader_val, device=self._device, num_classes=self._var_num_classes)
     print(confmat, type(confmat))
     
     if self._vars.save_val_img and (self._current_epoch != 0 and (self._current_epoch%self._vars.save_val_img_freq == 0 or self._current_epoch == 1)):
@@ -36,9 +36,7 @@ def run_validate(self):
         checkpoint["scaler"] = self._scaler.state_dict()
     save_on_master(checkpoint, osp.join(self._vars.weights_dir, "last.pth"))
 
-
-
-def validate(model, dataloader, device, num_classes):
+def validate_one_epoch(model, dataloader, device, num_classes):
     model.eval()
     confmat = ConfusionMatrix(num_classes)
     metric_logger = MetricLogger(delimiter="  ")

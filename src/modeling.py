@@ -67,6 +67,6 @@ def get_model(self):
     #     # We disable the cudnn benchmarking because it can noticeably affect the accuracy
     #     torch.backends.cudnn.benchmark = False
     #     torch.backends.cudnn.deterministic = True
-    #     confmat = validate(self._model, self._dataloader_val, device=self._device, num_classes=self._var_num_classes)
+    #     confmat = validate_one_epoch(self._model, self._dataloader_val, device=self._device, num_classes=self._var_num_classes)
     #     print(confmat)
     #     return
