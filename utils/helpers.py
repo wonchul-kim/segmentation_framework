@@ -4,8 +4,7 @@ from pathlib import Path
 from glob import glob
 import re
 
-def round_clip_0_1(x, **kwargs):
-    return x.round().clip(0, 1)
+
 
 def cat_list(images, fill_value=0):
     max_size = tuple(max(s) for s in zip(*[img.shape for img in images]))

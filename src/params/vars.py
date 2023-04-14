@@ -43,6 +43,6 @@ def set_vars(cfgs, _vars, _augs=None):
     set_preprocess(cfgs, _vars)
     set_rois(cfgs, _vars)
     set_patches(cfgs, _vars)
-    set_logs(cfgs, _vars)
     set_envs(cfgs, _vars)
+    set_logs(cfgs, _vars, _augs)
     

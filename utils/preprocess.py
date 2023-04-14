@@ -5,6 +5,9 @@ MEAN_RGB = [0.485 * 255, 0.456 * 255, 0.406 * 255]
 STDDEV_RGB = [0.229 * 255, 0.224 * 255, 0.225 * 255]
 MAX = [255, 255, 255]
 
+def round_clip_0_1(x, **kwargs):
+    return x.round().clip(0, 1)
+
 def get_preprocessing(preprocessing_fn):
     if preprocessing_fn != None:
         _preprocessings = [

@@ -1,0 +1,18 @@
+horizontal_flip: 0.5 # probability
+vertical_flip: 0.5 # probability
+# random_rotate90: 0.0 # probability - randomly rotate by 0, 90, 180, 270 degrees
+# transpose: 0.1 # probability - switch X and Y axis
+
+# ### Add Noise
+# gaussian_noise: 0.1
+# sharpen: 0.1
+# blur: 0.1
+# motion_blur: 0.1
+# clahe: 0.1
+# ### Color Distortion
+# random_brightness: 0.1
+# random_gamma: 0.1
+# random_contrast: 0.1
+# hue_saturation_value: 0.1
+
+# grid_distortion: 0.1

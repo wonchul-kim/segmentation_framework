@@ -1,5 +1,6 @@
 import albumentations as A 
-from aivsegmentation.tensorflow.utils.helpers import round_clip_0_1
+from albumentations.pytorch import ToTensorV2
+from utils.preprocess import normalize_255, normalize_standard, round_clip_0_1
 
 str2func = {
     # "mask_round_clip_0_1": A.Lambda(mask=round_clip_0_1),
@@ -22,19 +23,20 @@ str2func = {
     "normalize": A.Normalize,
 }
 
-def get_train_augmentations(augs, input_height=320, input_width=320):
-    # augmentations = [A.Lambda(mask=round_clip_0_1)]
-    augmentations = []
-    augmentations.append(A.Resize(input_height, input_width))
-
-    if len(augs) != 0:
+def get_train_transform(augs=None, image_normalization='standard', input_width=None, input_height=None):
+    
+    transforms = []
+    if input_width != None and input_height != None:
+        transforms.append(A.Resize(input_height, input_width))
+    
+    if augs != None and len(augs) != 0:
         for key1, val1 in augs.items():
             if not 'group' in key1:
                 if key1 != '':
                     if isinstance(val1, dict):
-                        augmentations.append(str2func[key1](**val1))
+                        transforms.append(str2func[key1](**val1))
                     else:
-                        augmentations.append(str2func[key1](p=float(val1)))
+                        transforms.append(str2func[key1](p=float(val1)))
             else:
                 group = []
                 p = 0
@@ -45,28 +47,39 @@ def get_train_augmentations(augs, input_height=320, input_width=320):
                         group.append(str2func[key2](**val1[key2]))
 
                 # assert p >= 0, f"group probability should be more than 0, now p = {p}"
-                augmentations.append(A.OneOf(group, p=p))
+                transforms.append(A.OneOf(group, p=p))
+            
+    if image_normalization == 'standard':
+        # transforms.append(A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)))
+        transforms.append(A.Lambda(name='normalize_standard', image=normalize_standard))
+    elif image_normalization == '255' or image_normalization == 255:
+        transforms.append(A.Lambda(name='normalize_255', image=normalize_255))
+    else:
+        NotImplementedError
+            
+    transforms.extend([])
+    transforms.append(ToTensorV2())
+    # transforms.append(A.Lambda(name='mask_round_clip', mask=round_clip_0_1))
 
-    # augmentations.append(A.PadIfNeeded(min_height=512, min_width=512, always_apply=True, border_mode=0))
-    augmentations.append(A.Lambda(name='mask_round_clip', mask=round_clip_0_1))
+    return A.Compose(transforms)
 
-    return A.Compose(augmentations)
-
-
-def get_val_augmentations(augs, input_height, input_width):
-    augmentations = []
-    augmentations.append(A.Resize(input_height, input_width))
-    augmentations.append(A.Lambda(name='mask_round_clip', mask=round_clip_0_1))
-
-    return A.Compose(augmentations)
-
-if __name__ == '__main__':
-    import os 
-    from aivutils.helpers.parsing import set_augs
-
-    augs = set_augs("data/recipes/augmentations.yml")
-
-    augmentations = get_train_augmentations(augs)
+def get_val_transform(augs=None, image_normalization='standard', input_width=None, input_height=None):
     
+    transforms = []
+    if input_width != None and input_height != None:
+        transforms.append(A.Resize(input_height, input_width))
+    
+    if image_normalization == 'standard':
+        # transforms.append(A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)))
+        transforms.append(A.Lambda(name='normalize_standard', image=normalize_standard))
+    elif image_normalization == '255' or image_normalization == 255:
+        transforms.append(A.Lambda(name='normalize_255', image=normalize_255))
+    else:
+        NotImplementedError
+    
+    transforms.append(ToTensorV2())
+    # transforms.append(A.Lambda(name='mask_round_clip', mask=round_clip_0_1))
 
-    print(augmentations)
+    return A.Compose(transforms)
+
+

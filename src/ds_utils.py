@@ -7,11 +7,11 @@ def get_dataset(self):
         from frameworks.pytorch.src.dataloaders import get_dataloader 
         from frameworks.pytorch.utils.debug import debug_dataset as debug_pytorch_dataset
         from frameworks.pytorch.src.preprocess import get_transform as get_pytorch_transform
-        from frameworks.pytorch.utils.augment import get_train_transform, get_val_transform
+        from utils.augment import get_train_transform, get_val_transform
         from utils.preprocess import get_denormalization_fn
 
         if self._vars.image_loading_lib == 'cv2':
-            train_transform = get_train_transform(self._vars.image_normalization)
+            train_transform = get_train_transform(augs=self._augs, image_normalization=self._vars.image_normalization)
             val_transform = get_val_transform(self._vars.image_normalization)
         elif self._vars.image_loading_lib == 'pil':
             train_transform = get_pytorch_transform(True, self._vars)
