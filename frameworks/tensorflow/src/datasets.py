@@ -9,21 +9,20 @@ from utils.labelme_utils import get_mask_from_labelme
 
 class IterableLabelmeDatasets():
     def __init__(self, img_folder, mode, classes, roi_info=None, patch_info=None, img_exts=['png', 'bmp'], image_channel_order='bgr', \
-                                augmentations=None, preprocessing=None, configs_dir=None, logger=None):
+                                transforms=None, configs_dir=None, logger=None):
         self.mode = mode 
         self.roi_info = roi_info
         self.classes = classes
         self.patch_info = patch_info
         self.class2idx = {}
         self.image_channel_order = image_channel_order
-        self.augmentations = augmentations
-        self.preprocessing = preprocessing
+        self.transforms = transforms
         self.logger = logger
         
-        ### To check applied augmentations in configs directory
+        ### To check applied transforms in configs directory
         if configs_dir is not None:
-            aug_txt = open(Path(configs_dir) / 'augmentations_{}.txt'.format(mode), 'a')
-            for aug in self.augmentations:
+            aug_txt = open(Path(configs_dir) / 'transforms_{}.txt'.format(mode), 'a')
+            for aug in self.transforms:
                 aug_txt.write(str(aug))
                 aug_txt.write("\n")
             aug_txt.close()
@@ -72,15 +71,10 @@ class IterableLabelmeDatasets():
 
             if rois == None:
                 img_info['counts'][0] += 1
-                # apply augmentations
-                if self.augmentations:
-                    sample = self.augmentations(image=self.image, mask=self.mask)
+                # apply transforms
+                if self.transforms:
+                    sample = self.transforms(image=self.image, mask=self.mask)
                     image, mask = sample['image'], sample['mask']
-
-                # apply preprocessing
-                if self.preprocessing:
-                    sample = self.preprocessing(image=image)
-                    image = sample['image']
 
                 mask = np.eye(len(self.classes) + 1)[mask.astype(np.uint8)]
                 yield image, mask, self.fname
@@ -102,15 +96,10 @@ class IterableLabelmeDatasets():
                     if image is None:
                         raise RuntimeError(f"Image is None({image}) for {img_file}")
 
-                    # apply augmentations
-                    if self.augmentations:
-                        sample = self.augmentations(image=image, mask=mask)
+                    # apply transforms
+                    if self.transforms:
+                        sample = self.transforms(image=image, mask=mask)
                         image, mask = sample['image'], sample['mask']
-
-                    # apply preprocessing
-                    if self.preprocessing:
-                        sample = self.preprocessing(image=image)
-                        image = sample['image']
                     
                     mask = np.eye(len(self.classes) + 1)[mask.astype(np.uint8)]
                     yield image, mask, self.fname

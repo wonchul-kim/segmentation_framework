@@ -36,8 +36,8 @@ class TrainSegmentation(AlgBase):
         super().alg_reset()
         self.train_losses, self.train_lrs = [], []
         self._current_epoch = 0
-        # self._var_ml_framework = "tensorflow"
-        self._var_ml_framework = "pytorch"
+        self._var_ml_framework = "tensorflow"
+        # self._var_ml_framework = "pytorch"
         
     def alg_set_cfgs(self, config="./data/configs/train.yml", info=None, recipe=None, augs=None, option=None):
         super().alg_set_cfgs(config=config, info=info, recipe=recipe, augs=augs, option=option)

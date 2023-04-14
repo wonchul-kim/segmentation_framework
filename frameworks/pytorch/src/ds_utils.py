@@ -5,7 +5,7 @@ import torchvision
 from frameworks.pytorch.src.datasets import COCODataset, MaskDataset, LabelmeDatasets, IterableLabelmeDatasets
 from utils.coco_utils import FilterAndRemapCocoCategories, ConvertCocoPolysToMask, _coco_remove_images_without_annotations, get_coco_cat_list
 
-def get_dataset(dir_path, dataset_format, mode, transform, classes, roi_info=None, patch_info=None, \
+def get_dataset(dir_path, dataset_format, mode, transforms, classes, roi_info=None, patch_info=None, \
                 image_channel_order='rgb', img_exts=['png', 'bmp']):
     def sbd(*args, **kwargs):
         return torchvision.datasets.SBDataset(*args, mode="segmentation", **kwargs)
@@ -20,11 +20,11 @@ def get_dataset(dir_path, dataset_format, mode, transform, classes, roi_info=Non
     p, ds_fn, num_classes = paths[dataset_format]
 
     if dataset_format == 'labelme':
-        ds = ds_fn(p, mode=mode, transforms=transform, classes=classes, \
+        ds = ds_fn(p, mode=mode, transforms=transforms, classes=classes, \
                 roi_info=roi_info, patch_info=patch_info, \
                 image_channel_order=image_channel_order, img_exts=img_exts)
     else:
-        ds = ds_fn(p, mode=mode, transforms=transform, classes=classes)
+        ds = ds_fn(p, mode=mode, transforms=transforms, classes=classes)
 
     if isinstance(ds, IterableLabelmeDatasets):
         print(f"* There are {ds.num_data} rois for {mode} dataset")

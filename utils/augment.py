@@ -23,7 +23,7 @@ str2func = {
     "normalize": A.Normalize,
 }
 
-def get_train_transform(augs=None, image_normalization='standard', input_width=None, input_height=None):
+def get_train_transforms(ml_framework, augs=None, image_normalization='standard', input_width=None, input_height=None):
     
     transforms = []
     if input_width != None and input_height != None:
@@ -58,12 +58,14 @@ def get_train_transform(augs=None, image_normalization='standard', input_width=N
         NotImplementedError
             
     transforms.extend([])
-    transforms.append(ToTensorV2())
+    if ml_framework == 'pytorch':
+        transforms.append(ToTensorV2())
+    
     # transforms.append(A.Lambda(name='mask_round_clip', mask=round_clip_0_1))
 
     return A.Compose(transforms)
 
-def get_val_transform(augs=None, image_normalization='standard', input_width=None, input_height=None):
+def get_val_transforms(ml_framework, augs=None, image_normalization='standard', input_width=None, input_height=None):
     
     transforms = []
     if input_width != None and input_height != None:
@@ -76,8 +78,10 @@ def get_val_transform(augs=None, image_normalization='standard', input_width=Non
         transforms.append(A.Lambda(name='normalize_255', image=normalize_255))
     else:
         NotImplementedError
-    
-    transforms.append(ToTensorV2())
+
+    if ml_framework == 'pytorch':
+        transforms.append(ToTensorV2())
+        
     # transforms.append(A.Lambda(name='mask_round_clip', mask=round_clip_0_1))
 
     return A.Compose(transforms)

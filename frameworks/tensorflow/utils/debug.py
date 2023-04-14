@@ -4,7 +4,8 @@ import numpy as np
 import cv2 
 import math
 
-def debug_dataset(dataset, debug_dir, mode, num_classes, input_channel=3, ratio=0.1, denormalization_fn=None, image_channel_order='bgr', width=256, height=256, rows=4, cols=4):
+def debug_dataset(dataset, debug_dir, mode, num_classes, input_channel=3, ratio=0.1, denormalize=None, \
+                    image_channel_order='bgr', width=256, height=256, rows=4, cols=4):
     # imgsz_h, imgsz_w, num_classes = dataset[0][1].shape
     # width = min(imgsz_w, width)
     # height = min(imgsz_h, height)
@@ -30,8 +31,8 @@ def debug_dataset(dataset, debug_dir, mode, num_classes, input_channel=3, ratio=
                     fname = None
                 image = np.array(image)
                 mask = np.array(mask)
-                if denormalization_fn:
-                    image = denormalization_fn(image)
+                if denormalize:
+                    image = denormalize(image)
                 
                 image = cv2.resize(image, (height, width))
                 if input_channel == 3:
@@ -81,8 +82,8 @@ def debug_dataset(dataset, debug_dir, mode, num_classes, input_channel=3, ratio=
                 fname = None
             image = np.array(image)
             mask = np.array(mask)
-            if denormalization_fn:
-                image = denormalization_fn(image)
+            if denormalize:
+                image = denormalize(image)
             
             image = cv2.resize(image, (height, width))
             if input_channel == 3:
