@@ -1,5 +1,4 @@
 import os.path as osp
-import random
 import numpy as np
 import cv2 
 import math
@@ -69,7 +68,6 @@ def debug_dataset(dataset, debug_dir, mode, num_classes, input_channel=3, ratio=
                     mosaic = np.full((int(rows*(height + 50)), int(cols*width*2), input_channel), 255, dtype=np.uint8)
                     num_frame = 0
                     num_final += 1
-                
             idx += 1
 
         cv2.imwrite(osp.join(debug_dir, mode + '_dataset_{}.png'.format(num_final)), mosaic)         

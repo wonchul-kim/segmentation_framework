@@ -91,7 +91,7 @@ if __name__ == "__main__":
     engine.alg_set_params()
     engine.alg_set_variables()
     engine.alg_set_datasets()
-    # engine.alg_set_model()
+    engine.alg_set_model()
 
     # start_time = time.time()
     # for _ in range(engine._vars.start_epoch, engine._vars.epochs):
