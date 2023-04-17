@@ -27,7 +27,7 @@ def validate(self):
                     "optimizer": self._optimizer.state_dict(),
                     "lr_scheduler": self._lr_scheduler.state_dict(),
                     "epoch": self._var_current_epoch,
-                    "args": self._vars,
+                    "vars": self._vars,
                     }  
         
         save_on_master(checkpoint, osp.join(self._vars.weights_dir, f"model_{self._var_current_epoch}.pth"))
