@@ -34,7 +34,8 @@ class TrainSegmentation(AlgBase):
     def alg_stop(self):
         super().alg_stop()
         
-        self._var_end_time = time.time() - self._var_start_time 
+        self._var_end_time = str(datetime.timedelta(seconds=int(time.time() - self._var_start_time)))
+        print(f">>> The total training time is {self._var_end_time}")
         
     def alg_end(self):
         super().alg_end()
@@ -43,8 +44,9 @@ class TrainSegmentation(AlgBase):
         super().alg_reset()
         self.train_losses, self.train_lrs = [], []
         self._var_current_epoch = 0
-        # self._var_ml_framework = "tensorflow"
-        self._var_ml_framework = "pytorch"
+        
+        self._var_ml_framework = "tensorflow"
+        # self._var_ml_framework = "pytorch"
         
     def alg_set_cfgs(self, config="./data/configs/train.yml", info=None, recipe=None, augs=None, option=None):
         super().alg_set_cfgs(config=config, info=info, recipe=recipe, augs=augs, option=option)
