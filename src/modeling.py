@@ -63,7 +63,7 @@ def get_model(self):
                 if self._vars.amp:
                     self._scaler.load_state_dict(checkpoint["scaler"])
 
-        self._current_epoch += self._vars.start_epoch
+        self._var_current_epoch += self._vars.start_epoch
 
         # if self._vars.test_only:
         #     # We disable the cudnn benchmarking because it can noticeably affect the accuracy

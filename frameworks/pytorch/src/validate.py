@@ -12,6 +12,7 @@ def validate_one_epoch(model, dataloader, device, num_classes):
     metric_logger = MetricLogger(delimiter="  ")
     header = "Test:"
     num_processed_samples = 0
+    
     with torch.inference_mode():
         for batch in metric_logger.log_every(dataloader, 100, header):
             if len(batch) == 3:
