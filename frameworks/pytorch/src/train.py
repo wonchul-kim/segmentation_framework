@@ -12,7 +12,6 @@ def train_one_epoch(model, criterion, optimizer, dataloader, lr_scheduler, devic
     metric_logger = MetricLogger(delimiter="  ")
     metric_logger.add_meter("lr", SmoothedValue(window_size=1, fmt="{value}"))
     header = f"Epoch: [{epoch}]"
-    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ", epoch)
     for batch in metric_logger.log_every(dataloader, print_freq, header):
         if len(batch) == 3:
             image, target, fname = batch
