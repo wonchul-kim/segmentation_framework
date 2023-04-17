@@ -9,11 +9,11 @@ from frameworks.pytorch.src.validate import validate_one_epoch, save_validation
 def validate(self):
     tic = time.time()
     confmat = validate_one_epoch(self._model, self._dataloader_val, device=self._device, num_classes=self._var_num_classes)
+    print(confmat, type(confmat))
 
     total_time_val = str(datetime.timedelta(seconds=int(time.time() - tic)))
     print(f"** Validtaion time {total_time_val}")
     
-    print(confmat, type(confmat))
     
     if self._vars.save_val_img and (self._var_current_epoch != 0 \
                         and (self._var_current_epoch%self._vars.save_val_img_freq == 0 or self._var_current_epoch == 1)):

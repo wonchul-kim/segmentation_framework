@@ -71,7 +71,8 @@ def save_validation(model, device, dataset, num_classes, epoch, output_dir, deno
         else: 
             image, mask = batch[0].detach(), batch[1].detach()
             fname = None           
-        image = image.to(device)
+        image = image.to(device, dtype=torch.float32)
+        # image = image.to(device)
         image = image.unsqueeze(0)
         preds = model(image)
         if isinstance(preds, dict):
