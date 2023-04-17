@@ -19,8 +19,8 @@ def train_one_epoch(model, criterion, optimizer, dataloader, lr_scheduler, devic
             image, target = batch 
             fname = None
                         
-        # image, target = image.to(device, dtype=torch.float32), target.to(device, torch.float32)
-        image, target = image.to(device), target.to(device)
+        image, target = image.to(device, dtype=torch.float32), target.to(device, torch.int64)
+        # image, target = image.to(device), target.to(device)
         with torch.cuda.amp.autocast(enabled=scaler is not None):
             output = model(image)
             loss = criterion(output, target)

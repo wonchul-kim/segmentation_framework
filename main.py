@@ -8,15 +8,14 @@ from src.ds_utils import get_dataset
 from src.modeling import get_model
 import tensorflow as tf
 
-from frameworks.pytorch.src.train import train_one_epoch
-from frameworks.pytorch.src.validate import validate_one_epoch, save_validation
-from utils.torch_utils import save_on_master
+# from frameworks.pytorch.src.train import train_one_epoch
+# from frameworks.pytorch.src.validate import validate_one_epoch, save_validation
+# from utils.torch_utils import save_on_master
 
 from src.train import train 
 from src.validate import validate
 from src.params.vars import set_vars
 from utils.torch_utils import set_envs
-import matplotlib.pyplot as plt 
 
 from utils.bases.algBase import AlgBase
 import argparse
@@ -45,8 +44,8 @@ class TrainSegmentation(AlgBase):
         self.train_losses, self.train_lrs = [], []
         self._var_current_epoch = 0
         
-        self._var_ml_framework = "tensorflow"
-        # self._var_ml_framework = "pytorch"
+        # self._var_ml_framework = "tensorflow"
+        self._var_ml_framework = "pytorch"
         
     def alg_set_cfgs(self, config="./data/configs/train.yml", info=None, recipe=None, augs=None, option=None):
         super().alg_set_cfgs(config=config, info=info, recipe=recipe, augs=augs, option=option)
@@ -131,17 +130,17 @@ if __name__ == "__main__":
     
     cfgs = argparse.Namespace()
     config = "./data/configs/train.yml"
-    # info = './data/_unit_tests/public/coco.yml'
-    # info = './data/_unit_tests/public/camvid.yml'
-    # info = './data/_unit_tests/projects/train/no_roi_no_patches.yml'
-    # info = './data/_unit_tests/projects/train/single_rois_wo_patches.yml'
-    # info = './data/_unit_tests/projects/train/multiple_rois_wo_patches.yml'
-    # info = './data/_unit_tests/projects/train/single_rois_w_patches.yml'
-    info = './data/_unit_tests/projects/train/multiple_rois_w_patches.yml'
+    # info = './data/recipes/public/coco.yml'
+    # info = './data/recipes/public/camvid.yml'
+    # info = './data/recipes/projects/train/no_roi_no_patches.yml'
+    # info = './data/recipes/projects/train/single_rois_wo_patches.yml'
+    # info = './data/recipes/projects/train/multiple_rois_wo_patches.yml'
+    # info = './data/recipes/projects/train/single_rois_w_patches.yml'
+    info = './data/recipes/projects/train/multiple_rois_w_patches.yml'
     # info = './data/projects/sungwoo_u_top_bottom.yml'
-    recipe = './data/recipes/train.yml'
-    # recipe = './data/recipes/train_tf.yml'
-    # augs = "./data/recipes/augs.yml"
+    recipe = './data/params/train.yml'
+    # recipe = './data/params/train_tf.yml'
+    # augs = "./data/params/augs.yml"
     augs = None
     option = None
 
@@ -152,7 +151,8 @@ if __name__ == "__main__":
     engine.alg_set_datasets()
     engine.alg_set_model()
 
-    # engine.run()
+    ## engine.run()
+    
     for _ in range(engine._vars.start_epoch, engine._vars.epochs):
         engine.alg_run_one_epoch()
         engine.alg_validate()

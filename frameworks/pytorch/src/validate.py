@@ -21,7 +21,7 @@ def validate_one_epoch(model, dataloader, device, num_classes):
                 image, target = batch
                 fname = None
                 
-            image, target = image.to(device, dtype=torch.float32), target.to(device, torch.float32)
+            image, target = image.to(device, dtype=torch.float32), target.to(device, torch.int64)
             output = model(image)
             if isinstance(output, dict):
                 output = output["out"]
