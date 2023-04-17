@@ -77,7 +77,7 @@ def get_model(self):
         from frameworks.tensorflow.models.modeling import get_model 
         from frameworks.tensorflow.src.optimizers import get_optimizer
         from frameworks.tensorflow.src.losses import get_criterion
-        from frameworks.tensorflow.src.lr_schedulers import ReduceLROnPlateau, LearningRateScheduler
+        from frameworks.tensorflow.src.lr_schedulers import get_lr_scheduler
         from frameworks.tensorflow.src.tf_utils import save_h5_model, save_h5_weights, save_ckpt, restore_ckpt
 
         from utils.helpers import mkdir
@@ -92,7 +92,6 @@ def get_model(self):
             print(f"*** CREATED model({self._vars.model_name}) with backbone({self._vars.backbone})", self.alg_set_model.__name__, self.__class__.__name__)
 
             self._optimizer = get_optimizer(self._vars.optimizer, self._vars.init_lr, self._vars.amp)
-
             self._loss_fn, self._iou_score = get_criterion(self._vars.loss_fn, self._vars.focal_loss, self._vars.class_weights)
                 
             def compute_loss(labels, preds):
@@ -105,7 +104,7 @@ def get_model(self):
             # self._model.build(input_shape=(self._vars.batch_size, self._vars.input_height, self._vars.input_width, self._vars.input_channel))
             # self._model.run_eagerly = True
 
-            self._lr_scheduler = LearningRateScheduler(lr_scheduler_type=self._vars.lr_scheduler_type, optimizer=self._optimizer, \
+            self._lr_scheduler = get_lr_scheduler(lr_scheduler_type=self._vars.lr_scheduler_type, optimizer=self._optimizer, \
                                                 epochs=self._vars.epochs, end_lr=self._vars.end_lr, \
                                                 lr_warmup_epochs=self._vars.lr_warmup_epochs, lr_warmup_hold=self._vars.lr_warmup_hold)
 

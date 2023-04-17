@@ -28,6 +28,8 @@ class TrainSegmentation(AlgBase):
         super().__init__()
         
         self._var_start_time = time.time()
+        self._var_verbose = True
+        self._performances = []
         self.alg_reset()
         
     def alg_stop(self):
@@ -43,9 +45,10 @@ class TrainSegmentation(AlgBase):
         super().alg_reset()
         self.train_losses, self.train_lrs = [], []
         self._var_current_epoch = 0
+        self._var_current_total_step = 0
         
-        # self._var_ml_framework = "tensorflow"
-        self._var_ml_framework = "pytorch"
+        self._var_ml_framework = "tensorflow"
+        # self._var_ml_framework = "pytorch"
         
     def alg_set_cfgs(self, config="./data/configs/train.yml", info=None, recipe=None, augs=None, option=None):
         super().alg_set_cfgs(config=config, info=info, recipe=recipe, augs=augs, option=option)
@@ -138,8 +141,8 @@ if __name__ == "__main__":
     # info = './data/recipes/projects/train/single_rois_w_patches.yml'
     info = './data/recipes/projects/train/multiple_rois_w_patches.yml'
     # info = './data/projects/sungwoo_u_top_bottom.yml'
-    recipe = './data/params/train.yml'
-    # recipe = './data/params/train_tf.yml'
+    # recipe = './data/params/train.yml'
+    recipe = './data/params/train_tf.yml'
     # augs = "./data/params/augs.yml"
     augs = None
     option = None

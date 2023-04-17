@@ -6,6 +6,7 @@ import torch
 from utils.torch_utils import reduce_across_processes
 from utils.metrics import ConfusionMatrix, MetricLogger
 
+@torch.inference_mode()
 def validate_one_epoch(model, dataloader, device, num_classes):
     model.eval()
     confmat = ConfusionMatrix(num_classes)

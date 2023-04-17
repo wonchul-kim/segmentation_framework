@@ -55,11 +55,11 @@ def get_dataset(self):
 
         self._var_strategy = tf.distribute.MirroredStrategy()
         
-        train_dataset, self._num_classes = get_tensorflow_dataset(dir_path=self._vars.input_dir, dataset_format=self._vars.dataset_format, mode="train", \
+        train_dataset, self._var_num_classes = get_tensorflow_dataset(dir_path=self._vars.input_dir, dataset_format=self._vars.dataset_format, mode="train", \
                                             transforms=train_transforms, classes=self._vars.classes, \
                                             roi_info=self._vars.roi_info, patch_info=self._vars.patch_info, \
                                             image_channel_order=self._vars.image_channel_order, img_exts=self._vars.img_exts)
-        self._dataset_val, self._num_classes = get_tensorflow_dataset(dir_path=self._vars.input_dir, dataset_format=self._vars.dataset_format, mode="val", \
+        self._dataset_val, self._var_num_classes = get_tensorflow_dataset(dir_path=self._vars.input_dir, dataset_format=self._vars.dataset_format, mode="val", \
                                             transforms=val_transforms, classes=self._vars.classes, \
                                             roi_info=self._vars.roi_info, patch_info=self._vars.patch_info, \
                                             image_channel_order=self._vars.image_channel_order, img_exts=self._vars.img_exts)
@@ -71,21 +71,21 @@ def get_dataset(self):
             debug_tensorflow_dataset(self._dataset_val, self._vars.debug_dir, 'val', self._vars.num_classes, self._vars.input_channel, \
                                 self._vars.debug_dataset_ratio, self._fn_denormalize, self._vars.image_channel_order)
         
-        train_dataloader = IterableDataloader(train_dataset, batch_size=self._vars.batch_size, shuffle=True, drop_last=False)
+        self._dataloader = IterableDataloader(train_dataset, batch_size=self._vars.batch_size, shuffle=True, drop_last=False)
         if self._var_strategy != None:
-            val_dataloader = IterableDataloader(self._dataset_val, batch_size=self._var_strategy.num_replicas_in_sync, shuffle=False, drop_last=False)
+            self._dataloader_val = IterableDataloader(self._dataset_val, batch_size=self._var_strategy.num_replicas_in_sync, shuffle=False, drop_last=False)
         else:
-            val_dataloader = IterableDataloader(self._dataset_val, batch_size=1, shuffle=False, drop_last=False)
+            self._dataloader_val = IterableDataloader(self._dataset_val, batch_size=1, shuffle=False, drop_last=False)
         
         if self._var_strategy != None:
-            _train_dataset = tf.data.Dataset.from_generator(lambda: train_dataloader,
+            _train_dataset = tf.data.Dataset.from_generator(lambda: self._dataloader,
                                                     output_types=(tf.float32, tf.float32, tf.string),
                                                     # output_shapes=(tf.TensorShape([None, None, None, None]),
                                                     #                 tf.TensorShape([None, None, None, None]),
                                                     #                 )
                                                     )
             # logger(f"_train_dataset is loaded from dataset_generator" , get_dataset.__name__)
-            self._dataset_val = tf.data.Dataset.from_generator(lambda: val_dataloader,
+            _dataset_val = tf.data.Dataset.from_generator(lambda: self._dataloader_val,
                                                         output_types=(tf.float32, tf.float32, tf.string),
                                                         # output_shapes=(tf.TensorShape([None, None, None, None]),
                                                         #                 tf.TensorShape([None, None, None, None]), 
@@ -94,12 +94,10 @@ def get_dataset(self):
             # logger(f"_self._dataset_val is loaded from dataset_generator" , get_dataset.__name__)
 
 
-            train_dist_dataset = self._var_strategy.experimental_distribute_dataset(_train_dataset)
+            self._train_dist_dataset = self._var_strategy.experimental_distribute_dataset(_train_dataset)
             # logger(f"train_dist_dataset is loaded from experimental_distribute_dataset" , get_dataset.__name__)
-            val_dist_dataset = self._var_strategy.experimental_distribute_dataset(self._dataset_val)
+            self._val_dist_dataset = self._var_strategy.experimental_distribute_dataset(_dataset_val)
             # logger(f"val_dist_dataset is loaded from experimental_distribute_dataset" , get_dataset.__name__)
-            
-        self._dataloader, self._dataloader_val = train_dist_dataset, val_dist_dataset
-        
+                    
     else:
         raise ValueError(f"There is no such ml-framework: {self._var_ml_framework}")

@@ -46,6 +46,8 @@ class SegmentationPresetTrain:
         
         if image_normalization == 'standard':
             trans.append(T.Normalize(mean=MEAN, std=STD))
+        elif image_normalization == None or image_normalization == "":
+            pass
         else:
             NotImplementedError
         
@@ -64,10 +66,14 @@ class SegmentationPresetEval:
                 T.ConvertImageDtype(torch.float),
             ]
         )
+        
         if image_normalization == 'standard':
             trans.append(T.Normalize(mean=MEAN, std=STD))
+        elif image_normalization == None or image_normalization == "":
+            pass
         else:
             NotImplementedError
+        
 
         self.transforms = T.Compose(trans)
 

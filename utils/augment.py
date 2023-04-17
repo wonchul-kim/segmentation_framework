@@ -54,6 +54,8 @@ def get_train_transforms(ml_framework, augs=None, image_normalization='standard'
         transforms.append(A.Lambda(name='normalize_standard', image=normalize_standard))
     elif image_normalization == '255' or image_normalization == 255:
         transforms.append(A.Lambda(name='normalize_255', image=normalize_255))
+    elif image_normalization == None or image_normalization == "":
+        pass
     else:
         NotImplementedError
             
@@ -76,9 +78,11 @@ def get_val_transforms(ml_framework, augs=None, image_normalization='standard', 
         transforms.append(A.Lambda(name='normalize_standard', image=normalize_standard))
     elif image_normalization == '255' or image_normalization == 255:
         transforms.append(A.Lambda(name='normalize_255', image=normalize_255))
+    elif image_normalization == None or image_normalization == "":
+        pass
     else:
         NotImplementedError
-
+        
     if ml_framework == 'pytorch':
         transforms.append(ToTensorV2())
         

@@ -1,6 +1,14 @@
 import tensorflow as tf
 import numpy as np 
 
+
+def get_lr_scheduler(lr_scheduler_type, optimizer, epochs, end_lr, lr_warmup_epochs, lr_warmup_hold):
+    
+    lr_scheduler = LearningRateScheduler(lr_scheduler_type=lr_scheduler_type, optimizer=optimizer, epochs=epochs, end_lr=end_lr, \
+                                                            lr_warmup_epochs=lr_warmup_epochs, lr_warmup_hold=lr_warmup_hold)
+    
+    return lr_scheduler
+
 class ReduceLROnPlateau:
     def __init__(
         self,

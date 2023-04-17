@@ -44,6 +44,42 @@ def set_vars(cfgs, _vars, _augs=None):
 
     _vars.num_classes = len(cfgs.classes) + 1
 
+    ### weights for background
+    if hasattr(cfgs, 'bg_weights'):
+        if cfgs.bg_weights != None and cfgs.bg_weights != "":
+            if isinstance(cfgs.bg_weights, str):
+                _vars.bg_weights = list(map(float, cfgs.bg_weights.split(",")))
+            elif isinstance(cfgs.bg_weights, list):
+                _vars.bg_weights = cfgs.bg_weights
+            else: 
+                raise ValueError(f"There is no such ")
+        else:
+            _vars.bg_weights = None
+    else:
+        _vars.bg_weights = None 
+
+    if hasattr(cfgs, 'bg_weights_applied_epoch'):
+        if cfgs.bg_weights_applied_epoch != None and cfgs.bg_weights_applied_epoch != "":
+            if isinstance(cfgs.bg_weights_applied_epoch, str):
+                _vars.bg_weights_applied_epoch = list(map(int, cfgs.bg_weights_applied_epoch.split(",")))
+            elif isinstance(cfgs.bg_weights_applied_epoch, list):
+                _vars.bg_weights_applied_epoch = cfgs.bg_weights_applied_epoch
+            else: 
+                raise ValueError(f"There is no such ")
+        else:
+            _vars.bg_weights_applied_epoch = None
+    else:
+        _vars.bg_weights_applied_epoch = None 
+
+    if _vars.bg_weights == None or _vars.bg_weights_applied_epoch == None:
+        _vars.class_weights = None 
+    else:
+        _vars.class_weights = [int(_vars.bg_weights[0])] + [1]*len(_vars.classes)
+        del _vars.bg_weights[0]
+
+
+
+
     set_preprocess(cfgs, _vars)
     set_rois(cfgs, _vars)
     set_patches(cfgs, _vars)

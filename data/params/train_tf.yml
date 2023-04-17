@@ -21,17 +21,19 @@ crl: false
 image_loading_lib: "cv2"
 image_normalization: "standard"
 # standard, 255
-image_channel_order: "rgb"
+image_channel_order: "bgr"
 img_exts: "bmp,png"
 
 ### for loss params. #######################
+# bg_weights: [0.1, 0.3, 0.5]
+# bg_weights_applied_epoch: [100, 200]
 
 ### for training params. #######################
 device: cuda
-device_ids: 0,1,2,3
+device_ids: 0,1
 start_epoch: 0
-epochs: 3000
-batch_size: 64
+epochs: 100
+batch_size: 4
 num_workers: 16
 loss_fn: dice
 focal_loss: true

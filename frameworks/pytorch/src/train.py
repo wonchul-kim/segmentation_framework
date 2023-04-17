@@ -1,5 +1,6 @@
 import torch
 import time
+import datetime
 from utils.metrics import SmoothedValue, MetricLogger
 
 def train_one_epoch(model, criterion, optimizer, dataloader, lr_scheduler, device, epoch, print_freq, scaler=None):
@@ -8,10 +9,12 @@ def train_one_epoch(model, criterion, optimizer, dataloader, lr_scheduler, devic
         * target: [batch, height, width]
         * output: [batch, classes, height, width]
     '''
+    tic = time.time()
     model.train()
     metric_logger = MetricLogger(delimiter="  ")
     metric_logger.add_meter("lr", SmoothedValue(window_size=1, fmt="{value}"))
     header = f"Epoch: [{epoch}]"
+
     for batch in metric_logger.log_every(dataloader, print_freq, header):
         if len(batch) == 3:
             image, target, fname = batch
@@ -37,4 +40,7 @@ def train_one_epoch(model, criterion, optimizer, dataloader, lr_scheduler, devic
         lr_scheduler.step()
         metric_logger.update(loss=loss.item(), lr=optimizer.param_groups[0]["lr"])
 
+    total_time_train = str(datetime.timedelta(seconds=int(time.time() - tic)))
+    print(f"** Training time {total_time_train}")
+    
     return loss.item(), optimizer.param_groups[0]["lr"]
