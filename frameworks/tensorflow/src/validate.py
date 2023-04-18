@@ -118,9 +118,7 @@ def save_validation(model, dataset, num_classes, epoch, output_dir, input_width,
             else:
                 fname = None
             _image = np.expand_dims(image, axis=0)
-            print(">>>>>>>>>>>>>> ", denormalize)
             if denormalize:
-                print("===============================")
                 image = denormalize(image)
             
             if input_channel == 3:

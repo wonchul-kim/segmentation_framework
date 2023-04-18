@@ -7,7 +7,6 @@ from frameworks.tensorflow.src.tf_utils import save_h5_weights
 
 @tf.function
 def train_step(self, x, y):
-    print(x.shape, y.shape, x.dtype, y.dtype)
     # Calculate the model's prediction and with it the loss and iou-score
     y = tf.cast(y, tf.float32)
     with tf.GradientTape() as tape:
