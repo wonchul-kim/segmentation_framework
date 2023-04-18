@@ -1,8 +1,13 @@
+from ast import Not
 from utils.augment import get_train_transforms, get_val_transforms
 from utils.preprocess import get_denormalization_fn
 from threading import Thread 
 
 def get_dataset(self):
+    
+    self._fn_denormalize = get_denormalization_fn(self._vars.image_normalization)
+    print(f"* Denormalization function is {self._fn_denormalize}")
+    
     if self._var_ml_framework == 'pytorch':
         from frameworks.pytorch.src.ds_utils import get_dataset as get_pytorch_dataset
         from frameworks.pytorch.src.dataloaders import get_dataloader 
@@ -15,7 +20,6 @@ def get_dataset(self):
         elif self._vars.image_loading_lib == 'pil':
             train_transforms = get_pytorch_transform(True, self._vars)
             val_transforms = get_pytorch_transform(False, self._vars)
-        self._fn_denormalize = get_denormalization_fn(self._vars.image_normalization)
         
         train_dataset, self._var_num_classes = get_pytorch_dataset(dir_path=self._vars.input_dir, dataset_format=self._vars.dataset_format, mode="train", \
                                                     transforms=train_transforms, classes=self._vars.classes, \
@@ -27,9 +31,9 @@ def get_dataset(self):
                                                     image_channel_order=self._vars.image_channel_order, img_exts=self._vars.img_exts)
         
         if self._vars.debug_dataset and not self._vars.resume:
-            debug_pytorch_dataset(train_dataset, self._vars.debug_dir, 'train', self._var_num_classes, self._fn_denormalize, \
-                                    self._vars.debug_dataset_ratio)
-            debug_pytorch_dataset(self._dataset_val, self._vars.debug_dir, 'val', self._var_num_classes, self._fn_denormalize, \
+            for mode in ['train', 'val']:
+                print(f"* Started to debug {mode} datasets")
+                debug_pytorch_dataset(train_dataset, self._vars.debug_dir, mode, self._var_num_classes, self._fn_denormalize, \
                                     self._vars.debug_dataset_ratio)
 
         self._dataloader, self._dataloader_val = get_dataloader(train_dataset, self._dataset_val, self._vars)
@@ -49,27 +53,28 @@ def get_dataset(self):
         from frameworks.tensorflow.src.dataloaders import IterableDataloader
         from frameworks.tensorflow.utils.debug import debug_dataset as debug_tensorflow_dataset
         
-        train_transforms = get_train_transforms(self._var_ml_framework, augs=self._augs, image_normalization=self._vars.image_normalization)
-        val_transforms = get_val_transforms(self._var_ml_framework, self._vars.image_normalization)
-        self._fn_denormalize = get_denormalization_fn(self._vars.image_normalization)
+        if self._vars.image_loading_lib == 'cv2':
+            train_transforms = get_train_transforms(self._var_ml_framework, augs=self._augs, image_normalization=self._vars.image_normalization)
+            val_transforms = get_val_transforms(self._var_ml_framework, self._vars.image_normalization)
+        else:
+            NotImplementedError
 
         self._var_strategy = tf.distribute.MirroredStrategy()
         
-        train_dataset, self._var_num_classes = get_tensorflow_dataset(dir_path=self._vars.input_dir, dataset_format=self._vars.dataset_format, mode="train", \
-                                            transforms=train_transforms, classes=self._vars.classes, \
+        train_dataset, self._var_num_classes = get_tensorflow_dataset(dir_path=self._vars.input_dir, dataset_format=self._vars.dataset_format, \
+                                            mode="train", transforms=train_transforms, classes=self._vars.classes, \
                                             roi_info=self._vars.roi_info, patch_info=self._vars.patch_info, \
                                             image_channel_order=self._vars.image_channel_order, img_exts=self._vars.img_exts)
-        self._dataset_val, self._var_num_classes = get_tensorflow_dataset(dir_path=self._vars.input_dir, dataset_format=self._vars.dataset_format, mode="val", \
-                                            transforms=val_transforms, classes=self._vars.classes, \
+        self._dataset_val, self._var_num_classes = get_tensorflow_dataset(dir_path=self._vars.input_dir, dataset_format=self._vars.dataset_format, \
+                                            mode="val", transforms=val_transforms, classes=self._vars.classes, \
                                             roi_info=self._vars.roi_info, patch_info=self._vars.patch_info, \
                                             image_channel_order=self._vars.image_channel_order, img_exts=self._vars.img_exts)
-        
         
         if self._vars.debug_dataset and not self._vars.resume:
-            debug_tensorflow_dataset(train_dataset, self._vars.debug_dir, 'train', self._vars.num_classes, self._vars.input_channel, \
-                                        self._vars.debug_dataset_ratio, self._fn_denormalize, self._vars.image_channel_order)
-            debug_tensorflow_dataset(self._dataset_val, self._vars.debug_dir, 'val', self._vars.num_classes, self._vars.input_channel, \
-                                self._vars.debug_dataset_ratio, self._fn_denormalize, self._vars.image_channel_order)
+            for mode in ['train', 'val']:
+                print(f"* Started to debug {mode} datasets")
+                debug_tensorflow_dataset(train_dataset, self._vars.debug_dir, mode, self._vars.num_classes, self._vars.input_channel, \
+                                            self._vars.debug_dataset_ratio, self._fn_denormalize, self._vars.image_channel_order)
         
         self._dataloader = IterableDataloader(train_dataset, batch_size=self._vars.batch_size, shuffle=True, drop_last=False)
         if self._var_strategy != None:
