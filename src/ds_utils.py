@@ -15,8 +15,9 @@ def get_dataset(self):
         from frameworks.pytorch.src.preprocess import get_transform as get_pytorch_transform
 
         if self._vars.image_loading_lib == 'cv2':
-            train_transforms = get_train_transforms(self._var_ml_framework, augs=self._augs, image_normalization=self._vars.image_normalization)
-            val_transforms = get_val_transforms(self._var_ml_framework, self._vars.image_normalization)
+            train_transforms = get_train_transforms(ml_framework=self._var_ml_framework, augs=self._augs, \
+                                                    image_normalization=self._vars.image_normalization)
+            val_transforms = get_val_transforms(ml_framework=self._var_ml_framework, augs=None, image_normalization=self._vars.image_normalization)
         elif self._vars.image_loading_lib == 'pil':
             train_transforms = get_pytorch_transform(True, self._vars)
             val_transforms = get_pytorch_transform(False, self._vars)
@@ -52,12 +53,18 @@ def get_dataset(self):
         from frameworks.tensorflow.src.ds_utils import get_dataset as get_tensorflow_dataset
         from frameworks.tensorflow.src.dataloaders import IterableDataloader
         from frameworks.tensorflow.utils.debug import debug_dataset as debug_tensorflow_dataset
+        from frameworks.tensorflow.src.tf_utils import set_tf_devices
         
         if self._vars.image_loading_lib == 'cv2':
-            train_transforms = get_train_transforms(self._var_ml_framework, augs=self._augs, image_normalization=self._vars.image_normalization)
-            val_transforms = get_val_transforms(self._var_ml_framework, self._vars.image_normalization)
+            train_transforms = get_train_transforms(ml_framework=self._var_ml_framework, augs=self._augs, \
+                                                    image_normalization=self._vars.image_normalization)
+            val_transforms = get_val_transforms(self._var_ml_framework, augs=None, image_normalization=self._vars.image_normalization)
         else:
             NotImplementedError
+
+        ### Set devices & log for Tensorflow
+        self._vars.device_ids = set_tf_devices(device=self._vars.device, device_ids=self._vars.device_ids, \
+                                                log_level=0, logger=None)
 
         self._var_strategy = tf.distribute.MirroredStrategy()
         

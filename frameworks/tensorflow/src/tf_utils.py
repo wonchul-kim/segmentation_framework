@@ -1,4 +1,5 @@
 import os.path as osp 
+import os
 import tensorflow as tf 
 
 def save_h5_weights(model, output_dir, fname, logger=None):
@@ -41,6 +42,58 @@ def restore_ckpt(ckpt, manager, logger=None):
     else:
         if logger:
             logger(f"Initializing from scratch.", restore_ckpt.__name__)
+
+
+def set_tf_devices(device='gpu', device_ids='0', log_level=0, logger=None):
+    ### Tensorflow log
+    os.environ['TF_CPP_MIN_LOG_LEVEL'] = str(log_level)
+
+    ### Set CUDA
+    if device.lower() == 'gpu' or device.lower() == 'cuda':
+        if isinstance(device_ids, int):
+            device_ids = str(device_ids)
+
+        if isinstance(device_ids, str):
+            os.environ['CUDA_VISIBLE_DEVICES'] = device_ids
+            print(f"* Set CUDA_VISIBLE_DEVICES: {device_ids}", set_tf_devices.__name__)
+            if logger:
+                logger(f"* Set CUDA_VISIBLE_DEVICES: {device_ids}", set_tf_devices.__name__)
+            device_ids = list(device_ids.split(','))
+        elif isinstance(device_ids, list):
+            _device_ids = ''
+            for idx, device_id in enumerate(device_ids):
+                _device_ids += str(device_id)
+                if idx == len(device_ids):
+                    break
+                else:
+                    _device_ids += ','
+            os.environ['CUDA_VISIBLE_DEVICES'] = _device_ids
+            if logger:
+                logger(f"* Set CUDA_VISIBLE_DEVICES: {_device_ids}", set_tf_devices.__name__)
+        else:
+            NotImplementedError(f"device_ids should be str, but f{type(device_ids)}, f{device_ids}")
+
+        ### configurate GPUs settings
+        physical_devices = tf.config.list_physical_devices('GPU')
+        for physical_device in physical_devices:
+            try:
+                tf.config.experimental.set_memory_growth(physical_device, True)
+                # tf.config.experimental.set_virtual_device_configuration(physical_device, 
+                #                     [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=5*1024)])
+                print(f'* Set memory growth: {physical_device}', set_tf_devices.__name__)
+                if logger:
+                    logger(f'* Set memory growth: {physical_device}', set_tf_devices.__name__)
+            except RuntimeError as error:
+                if logger:
+                    logger(f'* Did not set memory growth: {physical_device} for {error}', set_tf_devices.__name__)
+                pass
+    elif device.lower() == 'cpu':
+        os.environ['CUDA_VISIBLE_DEVICES'] = "-1"
+        logger(f'* Set CUDA_VISIBLE_DEVICES -1 to run algorithm with CPU', set_tf_devices.__name__)
+
+    return device_ids
+
+
 
 
 if __name__ == '__main__':

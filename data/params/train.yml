@@ -20,7 +20,7 @@ input_width: 512
 input_channel: 3
 
 ### for image #######################
-image_loading_lib: "pil"
+image_loading_lib: "cv2"
 image_normalization: "standard"
 # standard, 255
 image_channel_order: "rgb"

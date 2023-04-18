@@ -96,7 +96,7 @@ RGBs = [[255, 0, 0], [0, 255, 0], [0, 0, 255], \
         [255, 136, 0], [136, 0, 255], [255, 51, 153]]
 
 def save_validation(model, dataset, num_classes, epoch, output_dir, input_width, input_height, input_channel=3, \
-                        _fn_denormalize=None, image_channel_order='bgr', validation_image_idxes_list=[]):
+                        denormalize=None, image_channel_order='bgr', validation_image_idxes_list=[]):
     origin = 25,25
     font = cv2.FONT_HERSHEY_SIMPLEX
     # imgsz_x = dataloader[0][0].shape[1]
@@ -118,8 +118,10 @@ def save_validation(model, dataset, num_classes, epoch, output_dir, input_width,
             else:
                 fname = None
             _image = np.expand_dims(image, axis=0)
-            if _fn_denormalize:
-                image = _fn_denormalize(image)
+            print(">>>>>>>>>>>>>> ", denormalize)
+            if denormalize:
+                print("===============================")
+                image = denormalize(image)
             
             if input_channel == 3:
                 if image_channel_order == 'rgb':
@@ -138,9 +140,9 @@ def save_validation(model, dataset, num_classes, epoch, output_dir, input_width,
             else:
                 raise NotImplementedError(f"There is not yet training for input_channel ({input_channel})")
 
+            image = image.astype(np.uint8) 
             pred = cv2.addWeighted(image, 0.1, pred, 0.9, 0)
-
-            image = cv2.vconcat([text1, image.astype(np.uint8)])
+            image = cv2.vconcat([text1, image])
             mask = np.argmax(mask, axis=-1)*(255//num_classes)
             if input_channel == 3:
                 mask = cv2.vconcat([text2, cv2.cvtColor(mask.astype(np.uint8),cv2.COLOR_GRAY2BGR)])

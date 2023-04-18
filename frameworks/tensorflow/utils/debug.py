@@ -99,7 +99,7 @@ def debug_dataset(dataset, debug_dir, mode, num_classes, input_channel=3, ratio=
                 mask = mask.astype(np.uint8)
             else:
                 raise NotImplementedError(f"There is not yet training for input_channel ({input_channel})")
-
+            image = image.astype(np.uint8)
             mask = cv2.addWeighted(image, 0.1, mask, 0.9, 0)
             image_mask = cv2.hconcat([image, mask])
             if fname != None:

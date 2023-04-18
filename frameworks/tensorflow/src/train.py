@@ -1,4 +1,5 @@
-import time 
+import time
+import datetime
 import tensorflow as tf
 import psutil
 import numpy as np
@@ -6,6 +7,7 @@ from frameworks.tensorflow.src.tf_utils import save_h5_weights
 
 @tf.function
 def train_step(self, x, y):
+    print(x.shape, y.shape, x.dtype, y.dtype)
     # Calculate the model's prediction and with it the loss and iou-score
     y = tf.cast(y, tf.float32)
     with tf.GradientTape() as tape:
@@ -40,6 +42,7 @@ def train_one_epoch(self):
         x, y = batch[0], batch[1]
         # run one training step for the current batch
         # loss, iou = train_step(x, y)
+        
         per_replica_loss, per_replica_iou = self._var_strategy.run(train_step, args=(self, x, y,))
         # loss = self._var_strategy.reduce(tf.distribute.ReduceOp.MEAN, per_replica_loss, axis=None)
         loss = self._var_strategy.reduce(tf.distribute.ReduceOp.SUM, per_replica_loss, axis=None)
@@ -74,6 +77,9 @@ def train_one_epoch(self):
         print("\n")
         print("\r *** epoch: {} > loss: {} | iou: {} | lr: {}".format(self._var_current_epoch, float(np.round(sum(losses) / len(losses), 4)), \
                                         float(np.round(sum(iou_scores) / len(iou_scores), 4)), float(self._optimizer.lr.numpy())), end='')
+
+    total_time_train = str(datetime.timedelta(seconds=int(time.time() - tic_epoch)))
+    print(f"** Training time {total_time_train}")
 
     # self._lr_scheduler.on_epoch_end(np.round(sum(val_iou_scores) / len(val_iou_scores), 4))
     self._lr_scheduler.on_epoch_end()
