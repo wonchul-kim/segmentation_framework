@@ -1,6 +1,6 @@
 ### for model params #######################
 model_name: deeplabv3plus
-backbone: "resnet50"
+backbone: "efficientnetb3"
 backbone_weights: "imagenet"
 backbone_trainable: false
 # deeplabv3plus_mobilenet, deeplabv3plus_resnet101, deeplabv3plus_resnet50,
@@ -33,7 +33,7 @@ device: cuda
 device_ids: 0,1,2,3
 start_epoch: 0
 epochs: 100
-batch_size: 64
+batch_size: 512
 num_workers: 16
 loss_fn: dice
 focal_loss: true
