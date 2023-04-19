@@ -35,6 +35,14 @@ def set_patches(cfgs, _vars):
        
         _vars.patch_info = {"patch_width": int(cfgs.patch_width), "patch_height": int(cfgs.patch_height)}
 
+        if hasattr(cfgs, 'translate'):
+            if cfgs.translate != None:
+                translate = bool(cfgs.translate)
+            else:
+                translate = False
+        else:
+            translate = False
+
         if hasattr(cfgs, 'patch_include_point_positive'):
             if cfgs.patch_include_point_positive != None:
                 patch_include_point_positive = bool(cfgs.patch_include_point_positive)
@@ -44,6 +52,7 @@ def set_patches(cfgs, _vars):
             patch_include_point_positive = False
 
         _vars.patch_info['patch_include_point_positive'] = patch_include_point_positive
+        _vars.patch_info['translate'] = translate
 
         ####### for centric --------------------------------
         if _vars.patch_centric:

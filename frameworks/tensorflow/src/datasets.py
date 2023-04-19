@@ -4,7 +4,7 @@ import numpy as np
 import cv2 
 import random
 from pathlib import Path
-from utils.patches import get_images_info
+from utils.patches import get_images_info, get_translated_roi
 from utils.labelme_utils import get_mask_from_labelme
 
 class IterableLabelmeDatasets():
@@ -16,6 +16,8 @@ class IterableLabelmeDatasets():
         self.patch_info = patch_info
         self.class2idx = {}
         self.image_channel_order = image_channel_order
+        if patch_info != None:
+            self.translate = patch_info['translate']
         self.transforms = transforms
         self.logger = logger
         
@@ -82,6 +84,10 @@ class IterableLabelmeDatasets():
                 assert len(rois) != 0, RuntimeError(f"There is Null in rois of imgs_info: {img_info}")
                 for jdx, roi in enumerate(rois):
                     img_info['counts'][jdx] += 1
+                    
+                    if self.translate:
+                        roi = get_translated_roi(roi, w, h)
+                        
                     ####### To crop image with RoI
                     assert roi[0] >= 0 and roi[1] >=0, \
                             ValueError(f"roi_info top left/right should be more than 0, not tx({roi[0]}), ty({roi[1]})")

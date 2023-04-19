@@ -7,7 +7,7 @@ import cv2
 import os
 from typing import Any, Callable, Optional, Tuple, List
 from utils.labelme_utils import get_mask_from_labelme
-from utils.patches import get_images_info
+from utils.patches import get_images_info, get_translated_roi
 import albumentations
 
 class COCODataset(torchvision.datasets.vision.VisionDataset):
@@ -96,6 +96,8 @@ class IterableLabelmeDatasets(torch.utils.data.IterableDataset):
         assert self.num_data != 0, f"There is NO images in dataset directory: {osp.join(img_folder)} with {img_exts}"
         print(f"There are {self.num_data} images with roi({roi_info}) and patch_info({patch_info})")
         
+        if patch_info != None:
+            self.translate = patch_info['translate']
         self.transforms = transforms
         if isinstance(transforms, albumentations.core.composition.Compose):
             self.image_loading_lib = 'cv2'
@@ -166,6 +168,10 @@ class IterableLabelmeDatasets(torch.utils.data.IterableDataset):
                 assert len(rois) != 0, RuntimeError(f"There is Null in rois of imgs_info: {img_info}")
                 for jdx, roi in enumerate(rois):
                     self.imgs_info[idx]['counts'][jdx] += 1
+                    
+                    if self.translate:
+                        roi = get_translated_roi(roi, w, h)
+                        
                     ####### To crop image with RoI
                     assert roi[0] >= 0 and roi[1] >=0, \
                             ValueError(f"roi_info top left/right should be more than 0, not tx({roi[0]}), ty({roi[1]})")

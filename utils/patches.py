@@ -304,3 +304,50 @@ def get_sliding_patches(img_width, img_height, patch_height, patch_width, points
 
     return sliding_patches_rois, sliding_patches_num_data
 
+def get_translated_roi(roi, img_width, img_height):
+    tl_x, tl_y, br_x, br_y = roi[0], roi[1], roi[2], roi[3]
+    roi_width = int(abs(br_x - tl_x))
+    roi_height = int(abs(br_y - tl_y))
+
+    cxs, cys = [roi[0], roi[2]], [roi[1], roi[3]]
+    avg_cx = int(np.mean(cxs))
+    avg_cy = int(np.mean(cys))
+    
+    ### FIXME: dist also should be random
+    dist_ratio = [2, 3, 4, 5]
+    move_x = int(roi_width/random.choice(dist_ratio))
+    move_y = int(roi_height/random.choice(dist_ratio))
+
+    centers = [[avg_cx, avg_cy], \
+                [avg_cx + move_x, avg_cy], [avg_cx - move_x, avg_cy], \
+                [avg_cx, avg_cy - move_y], [avg_cx, avg_cy + move_y], \
+                [avg_cx + move_x, avg_cy + move_y], [avg_cx + move_x, avg_cy - move_y], \
+                [avg_cx - move_x, avg_cy + move_y], [avg_cx - move_x, avg_cy - move_y]
+            ]
+
+    center_idx = random.choice(range(len(centers)))
+    
+    cx = int(centers[center_idx][0])
+    cy = int(centers[center_idx][1])
+
+    br_offset_x = int(cx + roi_width/2 - br_x)
+    br_offset_y = int(cy + roi_height/2 - br_y)
+    if br_offset_x > 0:
+        cx -= br_offset_x 
+    if br_offset_y > 0:
+        cy -= br_offset_y
+        
+    tl_offset_x = int(cx - roi_width/2)
+    tl_offset_y = int(cy - roi_height/2)
+    if tl_offset_x < 0:
+        cx -= tl_offset_x 
+    if tl_offset_y < 0:
+        cy -= tl_offset_y
+
+    new_roi = [int(cx - int(roi_width/2)), int(cy - int(roi_height/2)), \
+                                    int(cx + int(roi_width/2)), int(cy + int(roi_height/2))]
+    
+    assert new_roi[2] - new_roi[0] == roi_width and new_roi[3] - new_roi[1] == roi_height, \
+            ValueError(f"New roi has wrong width({new_roi[2] - new_roi[0]}) or height({new_roi[3] - new_roi[1]}, which must be width({roi_width} or height({roi_height})")
+
+    return new_roi
