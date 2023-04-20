@@ -8,7 +8,7 @@ def get_dataset(dir_path, dataset_format, mode, classes, roi_info=None, patch_in
     }
     p, ds_fn, num_classes = paths[dataset_format]
 
-    ds = ds_fn(p, mode=mode, classes=classes, \
+    ds = ds_fn(root=p, mode=mode, classes=classes, \
                 roi_info=roi_info, patch_info=patch_info, \
                 image_channel_order=image_channel_order, img_exts=img_exts, \
                 transforms=transforms, configs_dir=configs_dir, logger=logger)
@@ -32,10 +32,10 @@ def get_labelme(root, mode, classes, roi_info=None, patch_info=None, image_chann
     img_folder = PATHS[mode]
     img_folder = osp.join(root, img_folder)
 
-    dataset = IterableLabelmeDatasets(img_folder, mode, classes, \
-                            roi_info=roi_info, patch_info=patch_info, \
-                            image_channel_order=image_channel_order, img_exts=img_exts, \
-                            transforms=transforms, \
-                            configs_dir=None, logger=None)
+    dataset = IterableLabelmeDatasets(img_folder=img_folder, mode=mode, classes=classes, \
+                                        roi_info=roi_info, patch_info=patch_info, \
+                                        image_channel_order=image_channel_order, img_exts=img_exts, \
+                                        transforms=transforms, \
+                                        configs_dir=configs_dir, logger=logger)
 
     return dataset

@@ -67,7 +67,7 @@ def set_logs(cfgs, _vars, _augs=None):
         # latest_ckpt = get_latest_ckpt(cfgs.output_dir, 'segmentation')  
         # assert os.path.exists(latest_ckpt), ValueError(f'resume checkpoint({latest_ckpt}) does not exist')
         # # logger(f"* To resume training, latest ckpt is {latest_ckpt}")            
-        # with open(Path(latest_ckpt).parent.parent / 'configs/vars.yaml', errors='ignore') as f:
+        # with open(Path(latest_ckpt).parent.parent / 'configs/vars.yml', errors='ignore') as f:
         #     cfgs = argparse.Namespace(**yaml.safe_load(f)) 
         # cfgs.ckpt, cfgs.resume = latest_ckpt, True  
         # # logger(f'*** Resuming training from {latest_ckpt}')
@@ -90,11 +90,11 @@ def set_logs(cfgs, _vars, _augs=None):
     aivutils.mkdir(_vars.log_dir)
 
 
-    with open(osp.join(_vars.configs_dir, 'cfgs.yaml'), 'w') as f:
+    with open(osp.join(_vars.configs_dir, 'cfgs.yml'), 'w') as f:
         yaml.dump(cfgs.__dict__, f, indent=2)
 
-    with open(osp.join(_vars.configs_dir, 'vars.yaml'), 'w') as f:
+    with open(osp.join(_vars.configs_dir, 'vars.yml'), 'w') as f:
         yaml.dump(_vars.__dict__, f, indent=2)
         
-    with open(osp.join(_vars.configs_dir, 'augs.yaml'), 'w') as f:
+    with open(osp.join(_vars.configs_dir, 'augs.yml'), 'w') as f:
         yaml.dump(_augs, f, default_flow_style=False)
