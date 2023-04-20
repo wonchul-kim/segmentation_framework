@@ -20,7 +20,7 @@ def get_points_from_labelme(shape, shape_type, points, patch_info, mode):
             else:
                 raise RuntimeError(f"There is no such mode({mode}) for datasets")
     elif shape_type == 'circle':
-        _points = _points[0]
+        _points = _points
     elif shape_type == 'rectangle':
         __points = [_points[0]]
         __points.append([_points[1][0], _points[0][1]])
