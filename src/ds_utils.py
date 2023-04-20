@@ -53,7 +53,6 @@ def get_dataset(self):
         from frameworks.tensorflow.src.ds_utils import get_dataset as get_tensorflow_dataset
         from frameworks.tensorflow.src.dataloaders import IterableDataloader
         from frameworks.tensorflow.utils.debug import debug_dataset as debug_tensorflow_dataset
-        from frameworks.tensorflow.src.tf_utils import set_tf_devices
         
         if self._vars.image_loading_lib == 'cv2':
             train_transforms = get_train_transforms(ml_framework=self._var_ml_framework, augs=self._augs, \
@@ -62,20 +61,17 @@ def get_dataset(self):
         else:
             NotImplementedError
 
-        ### Set devices & log for Tensorflow
-        self._vars.device_ids = set_tf_devices(device=self._vars.device, device_ids=self._vars.device_ids, \
-                                                log_level=0, logger=None)
-
-        self._var_strategy = tf.distribute.MirroredStrategy()
-        
+       
         train_dataset, self._var_num_classes = get_tensorflow_dataset(dir_path=self._vars.input_dir, dataset_format=self._vars.dataset_format, \
                                             mode="train", transforms=train_transforms, classes=self._vars.classes, \
                                             roi_info=self._vars.roi_info, patch_info=self._vars.patch_info, \
-                                            image_channel_order=self._vars.image_channel_order, img_exts=self._vars.img_exts)
+                                            image_channel_order=self._vars.image_channel_order, img_exts=self._vars.img_exts, \
+                                            configs_dir=self._vars.configs_dir)
         self._dataset_val, self._var_num_classes = get_tensorflow_dataset(dir_path=self._vars.input_dir, dataset_format=self._vars.dataset_format, \
                                             mode="val", transforms=val_transforms, classes=self._vars.classes, \
                                             roi_info=self._vars.roi_info, patch_info=self._vars.patch_info, \
-                                            image_channel_order=self._vars.image_channel_order, img_exts=self._vars.img_exts)
+                                            image_channel_order=self._vars.image_channel_order, img_exts=self._vars.img_exts, \
+                                            configs_dir=self._vars.configs_dir)
         
         if self._vars.debug_dataset and not self._vars.resume:
             for mode in ['train', 'val']:
