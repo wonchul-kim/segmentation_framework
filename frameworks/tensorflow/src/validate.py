@@ -25,9 +25,6 @@ def validate_one_epoch(self):
     val_iou_scores = []
     self._dataloader_val.on_epoch_end()
 
-    # if self.save_validation_thread != None:
-    #     self.save_validation_thread.join()
-
     tic_epoch = time.time()
     for val_step, val_batch in enumerate(self._val_dist_dataset):
         x_val, y_val = val_batch[0], val_batch[1]
@@ -37,8 +34,6 @@ def validate_one_epoch(self):
         val_loss = self._var_strategy.reduce(tf.distribute.ReduceOp.SUM, per_replica_val_loss, axis=None)
         val_iou_score = self._var_strategy.reduce(tf.distribute.ReduceOp.MEAN, per_replica_val_iou_score, axis=None)
 
-        if self._var_verbose:
-            print("\r epoch: {} | step: {} | loss: {} | iou: {}".format(self._var_current_epoch, val_step, val_loss, val_iou_score), end='')
 
         val_losses.append(val_loss)
         val_iou_scores.append(val_iou_score)
@@ -46,19 +41,19 @@ def validate_one_epoch(self):
         gpu_mem = tf.config.experimental.get_memory_info('GPU:0')['peak']/1024/1024/1024
         tf.config.experimental.reset_memory_stats('GPU:0')
 
+        if self._var_verbose:
+            print("\rVALIDATE) val_loss: {} | val_iou: {}".format(float(np.round(sum(val_losses) / len(val_losses), 4)), \
+                                                        float(np.round(sum(val_iou_scores) / len(val_iou_scores), 4))), end='')
+            
+    print()
     tac_epoch = time.time()
     val_log = {'epoch': int(self._var_current_epoch), 'val_loss': float(np.round(sum(val_losses) / len(val_losses), 4)), \
                 'val_iou': float(np.round(sum(val_iou_scores) / len(val_iou_scores), 4)), \
                 'val_cpu_memory (GB)': float(cpu_mem), 'val_gpu_memory (GB)': float(gpu_mem), \
                 'time (s)': float(round(tac_epoch - tic_epoch, 3))}
-    
-    if self._var_verbose:
-        print("\n")
-        print("\r *** epoch: {} > loss: {} | iou: {}".format(self._var_current_epoch, float(np.round(sum(val_losses) / len(val_losses), 4)), \
-                            float(np.round(sum(val_iou_scores) / len(val_iou_scores), 4))), end='')
-    self.alg_log_info(val_log, self.alg_validate.__name__, self.__class__.__name__)
-    # self.monitor_val.log(val_log)    
-    # self.monitor_val.save(True)
+    print(val_log, self.alg_validate.__name__, self.__class__.__name__)
+    self._monitor_val.log(val_log)    
+    self._monitor_val.save(True)
 
     # if self._best_val_loss >= float(np.round(sum(val_losses) / len(val_losses), 4)):
     #     self._best_val_loss = float(np.round(sum(val_losses) / len(val_losses), 4))
@@ -70,26 +65,18 @@ def validate_one_epoch(self):
     #     save_h5_weights(self._model, self._vars.weights_dir, "best_iou", self.alg_log_info)
     #     # save_h5_model(self._model, self._vars.weights_dir, "best_iou", self.alg_log_info)
 
-    save_h5_weights(self._model, self._vars.weights_dir, "last", self.alg_log_info)
-    # save_h5_model(self._model, self._vars.weights_dir, "last", self.alg_log_info)
-    save_ckpt(self._last_ckpt, self._last_ckpt_manager, self.alg_log_info)
+    # save_h5_weights(self._model, self._vars.weights_dir, "last", self.alg_log_info)
+    # # save_h5_model(self._model, self._vars.weights_dir, "last", self.alg_log_info)
+    # save_ckpt(self._last_ckpt, self._last_ckpt_manager, self.alg_log_info)
 
-    # if self._vars.save_val_img:
-    #     if self._best_val_iou > self._vars.save_val_img_iou \
-    #         or (self._var_current_epoch%self._vars.save_val_img_freq == 0 and self._var_current_epoch != 0):
-    #         # self.save_validation_thread = Thread(target=save_validation, args=(self._model, self._dataset_val, self._var_num_classes, \
-    #         #         self._var_current_epoch, self._vars.val_dir, self._vars.input_width, self._vars.input_height, \
-    #         #         self._vars.input_channel, self._fn_denormalize, \
-    #         #         self._vars.image_channel_order, self.validation_image_idxes_list), daemon=True)
-    #         # self.save_validation_thread.start()    
         
-    save_validation(self._model, self._dataset_val, self._var_num_classes, \
-    self._var_current_epoch, self._vars.val_dir, self._vars.input_width, self._vars.input_height, \
-    self._vars.input_channel, self._fn_denormalize, \
-    self._vars.image_channel_order, [])
-        
+    save_validation(self._model, self._dataset_val, self._vars.num_classes, \
+                    self._var_current_epoch, self._vars.val_dir, self._vars.input_width, self._vars.input_height, \
+                    self._vars.input_channel, self._fn_denormalize, \
+                    self._vars.image_channel_order, [])
 
     return val_log 
+
 
 RGBs = [[255, 0, 0], [0, 255, 0], [0, 0, 255], \
         [255, 255, 0], [255, 0, 255], [0, 255, 255], \
