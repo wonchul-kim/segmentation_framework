@@ -1,20 +1,21 @@
 ### for model params #######################
 model_name: deeplabv3_resnet101
 backbone: "resnet50"
-backbone_weights: "imagenet" # ---------------------------- tf
+# deeplabv3plus_mobilenet, deeplabv3plus_resnet101, deeplabv3plus_resnet50,
+# deeplabv3plus_hrnetv2_48, deeplabv3plus_hrnetv2_32, deeplabv3plus_xception
+# ddrnet_39, ddrnet_23, ddrnet_23_slim
+# deeplabv3_resnet101, deeplabv3_resnet50
 include_tops: False # ---------------------------- tf
-pooling: null # ---------------------------- tf
+backbone_weights: "imagenet" # ---------------------------- tf
 backbone_trainable: false # ---------------------------- tf
+pooling: null # ---------------------------- tf
 
 seed_model: null # ---------------------------- tf
 
 num_filters: 32 # linknet # ---------------------------- tf
 depth_multiplier: 4 # linknet # ---------------------------- tf
 crl: false # ---------------------------- tf
-# deeplabv3plus_mobilenet, deeplabv3plus_resnet101, deeplabv3plus_resnet50,
-# deeplabv3plus_hrnetv2_48, deeplabv3plus_hrnetv2_32, deeplabv3plus_xception
-# ddrnet_39, ddrnet_23, ddrnet_23_slim
-# deeplabv3_resnet101, deeplabv3_resnet50
+
 input_height: 512
 input_width: 512
 input_channel: 3
@@ -27,6 +28,8 @@ image_channel_order: "rgb"
 img_exts: "bmp,png"
 
 ### for loss params. #######################
+# bg_weights: [0.1, 0.3, 0.5]
+# bg_weights_applied_epoch: [100, 200]
 
 ### for training params. #######################
 device: cuda

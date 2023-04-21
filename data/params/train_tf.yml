@@ -1,21 +1,24 @@
 ### for model params #######################
 model_name: deeplabv3plus
 backbone: "efficientnetb3"
-backbone_weights: "imagenet"
-backbone_trainable: false
 # deeplabv3plus_mobilenet, deeplabv3plus_resnet101, deeplabv3plus_resnet50,
 # deeplabv3plus_hrnetv2_48, deeplabv3plus_hrnetv2_32, deeplabv3plus_xception
 # ddrnet_39, ddrnet_23, ddrnet_23_slim
 # deeplabv3_resnet101, deeplabv3_resnet50
-input_height: 512
-input_width: 512
-input_channel: 3
+include_tops: false 
+backbone_trainable: false
+backbone_weights: "imagenet"
+pooling: null 
 
 seed_model: null
 
 num_filters: 32 # linknet
 depth_multiplier: 4 # linknet
 crl: false
+
+input_height: 512
+input_width: 512
+input_channel: 3
 
 ### for image #######################
 image_loading_lib: "cv2"
