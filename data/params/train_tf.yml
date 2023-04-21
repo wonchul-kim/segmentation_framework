@@ -1,21 +1,24 @@
 ### for model params #######################
 model_name: deeplabv3plus
 backbone: "efficientnetb3"
-backbone_weights: "imagenet"
-backbone_trainable: false
 # deeplabv3plus_mobilenet, deeplabv3plus_resnet101, deeplabv3plus_resnet50,
 # deeplabv3plus_hrnetv2_48, deeplabv3plus_hrnetv2_32, deeplabv3plus_xception
 # ddrnet_39, ddrnet_23, ddrnet_23_slim
 # deeplabv3_resnet101, deeplabv3_resnet50
-input_height: 512
-input_width: 512
-input_channel: 3
+backbone_weights: "imagenet"
+backbone_trainable: false
+include_tops: False
+pooling: null
 
 seed_model: null
 
 num_filters: 32 # linknet
 depth_multiplier: 4 # linknet
 crl: false
+
+input_height: 512
+input_width: 512
+input_channel: 3
 
 ### for image #######################
 image_loading_lib: "cv2"
@@ -33,7 +36,7 @@ device: cuda
 device_ids: 0,1,2,3
 start_epoch: 0
 epochs: 100
-batch_size: 512
+batch_size: 256
 num_workers: 16
 loss_fn: dice
 focal_loss: true
@@ -48,8 +51,8 @@ lr_warmup_decay: 0.01
 amp: false # Mixed precision training parameters
 
 ### for logs #######################
-debug_dataset: false
-debug_dataset_ratio: 0.01
+debug_dataset: true
+debug_dataset_ratio: 0.1
 
 print_freq: 10
 save_model_freq: 10
