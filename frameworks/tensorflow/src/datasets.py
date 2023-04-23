@@ -14,7 +14,6 @@ class IterableLabelmeDatasets():
         self.roi_info = roi_info
         self.classes = classes
         self.patch_info = patch_info
-        self.class2idx = {}
         self.image_channel_order = image_channel_order
         if patch_info != None:
             self.translate = patch_info['translate']
@@ -29,11 +28,6 @@ class IterableLabelmeDatasets():
                 aug_txt.write("\n")
             aug_txt.close()
 
-        for idx, _class in enumerate(classes):
-            self.class2idx[_class.lower()] = int(idx) + 1
-            
-        if self.logger != None:
-            self.logger(f"* {self.mode}: self.class2idx: {self.class2idx} with background: 0", self.__init__.__name__, self.__class__.__name__) 
 
         print(f"* roi_info: {roi_info}")
         print(f"* patch_info: {patch_info}")
@@ -45,6 +39,8 @@ class IterableLabelmeDatasets():
         for idx, label in enumerate(classes):
             self.class2label[label.lower()] = int(idx) + 1
         print(f"There are {self.class2label} classes")
+        if self.logger != None:
+            self.logger(f"* {self.mode}: self.class2label: {self.class2label} with background: 0", self.__init__.__name__, self.__class__.__name__) 
 
     def shuffle(self):
         random.shuffle(self.imgs_info)

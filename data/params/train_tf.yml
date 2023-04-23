@@ -35,7 +35,7 @@ img_exts: "bmp,png"
 device: cuda
 device_ids: 0,1,2,3
 start_epoch: 0
-epochs: 100
+epochs: 500
 batch_size: 256
 num_workers: 16
 loss_fn: dice
@@ -44,7 +44,7 @@ optimizer: adam
 lr_scheduler_type: cosine
 init_lr: 0.001
 end_lr: 1e-6
-lr_warmup_epochs: 10
+lr_warmup_epochs: 0
 lr_warmup_hold: 0
 lr_warmup_method: linear
 lr_warmup_decay: 0.01
