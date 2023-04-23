@@ -53,9 +53,8 @@ class MaskDataset(torch.utils.data.Dataset):
             'tree', 'signsymbol', 'fence', 'car', 
             'pedestrian', 'bicyclist', 'unlabelled']
 
-    def __init__(self, img_folder, classes, roi=None, transforms=None, img_exts=['png', 'bmp']):
+    def __init__(self, img_folder, classes, transforms=None, img_exts=['png', 'bmp']):
         self.img_folder = img_folder
-        self.roi = roi
         self.transforms = transforms
 
         print(f"There {classes} classes")
