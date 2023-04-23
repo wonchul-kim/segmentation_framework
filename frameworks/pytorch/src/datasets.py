@@ -81,9 +81,9 @@ class MaskDataset(torch.utils.data.Dataset):
         mask = Image.open(mask_file)        
         
         if self.transforms is not None:
-            image, target = self.transforms(image, mask)
+            image, mask = self.transforms(image, mask)
 
-        return image, target, fname
+        return image, mask, fname
 
 class IterableLabelmeDatasets(torch.utils.data.IterableDataset):
     def __init__(self, mode, img_folder, classes, transforms=None, roi_info=None, patch_info=None, \
