@@ -92,6 +92,7 @@ def debug_dataset(dataset, debug_dir, mode, num_classes, input_channel=3, ratio=
                     pass
                 else:
                     raise ValueError(f"There is no such image_channel_order({image_channel_order})")
+
                 mask = np.argmax(cv2.resize(mask, (height, width)), axis=-1)*(255//num_classes)
                 mask = cv2.cvtColor(mask.astype(np.uint8), cv2.COLOR_GRAY2BGR)
             elif input_channel == 1:

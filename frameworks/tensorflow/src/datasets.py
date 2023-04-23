@@ -1,6 +1,7 @@
 import os
 import os.path as osp 
 import numpy as np
+from glob import glob
 import cv2 
 import random
 from pathlib import Path
@@ -105,4 +106,67 @@ class IterableLabelmeDatasets():
                     
                     mask = np.eye(len(self.classes) + 1)[mask.astype(np.uint8)]
                     yield image, mask, self.fname
+
+##FIXME: This maskdataset is too dependent to camvid dataset..., especially total_classes w/o background label 
+class MaskDataset:
+   
+    TOTAL_CLASSES = ['sky', 'building', 'pole', 'road', 'pavement', 
+               'tree', 'signsymbol', 'fence', 'car', 
+               'pedestrian', 'bicyclist', 'unlabelled']
+    
+    CLASSES_DICT = {"sky": 0, "building": 1, "pole": 2, "road": 3, "pavement": 4,
+                    "tree": 5, "signsymbol": 6, "fence": 7, "car": 8,
+                    "pedestrian": 9, "bicyclist": 10, "unlabelled": 11}
+
+    def __init__(self, img_folder, classes=None, transforms=None, img_exts=['png', 'bmp']):
+        self.img_folder = img_folder
+        self.transforms = transforms
+
+        print(f"There {classes} classes")
+        self.class_values = [self.TOTAL_CLASSES.index(cls.lower()) for cls in classes]
+        print(f"  - class_values: {self.class_values}")
+        
+        self.img_files = []
+        for img_ext in img_exts:
+            self.img_files += glob(os.path.join(self.img_folder, "*.{}".format(img_ext)))
+        print(f"  - There are {len(self.img_files)} image files")
+
+        # convert str names to class values on masks
+        self.class_values = [self.TOTAL_CLASSES.index(cls.lower()) for cls in classes]
+        
+        self.transforms = transforms
+        
+    def __len__(self):
+        return len(self.img_files)
+    
+    def __getitem__(self, idx):
+        img_file = self.img_files[idx]
+        fname = osp.split(osp.splitext(img_file)[0])[-1]
+
+        mask_file = osp.join(self.img_folder, '../masks/{}.png'.format(fname))
+        if not osp.exists(mask_file):
+            raise Exception(f"There is no such mask image {mask_file}")
+
+        image = cv2.imread(self.img_files[idx])
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        mask = cv2.imread(mask_file, 0)        
+        
+        print(image.shape, mask.shape)
+
+         # extract certain classes from mask (e.g. cars)
+        masks = [(mask == v) for v in self.class_values]
+        mask = np.stack(masks, axis=-1).astype('float')
+        
+        # add background if mask is not binary
+        if mask.shape[-1] != 1:
+            background = 1 - mask.sum(axis=-1, keepdims=True)
+            mask = np.concatenate((mask, background), axis=-1)
+        
+        if self.transforms is not None:
+            sample = self.transforms(image=image, mask=mask)
+            image, mask = sample['image'], sample['mask']
+
+        return image, mask, fname
+        
+    
 

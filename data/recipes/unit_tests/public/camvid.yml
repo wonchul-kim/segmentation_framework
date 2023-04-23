@@ -1,0 +1,19 @@
+### for dataset params.
+input_dir: /HDD/datasets/public/camvid
+output_dir: "res"
+dataset_format: mask
+classes:
+  [
+    "sky",
+    "building",
+    "pole",
+    "road",
+    "pavement",
+    "tree",
+    "signsymbol",
+    "fence",
+    "car",
+    "pedestrian",
+    "bicyclist",
+    "unlabelled",
+  ]

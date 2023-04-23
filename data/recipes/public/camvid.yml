@@ -1,7 +1,0 @@
-### for dataset params.
-input_dir: /DeepLearning/_unittest/public/camvid/datasets
-output_dir: "/DeepLearning/_unittest/public/camvid"
-dataset_format: mask
-classes: ['sky', 'building', 'pole', 'road', 'pavement', 'tree', 'signsymbol', 
-          'fence', 'car', 'pedestrian', 'bicyclist', 'unlabelled']
-

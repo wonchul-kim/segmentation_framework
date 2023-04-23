@@ -92,12 +92,12 @@ if __name__ == "__main__":
     cfgs = argparse.Namespace()
     config = "./data/configs/train.yml"
     # info = './data/recipes/public/coco.yml'
-    # info = './data/recipes/public/camvid.yml'
+    info = './data/recipes/unit_tests/public/camvid.yml'
     # info = './data/recipes/projects/train/no_roi_no_patches.yml'
     # info = './data/recipes/projects/train/single_rois_wo_patches.yml'
     # info = './data/recipes/projects/train/multiple_rois_wo_patches.yml'
     # info = './data/recipes/projects/train/single_rois_w_patches.yml'
-    info = './data/recipes/projects/train/multiple_rois_w_patches.yml'
+    # info = './data/recipes/projects/train/multiple_rois_w_patches.yml'
     # info = './data/projects/sungwoo_u_top_bottom.yml'
     # recipe = './data/params/train.yml'
     recipe = './data/params/train_tf.yml'
@@ -110,11 +110,11 @@ if __name__ == "__main__":
     engine.alg_set_params()
     engine.alg_set_variables()
     engine.alg_set_datasets()
-    engine.alg_set_model()
+    # engine.alg_set_model()
 
-    # ## engine.run()
+    # # ## engine.run()
     
-    for _ in range(engine._vars.start_epoch, engine._vars.epochs):
-        engine.alg_run_one_epoch()
-        engine.alg_validate()
+    # for _ in range(engine._vars.start_epoch, engine._vars.epochs):
+    #     engine.alg_run_one_epoch()
+    #     engine.alg_validate()
 
