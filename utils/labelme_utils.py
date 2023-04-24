@@ -2,6 +2,7 @@ import cv2
 from PIL import Image 
 import numpy as np
 import json 
+import math 
 
 def get_points_from_labelme(shape, shape_type, points, patch_info, mode):
     _points = shape['points']
@@ -20,7 +21,7 @@ def get_points_from_labelme(shape, shape_type, points, patch_info, mode):
             else:
                 raise RuntimeError(f"There is no such mode({mode}) for datasets")
     elif shape_type == 'circle':
-        _points = _points
+        _points = [_points[0]]
     elif shape_type == 'rectangle':
         __points = [_points[0]]
         __points.append([_points[1][0], _points[0][1]])
@@ -38,15 +39,21 @@ def get_mask_from_labelme(json_file, width, height, class2label, format='pil'):
         anns = json.load(f)
     mask = np.zeros((height, width))
     for shapes in anns['shapes']:
+        shape_type = shapes['shape_type'].lower()
         label = shapes['label'].lower()
         if label in class2label.keys():
             _points = shapes['points']
-            try:
-                arr = np.array(_points, dtype=np.int32)
-            except:
-                print("Not found:", _points)
-                continue
-            cv2.fillPoly(mask, [arr], color=(class2label[label]))
+            if shape_type == 'circle':
+                cx, cy = _points[0][0], _points[0][1]
+                radius = int(math.sqrt((cx - _points[1][0]) ** 2 + (cy - _points[1][1]) ** 2))
+                cv2.circle(mask, (int(cx), int(cy)), int(radius), True, -1)
+            else:
+                try:
+                    arr = np.array(_points, dtype=np.int32)
+                except:
+                    print("Not found:", _points)
+                    continue
+                cv2.fillPoly(mask, [arr], color=(class2label[label]))
 
     if format == 'pil':
         return Image.fromarray(mask)
