@@ -62,7 +62,7 @@ class Dataloader(tf.keras.utils.Sequence):
 
         batch = [np.stack(samples, axis=0) for samples in zip(*data)]
         
-        return batch
+        return batch[0], batch[1], batch[2]    
 
 
     def __len__(self):

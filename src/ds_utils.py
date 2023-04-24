@@ -51,7 +51,7 @@ def get_dataset(self):
     elif self._var_ml_framework == 'tensorflow':
         import tensorflow as tf
         from frameworks.tensorflow.src.ds_utils import get_dataset as get_tensorflow_dataset
-        from frameworks.tensorflow.src.dataloaders import IterableDataloader
+        from frameworks.tensorflow.src.dataloaders import IterableDataloader, Dataloader
         from frameworks.tensorflow.utils.debug import debug_dataset as debug_tensorflow_dataset
         
         if self._vars.image_loading_lib == 'cv2':
@@ -61,7 +61,6 @@ def get_dataset(self):
         else:
             NotImplementedError
 
-       
         train_dataset, self._var_num_classes = get_tensorflow_dataset(dir_path=self._vars.input_dir, dataset_format=self._vars.dataset_format, \
                                             mode="train", transforms=train_transforms, classes=self._vars.classes, \
                                             roi_info=self._vars.roi_info, patch_info=self._vars.patch_info, \
@@ -79,12 +78,20 @@ def get_dataset(self):
                 debug_tensorflow_dataset(train_dataset, self._vars.debug_dir, mode, self._vars.num_classes, self._vars.input_channel, \
                                             self._vars.debug_dataset_ratio, self._fn_denormalize, self._vars.image_channel_order)
         
-        self._dataloader = IterableDataloader(train_dataset, batch_size=self._vars.batch_size, shuffle=True, drop_last=False)
-        if self._var_strategy != None:
-            self._dataloader_val = IterableDataloader(self._dataset_val, batch_size=self._var_strategy.num_replicas_in_sync, shuffle=False, drop_last=False)
+
+        if self._vars.dataset_format == 'labelme':
+            self._dataloader = IterableDataloader(train_dataset, batch_size=self._vars.batch_size, shuffle=True, drop_last=False)
+            if self._var_strategy != None:
+                self._dataloader_val = IterableDataloader(self._dataset_val, batch_size=self._var_strategy.num_replicas_in_sync, shuffle=False, drop_last=False)
+            else:
+                self._dataloader_val = IterableDataloader(self._dataset_val, batch_size=1, shuffle=False, drop_last=False)
         else:
-            self._dataloader_val = IterableDataloader(self._dataset_val, batch_size=1, shuffle=False, drop_last=False)
-        
+            self._dataloader = Dataloader(train_dataset, batch_size=self._vars.batch_size, shuffle=True, drop_last=False)
+            if self._var_strategy != None:
+                self._dataloader_val = Dataloader(self._dataset_val, batch_size=self._var_strategy.num_replicas_in_sync, shuffle=False, drop_last=False)
+            else:
+                self._dataloader_val = Dataloader(self._dataset_val, batch_size=1, shuffle=False, drop_last=False)
+            
         if self._var_strategy != None:
             _train_dataset = tf.data.Dataset.from_generator(lambda: self._dataloader,
                                                     output_types=(tf.float32, tf.float32, tf.string),

@@ -151,9 +151,7 @@ class MaskDataset:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         mask = cv2.imread(mask_file, 0)        
         
-        print(image.shape, mask.shape)
-
-         # extract certain classes from mask (e.g. cars)
+        # extract certain classes from mask (e.g. cars)
         masks = [(mask == v) for v in self.class_values]
         mask = np.stack(masks, axis=-1).astype('float')
         

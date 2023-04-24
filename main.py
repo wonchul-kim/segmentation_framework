@@ -110,11 +110,11 @@ if __name__ == "__main__":
     engine.alg_set_params()
     engine.alg_set_variables()
     engine.alg_set_datasets()
-    # engine.alg_set_model()
+    engine.alg_set_model()
 
-    # # ## engine.run()
+    # ## engine.run()
     
-    # for _ in range(engine._vars.start_epoch, engine._vars.epochs):
-    #     engine.alg_run_one_epoch()
-    #     engine.alg_validate()
+    for _ in range(engine._vars.start_epoch, engine._vars.epochs):
+        engine.alg_run_one_epoch()
+        engine.alg_validate()
 
