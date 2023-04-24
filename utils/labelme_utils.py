@@ -47,13 +47,18 @@ def get_mask_from_labelme(json_file, width, height, class2label, format='pil'):
                 cx, cy = _points[0][0], _points[0][1]
                 radius = int(math.sqrt((cx - _points[1][0]) ** 2 + (cy - _points[1][1]) ** 2))
                 cv2.circle(mask, (int(cx), int(cy)), int(radius), True, -1)
-            else:
+            elif shape_type in ['polygon', 'rectangle', 'watershed'] and len(_points) >= 3:
                 try:
                     arr = np.array(_points, dtype=np.int32)
                 except:
                     print("Not found:", _points)
                     continue
                 cv2.fillPoly(mask, [arr], color=(class2label[label]))
+            elif shape_type in ['point']:
+                pass
+            else:
+                raise ValueError(f"There is no such shape-type: {shape_type}")
+
 
     if format == 'pil':
         return Image.fromarray(mask)
