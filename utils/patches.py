@@ -39,11 +39,12 @@ def get_images_info(mode, img_folder, img_exts, classes=None, roi_info=None, pat
                     img_info['rois'] += rois
                     num_data += _num_data
         
-        # if img_info['rois'] != None and len(img_info['rois']) == 0:
-        #     continue
+        if img_info['rois'] != None and len(img_info['rois']) == 0:
+            print(f"*** There is zero rois for {img_file}")
+            continue
         
-        if img_info['rois'] != None:
-            assert len(img_info['rois']) != 0, ValueError(f"There is zero rois for {img_file}")
+        # if img_info['rois'] != None:
+        #     assert len(img_info['rois']) != 0, ValueError(f"There is zero rois for {img_file}")
         
                                     
         ### to debug dataset if all data is used
@@ -66,6 +67,7 @@ def get_imgs_info_from_patches(mode, img_file, classes, patch_info, roi=None):
     img_width, img_height = anns['imageWidth'], anns['imageHeight']
     num_data = 0
     rois, points = [], []
+    is_empty_json = True
     if len(anns['shapes']) != 0:
         for shape in anns['shapes']:
             shape_type = str(shape['shape_type']).lower()
@@ -76,6 +78,8 @@ def get_imgs_info_from_patches(mode, img_file, classes, patch_info, roi=None):
 
                 if not _points: ### there is no points
                     continue
+
+                is_empty_json = False
 
                 if roi != None:
                     if is_points_not_in_roi(_points, roi): ### when out of roi
@@ -88,7 +92,7 @@ def get_imgs_info_from_patches(mode, img_file, classes, patch_info, roi=None):
             rois += centric_patches_rois
             num_data += centric_patches_num_data
 
-        if patch_info['patch_slide'] or len(rois) == 0:
+        if patch_info['patch_slide'] or (len(rois) == 0 and is_empty_json):
             if patch_info['patch_slide']:
                 overlap_ratio=patch_info['patch_overlap_ratio']
                 num_involved_pixel=patch_info['patch_num_involved_pixel']
