@@ -67,8 +67,7 @@ def get_imgs_info_from_patches(mode, img_file, classes, patch_info, roi=None):
     img_width, img_height = anns['imageWidth'], anns['imageHeight']
     num_data = 0
     rois, points = [], []
-    is_empty_json = True
-    if len(anns['shapes']) != 0:
+    if len(anns['shapes']) != 0: # for negatvie samples
         for shape in anns['shapes']:
             shape_type = str(shape['shape_type']).lower()
             label = shape['label'].lower()
@@ -79,20 +78,18 @@ def get_imgs_info_from_patches(mode, img_file, classes, patch_info, roi=None):
                 if not _points: ### there is no points
                     continue
 
-                is_empty_json = False
-
                 if roi != None:
                     if is_points_not_in_roi(_points, roi): ### when out of roi
                         continue
 
                 points.append(_points)
                 
-        if patch_info['patch_centric']:
+        if patch_info['patch_centric'] and len(points) > 0:
             centric_patches_rois, centric_patches_num_data = get_centric_patches(points, patch_info, img_width, img_height, roi=roi)
             rois += centric_patches_rois
             num_data += centric_patches_num_data
 
-        if patch_info['patch_slide'] or (len(rois) == 0 and is_empty_json):
+        if patch_info['patch_slide'] and len(points) > 0:
             if patch_info['patch_slide']:
                 overlap_ratio=patch_info['patch_overlap_ratio']
                 num_involved_pixel=patch_info['patch_num_involved_pixel']
@@ -120,7 +117,7 @@ def get_imgs_info_from_patches(mode, img_file, classes, patch_info, roi=None):
                 rois.append(patch_coord)
             num_data += num_patch_slide
             
-    else:
+    else: # for positive samples
         if patch_info['patch_slide']:
             overlap_ratio=patch_info['patch_overlap_ratio']
             num_involved_pixel=patch_info['patch_num_involved_pixel']
