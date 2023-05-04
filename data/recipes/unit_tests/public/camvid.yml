@@ -2,18 +2,17 @@
 input_dir: /HDD/datasets/public/camvid
 output_dir: "res"
 dataset_format: mask
-classes:
-  [
+classes: [
     "sky",
-    "building",
-    "pole",
-    "road",
-    "pavement",
-    "tree",
-    "signsymbol",
-    "fence",
+    # "building",
+    # "pole",
+    # "road",
+    # "pavement",
+    # "tree",
+    # "signsymbol",
+    # "fence",
     "car",
     "pedestrian",
-    "bicyclist",
-    "unlabelled",
+    # "bicyclist",
+    # "unlabelled",
   ]

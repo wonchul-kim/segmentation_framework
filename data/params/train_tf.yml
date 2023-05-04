@@ -22,9 +22,9 @@ input_channel: 3
 
 ### for image #######################
 image_loading_lib: "cv2"
-image_normalization: null
+image_normalization: standard
 # standard, 255, null
-image_channel_order: "bgr"
+image_channel_order: "rgb"
 img_exts: "bmp,png"
 
 ### for loss params. #######################
@@ -33,17 +33,17 @@ img_exts: "bmp,png"
 
 ### for training params. #######################
 device: cuda
-device_ids: 0,1,2,3
+device_ids: 0,1
 start_epoch: 0
-epochs: 500
-batch_size: 256
+epochs: 300
+batch_size: 8
 num_workers: 16
 loss_fn: dice
 focal_loss: true
 optimizer: sgd
 lr_scheduler_type: cosine
-init_lr: 0.001
-end_lr: 1e-6
+init_lr: 0.01
+end_lr: 1e-5
 lr_warmup_epochs: 0
 lr_warmup_hold: 0
 lr_warmup_method: linear

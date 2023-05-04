@@ -55,25 +55,34 @@ def validate_one_epoch(self):
     self._monitor_val.log(val_log)    
     self._monitor_val.save(True)
 
-    # if self._best_val_loss >= float(np.round(sum(val_losses) / len(val_losses), 4)):
-    #     self._best_val_loss = float(np.round(sum(val_losses) / len(val_losses), 4))
-    #     save_h5_weights(self._model, self._vars.weights_dir, "best_loss", self.alg_log_info)
-    #     # save_h5_model(self._model, self._vars.weights_dir, "best_loss", self.alg_log_info)
+    if self._var_best_val_loss >= float(np.round(sum(val_losses) / len(val_losses), 4)):
+        self._var_best_val_loss = float(np.round(sum(val_losses) / len(val_losses), 4))
+        save_h5_weights(self._model, self._vars.weights_dir, "best_loss", None)
+        # save_h5_weights(self._model, self._vars.weights_dir, "best_loss", self.alg_log_info)
+        # save_h5_model(self._model, self._vars.weights_dir, "best_loss", self.alg_log_info)
+        save_validation(self._model, self._dataset_val, self._vars.num_classes, \
+                        self._var_current_epoch, self._vars.val_dir, self._vars.input_width, self._vars.input_height, \
+                        self._vars.input_channel, self._fn_denormalize, \
+                        self._vars.image_channel_order, [])
 
-    # if self._best_val_iou <= float(np.round(sum(val_iou_scores) / len(val_iou_scores), 4)):
-    #     self._best_val_iou = float(np.round(sum(val_iou_scores) / len(val_iou_scores), 4))
-    #     save_h5_weights(self._model, self._vars.weights_dir, "best_iou", self.alg_log_info)
-    #     # save_h5_model(self._model, self._vars.weights_dir, "best_iou", self.alg_log_info)
+    if self._var_best_val_iou <= float(np.round(sum(val_iou_scores) / len(val_iou_scores), 4)):
+        self._var_best_val_iou = float(np.round(sum(val_iou_scores) / len(val_iou_scores), 4))
+        save_h5_weights(self._model, self._vars.weights_dir, "best_iou", None)
+        # save_h5_weights(self._model, self._vars.weights_dir, "best_iou", self.alg_log_info)
+        # save_h5_model(self._model, self._vars.weights_dir, "best_iou", self.alg_log_info)
+        save_validation(self._model, self._dataset_val, self._vars.num_classes, \
+                        self._var_current_epoch, self._vars.val_dir, self._vars.input_width, self._vars.input_height, \
+                        self._vars.input_channel, self._fn_denormalize, \
+                        self._vars.image_channel_order, [])
 
+
+    save_h5_weights(self._model, self._vars.weights_dir, "last", None)
     # save_h5_weights(self._model, self._vars.weights_dir, "last", self.alg_log_info)
-    # # save_h5_model(self._model, self._vars.weights_dir, "last", self.alg_log_info)
+    # save_h5_model(self._model, self._vars.weights_dir, "last", self.alg_log_info)
     # save_ckpt(self._last_ckpt, self._last_ckpt_manager, self.alg_log_info)
+    save_ckpt(self._last_ckpt, self._last_ckpt_manager, None)
 
         
-    save_validation(self._model, self._dataset_val, self._vars.num_classes, \
-                    self._var_current_epoch, self._vars.val_dir, self._vars.input_width, self._vars.input_height, \
-                    self._vars.input_channel, self._fn_denormalize, \
-                    self._vars.image_channel_order, [])
 
     return val_log 
 

@@ -48,6 +48,8 @@ class TrainSegmentation(AlgBase):
         self.train_losses, self.train_lrs = [], []
         self._var_current_epoch = 0
         self._var_current_total_step = 0
+        self._var_best_val_loss = 999
+        self._var_best_val_iou = -999
         
         self._var_ml_framework = "tensorflow"
         # self._var_ml_framework = "pytorch"
