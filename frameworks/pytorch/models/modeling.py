@@ -10,7 +10,8 @@ from frameworks.pytorch.models.deeplabv3plus.utils import set_bn_momentum
 from frameworks.pytorch.models.deeplabv3plus._deeplab import convert_to_separable_conv
 from frameworks.pytorch.models.segformer.segformer import SegFormer
 import collections
-
+from collections import OrderedDict
+from frameworks.pytorch.models.segnext.segnext import SegNext
 # def get_model(model_name, weights, weights_backbone, num_classes, aux_loss):
 #     model = torchvision.models.get_model(
 #             model_name,
@@ -94,6 +95,24 @@ def get_model(model_name, num_classes, weights=None, weights_backbone=None, aux_
             
         model.load_state_dict(new_state_dict, strict=False)
         print(f"*** Having loaded pretrained {weights_path}")
+    elif 'segnext' in model_name:
+        backbone = 'b'
+        weights_path = f'/DeepLearning/__weights/segmentation/segnext/segnext_mscan_{backbone}_20230227.pth'
+        model = SegNext(backbone=backbone, num_classes=num_classes)
+
+        checkpoint = torch.load(weights_path, map_location='cpu')
+
+        if isinstance(checkpoint, OrderedDict):
+            checkpoint_state_dict = checkpoint
+        elif isinstance(checkpoint, dict):
+            if 'state_dict' in checkpoint.keys():
+                checkpoint_state_dict = checkpoint['state_dict']
+            else:
+                raise RuntimeError(f"There is no state_dict in pretrained weights")
+        else:
+            raise RuntimeError(f"There is ERROR when loading the pretrained weights: {weights_path}")
+
+        model.load_state_dict(checkpoint_state_dict, strict=False)
 
     else:
         model = torchvision.models.segmentation.__dict__[model_name](pretrained=True, aux_loss=aux_loss)
@@ -116,8 +135,7 @@ def get_model(model_name, num_classes, weights=None, weights_backbone=None, aux_
                 model.aux_classifier[4] = torch.nn.Conv2d(10, num_classes, kernel_size=(1, 1), stride=(1, 1))
             else:
                 raise ValueError(f"There is no such model({model_name})")
-   
     return model
 
 if __name__ == '__main__':
-    model = get_model('deeplabv3plus_resnet101', 3)
+    model = get_model('segnext', 3)

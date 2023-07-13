@@ -21,7 +21,7 @@ def get_model(self):
             self._model = torch.nn.parallel.DistributedDataParallel(self._model, device_ids=[self._vars.gpu])
             self._model_without_ddp = self._model.module
 
-        if 'ddrnet' in self._vars.model_name or 'segformer' in self._vars.model_name:
+        if 'ddrnet' in self._vars.model_name or 'segformer' in self._vars.model_name or 'segnext' in self._vars.model_name:
             params_to_optimize = [
                 {"params": [p for p in self._model_without_ddp.parameters() if p.requires_grad]},
             ]
